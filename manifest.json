@@ -1,6 +1,6 @@
 {
-    "name": "被災状況調査アプリ",
-    "short_name": "調査アプリ",
+    "name": "被災状況調査アプリβ版",
+    "short_name": "調査appβ",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#2c3e50",
