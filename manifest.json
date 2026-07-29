@@ -1,0 +1,16 @@
+{
+    "name": "被災状況調査アプリ",
+    "short_name": "調査アプリ",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#2c3e50",
+    "theme_color": "#2c3e50",
+    "description": "オフライン対応の被災状況調査ツール",
+    "icons": [
+        {
+            "src": "icon.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        }
+    ]
+}
