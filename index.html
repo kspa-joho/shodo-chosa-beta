@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>被災状況調査アプリ (Phase 5.76)</title>
+    <title>被災状況調査アプリ (Phase 5.78)</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
@@ -493,7 +493,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <p style="font-size: 0.9rem; margin-bottom: 15px;">
             現場用アプリで収集したJZIPデータを取りまとめる<strong>統合管理版（PC用）</strong>はこちらからダウンロードできます。
         </p>
-        <a href="https://github.com/kspa-joho/shodo-chosa/raw/main/manager_app.zip"
+        <a href="https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip"
            style="display: block; width: 100%; padding: 12px; background: #2c3e50; color: white; text-align: center; border-radius: 4px; font-weight: bold; font-size: 1rem; text-decoration: none; box-sizing: border-box;">
             ⬇ 統合管理版をダウンロード（ZIP）
         </a>
@@ -504,8 +504,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <section id="content-spec" class="tab-content">
                 <div class="spec-container">
     <header style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 5.76)</h2>
-        <p><strong>Last Updated:</strong> Phase 5.76 (フルスクリーンボタンをヘッダー上段に移動)
+        <h2>被災状況調査システム 開発仕様書 (Phase 5.78)</h2>
+        <p><strong>Last Updated:</strong> Phase 5.78 (install_guide DL先をβ版リポジトリに変更・DLブロック追加)
         <p><strong>Status:</strong> App A (Stable)</p>
     </header>
 
@@ -627,7 +627,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <h3>7. PWA更新管理</h3>
         <div style="padding: 15px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px; margin-top: 10px;">
             <p style="margin:0 0 10px 0; font-weight:bold; color: #16a085;">アプリ更新管理</p>
-            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.76</strong></p>
+            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.78</strong></p>
             <div style="display:flex; align-items:center; gap:10px;">
                 <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="appControl.checkForUpdate()">更新を確認する</button>
                 <span id="update-status" style="font-size:0.9rem; color:#555;"></span>
@@ -4568,23 +4568,31 @@ window.appControl = {
     },
 
     // JPEG の dataUrl に GPS・方位 EXIF を書き込んで返す
-    // piexifjs が読み込まれていない場合・dataUrlが空の場合はそのまま返す
+    // JZIPエクスポート時にphotoListの情報をEXIFに書き込む
+    // 既存のEXIFはマージする（カメラ設定・撮影日時等を保持）
+    // piexifjsが未ロード・dataUrlが空・書き込みエラーの場合は元のdataUrlをそのまま返す（フォールバック）
     _embedExif(p) {
         if (!p.dataUrl) return p.dataUrl;
         if (typeof piexif === 'undefined') return p.dataUrl;
 
         try {
-            const exifObj = { "GPS": {} };
+            // 既存EXIFを読み込む（ない場合は空オブジェクト）
+            let exifObj;
+            try {
+                exifObj = piexif.load(p.dataUrl);
+            } catch(e) {
+                exifObj = { "0th": {}, "Exif": {}, "GPS": {}, "1st": {} };
+            }
+            if (!exifObj["GPS"]) exifObj["GPS"] = {};
 
             // 方位（GPSImgDirection）
-            // piexifjs は分数 [分子, 分母] 形式で受け取る
             if (p.azimuth !== null && p.azimuth !== undefined) {
                 exifObj["GPS"][piexif.GPSIFD.GPSImgDirection]    = [p.azimuth * 100, 100];
                 exifObj["GPS"][piexif.GPSIFD.GPSImgDirectionRef] = "T"; // T=真北基準
             }
 
             // GPS座標（緯度・経度）
-            if (p.lat !== null && p.lng !== null) {
+            if (p.lat !== null && p.lat !== undefined && p.lng !== null && p.lng !== undefined) {
                 // 十進数 → 度分秒（DMS）変換してから分数形式に変換する
                 const toDMS = (val) => {
                     const abs = Math.abs(val);
@@ -4596,17 +4604,16 @@ window.appControl = {
                 exifObj["GPS"][piexif.GPSIFD.GPSLatitude]     = toDMS(p.lat);
                 exifObj["GPS"][piexif.GPSIFD.GPSLatitudeRef]  = p.lat  >= 0 ? "N" : "S";
                 exifObj["GPS"][piexif.GPSIFD.GPSLongitude]    = toDMS(p.lng);
-                exifObj["GPS"][piexif.GPSIFD.GPSLongitudeRef] = p.lng >= 0 ? "E" : "W";
+                exifObj["GPS"][piexif.GPSIFD.GPSLongitudeRef] = p.lng  >= 0 ? "E" : "W";
 
-                // 精度情報（GPSHPositioningError）があれば記録
+                // 精度（GPSDOP）があれば記録
                 if (p.gpsAccuracy !== null && p.gpsAccuracy !== undefined) {
                     exifObj["GPS"][piexif.GPSIFD.GPSDOP] = [p.gpsAccuracy * 100, 100];
                 }
             }
 
-            // EXIFに書き込むものがなければそのまま返す
-            const hasData = Object.keys(exifObj["GPS"]).length > 0;
-            if (!hasData) return p.dataUrl;
+            // 書き込むGPSデータがなければそのまま返す
+            if (Object.keys(exifObj["GPS"]).length === 0) return p.dataUrl;
 
             const exifBytes = piexif.dump(exifObj);
             return piexif.insert(exifBytes, p.dataUrl);
