@@ -1,6 +1,6 @@
 {
     "name": "被災状況調査アプリ",
-    "short_name": "調査アプリ",
+    "short_name": "調査β版",
     "start_url": "/shodo-chosa-beta/",
     "scope": "/shodo-chosa-beta/",
     "display": "standalone",
