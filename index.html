@@ -3,14 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
     <title>被災状況調査アプリ (Phase 5.82)</title>
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
-    <style>
-        :root {
+    <style>:root {
     --primary-color: #2c3e50;
     --accent-color: #3498db;
     --bg-color: #f4f7f6;
@@ -106,8 +104,7 @@ body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; d
 .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 3px rgba(0,0,0,0.3); padding: 0; cursor: pointer; }
 .color-btn.active { transform: scale(1.2); border-color: #333; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
 .sketch-canvas-container { position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background: white; cursor: crosshair; touch-action: none; margin-bottom: 5px; }
-canvas.sketch-canvas { display: block; width: 100%; }
-    </style>
+canvas.sketch-canvas { display: block; width: 100%; }</style>
 </head>
 <body>
     <div id="app-container">
@@ -126,9 +123,133 @@ canvas.sketch-canvas { display: block; width: 100%; }
     </nav>
 </header>
 
-        <main id="main-content" style="flex: 1; overflow-y: auto;">
-            <section id="content-app" class="tab-content active">
-                <div class="survey-app-ui">
+        <main id="main-content">
+            <!-- 管理タブ：管理項目・調査を実施した者・端末設定 -->
+            <section id="content-manage" class="tab-content"><div class="survey-app-ui">
+
+    <!-- 現場管理（⑥複数現場管理の仮置き。Phase 5.xx で現場リスト方式に置き換え予定） -->
+    <div class="accordion-item" data-group="site-manage">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">現場管理</span><span class="summary-text">現場リスト（準備中）</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <p style="font-size:0.85rem; color:#888; margin:0;">
+                複数現場の切り替え機能は今後実装予定です。<br>
+                現在は1現場ずつJZIPで保存・読み込みしてください。
+            </p>
+        </div>
+    </div>
+
+    <!-- 管理項目 -->
+    <div class="accordion-item" data-group="num-mgmt">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">管理項目</span><span class="summary-text empty">未入力</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <div class="input-group"><label>会社ID</label><input type="text" name="company_id"></div>
+            <div class="input-group"><label>調査班長名</label><input type="text" name="leader_name"></div>
+            <div class="input-group"><label>整理番号</label><input type="text" name="ref_no"></div>
+            <div class="input-group"><label>調査日</label><input type="date" name="survey_date" id="default-date"></div>
+            <div class="input-group"><label>災害番号</label><input type="text" name="disaster_no"></div>
+            <div class="input-group">
+                <label>発注者名</label>
+                <input type="text" name="dept_name" placeholder="例：鹿児島県"
+                    oninput="syncDeptName(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- 調査を実施した者 -->
+    <div class="accordion-item" data-group="surveyor-info">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">調査を実施した者</span><span class="summary-text empty">未入力</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <div class="input-group"><label>会社名</label><input type="text" name="company_name"></div>
+            <div class="input-group"><label>電話番号</label><input type="tel" name="tel" class="validate-tel"></div>
+            <div class="input-group"><label>FAX番号</label><input type="tel" name="fax" class="validate-tel"></div>
+            <div class="input-group"><label>職氏名</label><input type="text" name="person_name"></div>
+            <div class="input-group"><label>E-mail</label><input type="email" name="email"></div>
+        </div>
+    </div>
+
+    <!-- 入出力データ操作 -->
+    <div class="accordion-item" data-group="io-area">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">入出力データ操作</span><span class="summary-text">データ操作</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+
+            <!-- 出力ファイル名構成 -->
+            <div class="filename-builder" style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666;">出力ファイル名構成</label>
+                <div style="display:flex; gap:2px; margin-top:5px;">
+                    <select class="fn-part" id="fn1">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none">なし</option>
+                    </select>
+                    <select class="fn-part" id="fn2">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no" selected>災害番号</option><option value="none">なし</option>
+                    </select>
+                    <select class="fn-part" id="fn3">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
+                    </select>
+                    <select class="fn-part" id="fn4">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
+                    </select>
+                    <select class="fn-part" id="fn5">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 写真設定 -->
+            <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666;">写真の出力横幅（長辺）</label>
+                <div style="display:flex; align-items:center; gap:8px; margin-top:5px; margin-bottom:8px;">
+                    <select id="photo-resize-width" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px; font-size:0.9rem;">
+                        <option value="800">800px（小・軽量）</option>
+                        <option value="1200" selected>1200px（標準）</option>
+                        <option value="1600">1600px（大）</option>
+                        <option value="2000">2000px（最大）</option>
+                        <option value="0">リサイズなし（元サイズ）</option>
+                    </select>
+                    <span style="font-size:0.75rem; color:#888;">で保存</span>
+                </div>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer;">
+                    <input type="checkbox" id="photo-force-43" style="width:18px; height:18px;">
+                    強制的に4:3にする（右側をカット）
+                </label>
+            </div>
+
+            <button type="button" class="btn-main" onclick="appControl.exportZip()">入力データ保存（JZIP形式）</button>
+            <input type="file" id="import-jzip" accept=".zip" style="display:none" onchange="appControl.importZip(this)">
+            <button type="button" class="btn-sub" onclick="document.getElementById('import-jzip').click()" style="margin-bottom:10px;">JZIP読み込み</button>
+            <button type="button" class="btn-sub" onclick="appControl.exportCSV()" style="margin-bottom:10px;">日報用CSVエクスポート（写真なし）</button>
+            <hr style="margin: 15px 0;">
+            <button type="button" class="btn-sub" style="background:#e67e22; margin-bottom:6px;"
+                onclick="appControl.saveDefaults()">初期値として保存</button>
+            <div style="display:flex; gap:6px; margin-bottom:6px;">
+                <button type="button" class="btn-sub" style="flex:1; background:#c0392b;"
+                    onclick="appControl.clearAll(false)">クリア（初期値を残す）</button>
+                <button type="button" class="btn-sub" style="flex:1; background:#922b21;"
+                    onclick="appControl.clearAll(true)">クリア（全未入力）</button>
+            </div>
+            <button type="button" class="btn-sub" style="background:#7f8c8d; margin-bottom:10px;"
+                onclick="appControl.applyDefaults()">初期値の読み込み</button>
+            <hr style="margin: 15px 0;">
+            <button type="button" class="btn-sub" style="background:#7f8c8d;"
+                onclick="mapCacheManager.clearAllCache()">地図キャッシュを開放する</button>
+        </div>
+    </div>
+
+</div>
+</section>
+            <!-- 現地調査タブ：位置図・諸元・被災状況・写真・JZIP入出力 -->
+            <section id="content-app"    class="tab-content active"><div class="survey-app-ui">
     <!-- 位置図 -->
     <div class="accordion-item" data-group="map-area">
         <button class="accordion-header">
@@ -343,52 +464,271 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <button type="button" class="btn-sub" onclick="appControl.exportCSV()" style="margin-bottom:10px;">日報用CSVエクスポート（写真なし）</button>
         </div>
     </div>
+</div></section>
+            <!-- 開発タブ：アプリ更新・開発ログ・アプリ化の手順 -->
+            <section id="content-dev"    class="tab-content"><div class="survey-app-ui">
+
+    <!-- アプリ更新 -->
+    <div class="accordion-item" data-group="app-update">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.82</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.82</strong></p>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
+                        onclick="appControl.checkForUpdate()">更新を確認する</button>
+                    <span id="update-status" style="font-size:0.9rem; color:#555;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 開発ログ（仕様書） -->
+    <div class="accordion-item" data-group="dev-log">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">開発ログ</span><span class="summary-text">仕様・決定事項</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content" style="padding:0;">
+            <div class="spec-container">
+    <header style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
+        <h2>被災状況調査システム 開発仕様書 (Phase 5.82)</h2>
+        <p><strong>Last Updated:</strong> Phase 5.82 (管理タブ・開発タブのアコーディオン整備)
+        <p><strong>Status:</strong> App A β版運用中</p>
+    </header>
+
+    <section>
+        <h3>1. プロジェクト背景と目的</h3>
+        <p>大規模災害時、通信遮断下にある現場から、確実に被害状況を事務所へ届けるための建設コンサルタント専用ツール。鹿児島県測量設計業協会の情報専門部会が主導して開発。</p>
+        <ul>
+            <li><strong>Local-First:</strong> サーバー・DB不要。PWAとしてスマホにインストールして動作する。</li>
+            <li><strong>Bucket Relay:</strong> データ連携は物理的なファイル移動（JZIP形式）で行う。</li>
+            <li><strong>Offline First:</strong> Service Workerにより地図タイル含めオフライン動作を保証する。</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>2. 開発運用ルール（SSOT）</h3>
+        <ul>
+            <li><strong>Phase管理:</strong> 会議の局面管理番号（X.XX）。package.jsonのversionおよびconfig.phaseを正とする。</li>
+            <li><strong>永遠のβ版:</strong> 現場フィードバックにより開発は永続する。「完成」と決めつけない。</li>
+            <li><strong>Spec as Code:</strong> 本ファイル（src/spec.html）はプロジェクトの唯一の正解情報（SSOT）である。</li>
+            <li><strong>コード提示ルール:</strong> 省略不可・全文表示・変更ファイルのみ・圧縮不可。最適化と意匠変更は判断を仰ぐ。毎回 package.json と spec.html を提示する。</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>3. ファイル構成 (File Manifest)</h3>
+        <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
+            <tr style="background:#eee;"><th>Filename</th><th>Role</th><th>Note</th></tr>
+            <tr><td><code>build.js</code></td><td>ビルドスクリプト</td><td>App A専用。piexif.jsを先頭に結合する。manage.htmlを追加読み込み。</td></tr>
+            <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
+            <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
+            <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン</td></tr>
+            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>現場管理（仮）・管理項目（発注者名含む）・調査を実施した者・入出力データ操作</td></tr>
+            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td></tr>
+            <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
+            <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブに埋め込み）</td></tr>
+            <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
+            <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
+            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>Leaflet初期化・描画・モード切替・GPS修正モード。maxZoom:25</td></tr>
+            <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
+            <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>UIヘルパー・オートセーブ・JZIP入出力・更新通知・saveDefaults/loadDefaults・clearAll・toggleFullWidth</td></tr>
+            <tr><td><code>sw.js</code></td><td>Service Worker</td><td>自動キャッシュ・skip-waiting対応</td></tr>
+            <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
+            <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
+            <tr><td><code>rogo-AAA.txt</code></td><td>ロゴデータ</td><td>Base64エンコード画像（ビルド時にインライン埋め込み）</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h3>4. タブ構成</h3>
+        <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
+            <tr style="background:#eee;"><th>タブ</th><th>section ID</th><th>内容</th><th>ソースファイル</th></tr>
+            <tr><td>管理</td><td>content-manage</td><td>管理項目・調査を実施した者・端末設定</td><td>manage.html</td></tr>
+            <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td><td>introduction.html</td></tr>
+            <tr><td>開発</td><td>content-dev</td><td>開発方針・アプリ化の手順</td><td>spec.html + install_guide.html</td></tr>
+        </table>
+        <p style="margin-top:10px; font-size:0.9rem;">※ Phase 5.82時点では⑦複数現場管理は未実装。「管理」タブは⑦実装時に現場リスト方式に置き換え予定。タブ構成自体は変わらない。</p>
+    </section>
+
+    <section>
+        <h3>5. 実装仕様とアーキテクチャ</h3>
+
+        <h4>5.1 データ構造 (JZIP)</h4>
+        <p>詳細は <code>jzip_spec.html</code> を参照。photoListの各要素：<code>{ fileName, memo, tag, azimuth, lat, lng, gpsAccuracy, gpsFixed }</code></p>
+
+        <h4>5.2 写真機能</h4>
+        <ul>
+            <li><strong>写真エリアのUI配置順（確定）:</strong> ナビゲーション → プレビュー → タグ・削除 → 📷撮影・📁ファイル選択 → 写真の備考 → センサーエリア（撮影方向・位置情報）</li>
+            <li><strong>IndexedDB永続化（photoStorage）:</strong> 撮影・選択・削除・ソート時にsyncAll()。起動時にrestore()で復元。</li>
+            <li><strong>カメラinput分離（確定・変更禁止）:</strong> photo-camera-input→handleCameraFile() / photo-file-input→handleFileSelect()。changeリスナーはDOMContentLoaded内でaddEventListenerで登録。</li>
+            <li><strong>4:3強制クロップ:</strong> 縦を基準に左寄せで右側をカット。端末設定タブのチェックボックスで制御。</li>
+            <li><strong>撮影ボタンのGPS表示:</strong> 「誤差○m」を直接表示。未取得時は点滅。GPS起動はDOMContentLoadedで実施。</li>
+            <li><strong>位置情報4状態:</strong> ○m / 修正済み（青・座標表示）/ 不明（EXIFから）/ 未取得</li>
+            <li><strong>GPS修正フロー:</strong> 修正ボタン→位置図タブ開く（現在ズーム+2）→地図タップ→写真タブに戻る。gpsFixed=true。</li>
+            <li><strong>方位センサー優先順位:</strong> webkitCompassHeading（iOS）→ deviceorientationabsolute（Android）→ deviceorientation</li>
+            <li><strong>JZIPエクスポート時のEXIF書き込み:</strong> 既存EXIFにマージしてGPS座標・方位・精度を書き込む。</li>
+        </ul>
+
+        <h4>5.3 地図機能</h4>
+        <ul>
+            <li>モード：メイン(位置)・サブ(落書き)・白紙メモの3モード。</li>
+            <li>maxZoom:25（オーバーズーム対応）。地図初期化はアコーディオンopen時（確定・変更禁止）。</li>
+            <li>地図キャッシュは自動蓄積方式。開放ボタンは端末設定タブ内。</li>
+        </ul>
+
+        <h4>5.4 初期値・クリア機能</h4>
+        <ul>
+            <li>保存先：LocalStorage（キー: survey_app_defaults）。起動時にloadDefaults()で自動読み込み。</li>
+            <li>端末設定タブに：初期値として保存・クリア（初期値を残す）・クリア（全未入力）・初期値の読み込み・地図キャッシュ開放</li>
+            <li>クリア時はフォーム・写真・地図・白紙メモ・オートセーブ・IndexedDBを全消去。初期値のLocalStorageは削除しない。</li>
+        </ul>
+
+        <h4>5.5 PWA・デプロイ（β版）</h4>
+        <ul>
+            <li>GitHub Pages: <code>https://kspa-joho.github.io/shodo-chosa-beta/</code></li>
+            <li>manifest.jsonのstart_url/scope: <code>/shodo-chosa-beta/</code></li>
+            <li>新バージョン検知時に確認ダイアログ→skip-waiting→自動リロード。</li>
+            <li>統合管理版DLリンク: <code>https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip</code></li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>6. 重要な決定事項</h3>
+        <ul>
+            <li><strong>3タブ構成（Phase 5.82確定）:</strong> 管理・現地調査・開発。⑦複数現場管理実装時も管理タブの中身を置き換えるだけでタブ構成は変わらない。</li>
+            <li><strong>カメラinput分離方針:</strong> 今後変更しない。</li>
+            <li><strong>位置情報の削除ボタン廃止:</strong> 誤操作防止。修正は地図タップのみ。</li>
+            <li><strong>EXIFはエクスポート時にマージ方式で書き込む。</strong></li>
+            <li><strong>地図初期化はアコーディオンopen時:</strong> 今後変更しない。</li>
+            <li><strong>IndexedDBでの写真永続化:</strong> アプリ落ち対策。clearAll()でIndexedDBも削除する。</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>7. 次に行うタスクの積み残し（改修指示書準拠）</h3>
+        <ul>
+            <li>【Step1-③】入力項目の初期値・階層設計（管理項目の初期値追加・災害番号常時表示等）</li>
+            <li>【Step2-①】真っ黒画像バグ（tainted canvas問題の修正）</li>
+            <li>【Step2-②】位置図と帳票枠のサイズ不一致（縦横比の調整）</li>
+            <li>【Step2-③】白紙メモのベクタ化（undo・文字移動・ブラウザバック対策）</li>
+            <li>【Step2-⑤】GPS・方位取得のUI調整（説明表示・8方位手入力追加）</li>
+            <li>【Step2-⑥】複数現場管理の再設計（管理タブを現場リスト方式に置き換え）</li>
+            <li>iPhone実機での動作確認（部会お披露目時）</li>
+            <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>8. PWA更新管理</h3>
+        <div style="padding: 15px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px; margin-top: 10px;">
+            <p style="margin:0 0 10px 0; font-weight:bold; color: #16a085;">アプリ更新管理</p>
+            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.82</strong></p>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="appControl.checkForUpdate()">更新を確認する</button>
+                <span id="update-status" style="font-size:0.9rem; color:#555;"></span>
+            </div>
+        </div>
+    </section>
 </div>
-            </section>
-            <section id="content-install" class="tab-content">
-                <!-- INSERT: INSTALL_CONTENT -->
-            </section>
-            <section id="content-spec" class="tab-content">
-                <!-- INSERT: SPEC_CONTENT -->
-            </section>
+
+        </div>
+    </div>
+
+    <!-- アプリ化の手順 -->
+    <div class="accordion-item" data-group="install-guide">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">アプリ化の手順</span><span class="summary-text">インストール方法</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content" style="padding:0;">
+            <div class="install-guide-container" style="padding: 20px; color: #333;">
+    <h2>アプリとしてインストールする方法</h2>
+    <p style="font-size: 0.9rem; margin-bottom: 20px;">
+        このツールは、ホーム画面に追加することで「アプリ」として動作し、
+        <strong>オフライン起動</strong>や<strong>全画面表示</strong>が可能になります。
+    </p>
+
+    <div class="guide-block" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #e74c3c;">
+        <h3 style="margin-top:0; color: #e74c3c;">iPhone (Safari) の場合</h3>
+        <ol style="padding-left: 20px; line-height: 1.6;">
+            <li>画面下部（または上部）の <strong>共有ボタン <span style="font-size:1.2em;">⎋</span></strong> をタップします。</li>
+            <li>メニューをスクロールして <strong>「ホーム画面に追加」</strong> を選択します。</li>
+            <li>右上の <strong>「追加」</strong> をタップします。</li>
+            <li>ホーム画面にアイコンが追加され、次回からそこから起動できます。</li>
+        </ol>
+    </div>
+
+    <div class="guide-block" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #27ae60;">
+        <h3 style="margin-top:0; color: #27ae60;">Android (Chrome) の場合</h3>
+        <ol style="padding-left: 20px; line-height: 1.6;">
+            <li>画面右上の <strong>メニューボタン <span style="font-size:1.2em;">⋮</span></strong> をタップします。</li>
+            <li><strong>「ホーム画面に追加」</strong> または <strong>「アプリをインストール」</strong> を選択します。</li>
+            <li>確認画面で <strong>「追加」</strong> をタップします。</li>
+            <li>ホーム画面にアイコンが追加され、次回からそこから起動できます。</li>
+        </ol>
+    </div>
+
+    <div style="font-size: 0.8rem; color: #666; background: #eee; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+        <strong>注意:</strong> PCでHTMLファイルを直接開いている場合、保存機能などが一部制限されることがあります。
+        さくらサーバー等のWebサーバーにアップロードしてからご利用ください。
+    </div>
+
+    <div class="guide-block" style="background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid #2c3e50;">
+        <h3 style="margin-top:0; color: #2c3e50;">統合管理版アプリのダウンロード</h3>
+        <p style="font-size: 0.9rem; margin-bottom: 15px;">
+            現場用アプリで収集したJZIPデータを取りまとめる<strong>統合管理版（PC用）</strong>はこちらからダウンロードできます。
+        </p>
+        <a href="https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip"
+           style="display: block; width: 100%; padding: 12px; background: #2c3e50; color: white; text-align: center; border-radius: 4px; font-weight: bold; font-size: 1rem; text-decoration: none; box-sizing: border-box;">
+            ⬇ 統合管理版をダウンロード（ZIP）
+        </a>
+    </div>
+</div>
+
+        </div>
+    </div>
+
+</div>
+</section>
         </main>
     </div>
-
-    <!-- プリセット保存モーダル -->
+    <!-- トースト通知 -->
+    <div id="toast" class="toast-notification"></div>
+    <!-- モーダル：プリセット保存 -->
     <div id="modal-preset-save" class="custom-modal-overlay">
         <div class="custom-modal-box">
-            <div class="custom-modal-title">プリセットを保存</div>
-            <p style="font-size:0.8rem; margin-bottom:5px;">名前を入力してください:</p>
-            <input type="text" id="preset-name-input" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px;">
+            <div class="custom-modal-title">プリセット名を入力</div>
+            <input type="text" id="preset-name-input" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;">
             <div class="custom-modal-actions">
-                <button type="button" class="btn-sub" onclick="window.uiHelper.closeModal()">キャンセル</button>
-                <button type="button" class="btn-main" onclick="window.uiHelper.confirmSavePreset()">保存</button>
+                <button type="button" class="btn-sub" onclick="uiHelper.closeModal()">キャンセル</button>
+                <button type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="uiHelper.confirmSavePreset()">保存</button>
             </div>
         </div>
     </div>
-
-    <!-- リセット確認モーダル (新規追加) -->
+    <!-- モーダル：リセット確認 -->
     <div id="modal-reset-confirm" class="custom-modal-overlay">
         <div class="custom-modal-box">
-            <div class="custom-modal-title" style="color:#c0392b;">新規調査開始</div>
-            <p style="font-size:0.9rem; margin-bottom:15px;">入力データを消去してリセットします。<br>「調査を実施した者」の情報は残しますか？</p>
-            <div class="custom-modal-actions" style="flex-direction: column; gap:10px;">
-                <button type="button" class="btn-main" onclick="window.uiHelper.confirmReset(true)">残す (推奨)</button>
-                <button type="button" class="btn-sub" style="background:#c0392b; color:white;" onclick="window.uiHelper.confirmReset(false)">残さない (全消去)</button>
-                <button type="button" class="btn-sub" onclick="window.uiHelper.closeModal()">キャンセル</button>
+            <div class="custom-modal-title">新規調査を開始します</div>
+            <p style="font-size:0.9rem; color:#555;">調査を実施した者の情報を引き継ぎますか？</p>
+            <div class="custom-modal-actions">
+                <button type="button" class="btn-sub" onclick="uiHelper.confirmReset(false)">引き継がない</button>
+                <button type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="uiHelper.confirmReset(true)">引き継ぐ</button>
             </div>
         </div>
     </div>
-
-    <!-- トースト通知 -->
-    <div id="toast" class="toast-notification">保存しました</div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- 地図画像化ライブラリ -->
     <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
-    <script>
-        /* piexifjs
+    <!-- piexif.js・アプリ本体JSはビルド時にsrc/から読み込んでここにインライン埋め込みする -->
+    <script>/* piexifjs
 
 The MIT License (MIT)
 
@@ -4562,7 +4902,6 @@ window.syncDeptName = function(val) {
         display.style.display = 'none';
     }
 };
-
-    </script>
+</script>
 </body>
 </html>
