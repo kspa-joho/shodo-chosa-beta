@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 5.84)</title>
+    <title>被災状況調査アプリ (Phase 5.85)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -468,12 +468,12 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.84</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.85</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.84</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.85</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -491,13 +491,13 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
         </button>
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
-    <header style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 5.84)</h2>
-        <p><strong>Last Updated:</strong> Phase 5.84 (accordion-content overflow制御・はみ出し修正)
+    <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
+        <h2>被災状況調査システム 開発仕様書 (Phase 5.85)</h2>
+        <p><strong>Last Updated:</strong> Phase 5.85 (spec.htmlのsection/headerタグをdivに置き換え・はみ出し根本修正)
         <p><strong>Status:</strong> App A β版運用中</p>
-    </header>
+    </div>
 
-    <section>
+    <div class="spec-section">
         <h3>1. プロジェクト背景と目的</h3>
         <p>大規模災害時、通信遮断下にある現場から、確実に被害状況を事務所へ届けるための建設コンサルタント専用ツール。鹿児島県測量設計業協会の情報専門部会が主導して開発。</p>
         <ul>
@@ -505,9 +505,9 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <li><strong>Bucket Relay:</strong> データ連携は物理的なファイル移動（JZIP形式）で行う。</li>
             <li><strong>Offline First:</strong> Service Workerにより地図タイル含めオフライン動作を保証する。</li>
         </ul>
-    </section>
+    </div>
 
-    <section>
+    <div class="spec-section">
         <h3>2. 開発運用ルール（SSOT）</h3>
         <ul>
             <li><strong>Phase管理:</strong> 会議の局面管理番号（X.XX）。package.jsonのversionおよびconfig.phaseを正とする。</li>
@@ -515,9 +515,9 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <li><strong>Spec as Code:</strong> 本ファイル（src/spec.html）はプロジェクトの唯一の正解情報（SSOT）である。</li>
             <li><strong>コード提示ルール:</strong> 省略不可・全文表示・変更ファイルのみ・圧縮不可。最適化と意匠変更は判断を仰ぐ。毎回 package.json と spec.html を提示する。</li>
         </ul>
-    </section>
+    </div>
 
-    <section>
+    <div class="spec-section">
         <h3>3. ファイル構成 (File Manifest)</h3>
         <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
             <tr style="background:#eee;"><th>Filename</th><th>Role</th><th>Note</th></tr>
@@ -540,9 +540,9 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
             <tr><td><code>rogo-AAA.txt</code></td><td>ロゴデータ</td><td>Base64エンコード画像（ビルド時にインライン埋め込み）</td></tr>
         </table>
-    </section>
+    </div>
 
-    <section>
+    <div class="spec-section">
         <h3>4. タブ構成</h3>
         <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
             <tr style="background:#eee;"><th>タブ</th><th>section ID</th><th>内容</th><th>ソースファイル</th></tr>
@@ -550,10 +550,10 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td><td>introduction.html</td></tr>
             <tr><td>開発</td><td>content-dev</td><td>開発方針・アプリ化の手順</td><td>spec.html + install_guide.html</td></tr>
         </table>
-        <p style="margin-top:10px; font-size:0.9rem;">※ Phase 5.84時点では⑦複数現場管理は未実装。「管理」タブは⑦実装時に現場リスト方式に置き換え予定。タブ構成自体は変わらない。</p>
-    </section>
+        <p style="margin-top:10px; font-size:0.9rem;">※ Phase 5.85時点では⑦複数現場管理は未実装。「管理」タブは⑦実装時に現場リスト方式に置き換え予定。タブ構成自体は変わらない。</p>
+    </div>
 
-    <section>
+    <div class="spec-section">
         <h3>5. 実装仕様とアーキテクチャ</h3>
 
         <h4>5.1 データ構造 (JZIP)</h4>
@@ -593,21 +593,21 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <li>新バージョン検知時に確認ダイアログ→skip-waiting→自動リロード。</li>
             <li>統合管理版DLリンク: <code>https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip</code></li>
         </ul>
-    </section>
+    </div>
 
-    <section>
+    <div class="spec-section">
         <h3>6. 重要な決定事項</h3>
         <ul>
-            <li><strong>3タブ構成（Phase 5.84確定）:</strong> 管理・現地調査・開発。⑦複数現場管理実装時も管理タブの中身を置き換えるだけでタブ構成は変わらない。</li>
+            <li><strong>3タブ構成（Phase 5.85確定）:</strong> 管理・現地調査・開発。⑦複数現場管理実装時も管理タブの中身を置き換えるだけでタブ構成は変わらない。</li>
             <li><strong>カメラinput分離方針:</strong> 今後変更しない。</li>
             <li><strong>位置情報の削除ボタン廃止:</strong> 誤操作防止。修正は地図タップのみ。</li>
             <li><strong>EXIFはエクスポート時にマージ方式で書き込む。</strong></li>
             <li><strong>地図初期化はアコーディオンopen時:</strong> 今後変更しない。</li>
             <li><strong>IndexedDBでの写真永続化:</strong> アプリ落ち対策。clearAll()でIndexedDBも削除する。</li>
         </ul>
-    </section>
+    </div>
 
-    <section>
+    <div class="spec-section">
         <h3>7. 次に行うタスクの積み残し（改修指示書準拠）</h3>
         <ul>
             <li>【Step1-③】入力項目の初期値・階層設計（管理項目の初期値追加・災害番号常時表示等）</li>
@@ -619,19 +619,19 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <li>iPhone実機での動作確認（部会お披露目時）</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
         </ul>
-    </section>
+    </div>
 
-    <section>
+    <div class="spec-section">
         <h3>8. PWA更新管理</h3>
         <div style="padding: 15px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px; margin-top: 10px;">
             <p style="margin:0 0 10px 0; font-weight:bold; color: #16a085;">アプリ更新管理</p>
-            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.84</strong></p>
+            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.85</strong></p>
             <div style="display:flex; align-items:center; gap:10px;">
                 <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="appControl.checkForUpdate()">更新を確認する</button>
                 <span id="update-status" style="font-size:0.9rem; color:#555;"></span>
             </div>
         </div>
-    </section>
+    </div>
 </div>
 
         </div>
