@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>被災状況調査アプリ (Phase 5.78)</title>
+    <title>被災状況調査アプリ (Phase 5.79)</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
@@ -17,9 +17,7 @@
     --app-max-width: 480px;
 }
 body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; display: flex; justify-content: flex-start; }
-#app-container { width: 100%; max-width: var(--app-max-width); min-height: 100vh; background-color: var(--bg-color); box-shadow: 2px 0 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; position: relative; transition: max-width 0.3s ease; }
-/* フルスクリーンモード：画面幅いっぱいに広げる */
-#app-container.fullwidth { max-width: 100%; }
+#app-container { width: 100%; max-width: var(--app-max-width); min-height: 100vh; background-color: var(--bg-color); box-shadow: 2px 0 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; position: relative; }
 
 /* タブ制御 */
 .tab-content { display: none !important; }
@@ -100,6 +98,11 @@ body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; d
 .sketch-tool-group:last-child { border: none; }
 .sketch-btn { padding: 6px 10px; border: 1px solid #ccc; background: #f9f9f9; border-radius: 3px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
 .sketch-btn.active { background: var(--accent-color); color: white; border-color: #2980b9; }
+/* 位置図タブのモード切替ボタン：非アクティブ時はダーク背景 */
+#mode-btn-map:not(.active), #mode-btn-draw:not(.active), #mode-btn-sketch:not(.active) { background: rgba(255,255,255,0.1); color: white; border-color: transparent; }
+/* フルスクリーンモード */
+#app-container { transition: max-width 0.3s ease; }
+#app-container.fullwidth { max-width: 100% !important; }
 .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 3px rgba(0,0,0,0.3); padding: 0; cursor: pointer; }
 .color-btn.active { transform: scale(1.2); border-color: #333; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
 .sketch-canvas-container { position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background: white; cursor: crosshair; touch-action: none; margin-bottom: 5px; }
@@ -504,9 +507,9 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <section id="content-spec" class="tab-content">
                 <div class="spec-container">
     <header style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 5.78)</h2>
-        <p><strong>Last Updated:</strong> Phase 5.78 (install_guide DL先をβ版リポジトリに変更・DLブロック追加)
-        <p><strong>Status:</strong> App A (Stable)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 5.79)</h2>
+        <p><strong>Last Updated:</strong> Phase 5.79 (style.css モード切替ボタン非アクティブ色修正)</p>
+        <p><strong>Status:</strong> App A β版運用中</p>
     </header>
 
     <section>
@@ -535,18 +538,18 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr style="background:#eee;"><th>Filename</th><th>Role</th><th>Note</th></tr>
             <tr><td><code>build.js</code></td><td>ビルドスクリプト</td><td>App A専用。piexif.jsを先頭に結合する</td></tr>
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>プレースホルダーは /* INSERT: CSS */ 等の形式</td></tr>
-            <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUIを定義</td></tr>
-            <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>ロゴ、タブ（アプリ/アプリ化の手順/開発方針）</td></tr>
-            <tr><td><code>introduction.html</code></td><td>アプリ本体UI</td><td>アコーディオン群（管理項目〜入出力）。位置図エリアにGPS修正バナー</td></tr>
+            <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
+            <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>ロゴ、タブ（アプリ/アプリ化の手順/開発方針）、⛶フルスクリーンボタン（ヘッダー上段）</td></tr>
+            <tr><td><code>introduction.html</code></td><td>アプリ本体UI</td><td>アコーディオン群（管理項目〜入出力）。位置図エリアにGPS修正バナー・3モード切替</td></tr>
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（アプリ内「開発方針」タブに埋め込み）</td></tr>
-            <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク</td></tr>
-            <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡して同期させる。</td></tr>
+            <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
+            <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
             <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
-            <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・プリセット・更新確認・mapCacheManager</td></tr>
-            <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）</td></tr>
-            <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>start_url/scope=/shodo-chosa/。スタンドアロン起動・アイコン定義</td></tr>
+            <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・プリセット・更新通知・mapCacheManager・saveDefaults/loadDefaults・clearAll・toggleFullWidth</td></tr>
+            <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ）・skip-waiting対応</td></tr>
+            <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
             <tr><td><code>rogo-AAA.txt</code></td><td>ロゴデータ</td><td>Base64エンコード画像（ビルド時にインライン埋め込み）</td></tr>
         </table>
@@ -561,42 +564,60 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <h4>4.2 写真機能</h4>
         <ul>
             <li><strong>写真エリアのUI配置順（確定）:</strong> ナビゲーション → プレビュー → タグ・削除 → 📷撮影・📁ファイル選択 → 写真の備考 → センサーエリア（撮影方向・位置情報）</li>
-            <li><strong>カメラinput分離（iPhone対応）:</strong> photo-camera-input（handleCameraFile・GPS自動記録）/ photo-file-input（handleFileSelect・EXIF読み込み）</li>
-            <li><strong>撮影ボタン:</strong> 「誤差○m」を直接表示。未取得時は点滅。GPS起動はDOMContentLoadedで実施。</li>
-            <li><strong>位置情報4状態:</strong> ○m（精度あり）/ 修正済み（地図タップ後・青）/ 不明（EXIFから）/ 未取得</li>
-            <li><strong>GPS修正フロー:</strong> 修正ボタン→写真タブ閉じ→位置図タブ開く（現在ズーム+2）→地図タップ→写真タブに戻る</li>
-            <li><strong>JZIPエクスポート時のEXIF書き込み:</strong> piexifjsでGPS座標・方位をJPEGに書き込む。エラー時フォールバック。</li>
-            <li><strong>リサイズ横幅指定:</strong> 入出力タグで800/1200/1600/2000px・なしを選択。デフォルト1200px。</li>
+            <li><strong>IndexedDB永続化（photoStorage）:</strong> 撮影・選択・削除・ソート・並び替え時にsyncAll()でDBに同期。アプリ起動時にrestore()でdataUrlを復元。アプリが落ちても写真が消えない。</li>
+            <li><strong>カメラinput分離（iPhone対応・確定・変更禁止）:</strong>
+                <ul>
+                    <li>photo-camera-input → handleCameraFile()：撮影時にgpsManagerの現在値を自動記録。</li>
+                    <li>photo-file-input → handleFileSelect()：EXIFからGPS座標を読む。gpsAccuracy=null。</li>
+                    <li>changeリスナーはDOMContentLoaded内でaddEventListenerで登録（iOS対応）。</li>
+                </ul>
+            </li>
+            <li><strong>4:3強制クロップ:</strong> 縦を基準に左寄せで右側をカット。targetWは4:3後の横幅が基準。入出力タブのチェックボックスで制御。</li>
+            <li><strong>撮影ボタンのGPS表示:</strong> 「誤差○m」を直接表示。未取得時は白↔グレー点滅。GPS起動はDOMContentLoadedで実施。</li>
+            <li><strong>位置情報4状態:</strong> ○m（精度あり）/ 修正済み（地図タップ後・青・座標表示）/ 不明（EXIFから）/ 未取得</li>
+            <li><strong>GPS修正フロー:</strong> 修正ボタン→写真タブ閉じ→位置図タブ開く（現在ズーム+2）→地図タップ→写真タブに戻る。gpsFixed=true。</li>
+            <li><strong>方位センサー優先順位:</strong> webkitCompassHeading（iOS）→ deviceorientationabsolute（Android）→ deviceorientation（フォールバック）</li>
+            <li><strong>JZIPエクスポート時のEXIF書き込み:</strong> piexifjsで既存EXIFにマージしてGPS座標・方位・精度を書き込む。エラー時フォールバック。</li>
+            <li><strong>リサイズ横幅指定:</strong> 入出力タブで800/1200/1600/2000px・なしを選択。デフォルト1200px。</li>
         </ul>
 
         <h4>4.3 地図機能</h4>
         <ul>
-            <li>ポリライン描画の完了はボタン専用（マーカータップ無効）。</li>
-            <li>モード：位置図（メイン・赤）/ 地図メモ（サブ・青）/ 白紙メモ（Canvas）/ GPS修正モード</li>
-            <li><strong>maxZoom:25（オーバーズーム対応）:</strong> maxNativeZoom:18（地理院）/19（ESRI）でタイルを拡大表示。</li>
-            <li><strong>地図初期化タイミング:</strong> storageManager.load()では初期化せず、アコーディオンを開いたときにinvalidateSize()→ペンディングデータ復元の順で実行。DOMサイズ0での初期化を防ぐ。</li>
-            <li><strong>地図キャッシュ:</strong> 表示したタイルを自動でCache Storageに蓄積（Stale-While-Revalidate方式）。意図的な一括先読み機能はUI非搭載。</li>
+            <li>モード：メイン(位置)・サブ(落書き)・白紙メモの3モード。モード切替ボタンはCSS activeクラスで色制御（インラインstyle禁止）。</li>
+            <li><strong>maxZoom:25（オーバーズーム対応）:</strong> maxNativeZoom:18（地理院）/19（ESRI）</li>
+            <li><strong>地図初期化タイミング（確定・変更禁止）:</strong> storageManager.load()では初期化せず、アコーディオンを開いたときにinvalidateSize()→ペンディングデータ復元の順で実行。</li>
+            <li><strong>地図キャッシュ:</strong> 自動蓄積方式。入出力タブに「地図キャッシュを開放する」ボタンあり（LocalStorageには影響しない）。</li>
         </ul>
 
-        <h4>4.4 キャッシュ管理</h4>
+        <h4>4.4 初期値・クリア機能</h4>
         <ul>
-            <li><strong>自動キャッシュ:</strong> 地図表示時に自動でタイルをキャッシュ。ユーザー操作不要。</li>
-            <li><strong>キャッシュ開放:</strong> 入出力データ操作タブの「地図キャッシュを開放する」ボタンでCache Storageを削除。LocalStorage（入力データ・プリセット）には影響しない。</li>
-            <li><strong>iOSの注意:</strong> ストレージ不足時にiOSがPWAのキャッシュを自動削除する場合がある。その際は再度地図を表示してキャッシュを再蓄積する。</li>
+            <li><strong>保存内容:</strong> 会社情報（company_id/leader_name/company_name/tel/fax/person_name/email）・fn1〜fn5・photo_resize_width・photo_force_43</li>
+            <li><strong>保存先:</strong> LocalStorage（キー: survey_app_defaults）。起動時にloadDefaults()で自動読み込み。</li>
+            <li><strong>クリア（初期値を残す）:</strong> フォーム・写真・地図・白紙メモ・オートセーブ・IndexedDBを全消去→初期値を適用。確認ダイアログあり。</li>
+            <li><strong>クリア（全未入力）:</strong> 同上だが初期値を適用しない。確認ダイアログあり。</li>
+            <li><strong>初期値の読み込み:</strong> 入力内容はそのまま・初期値フィールドだけ上書き。</li>
+            <li><strong>初期値のLocalStorageはクリア操作では削除しない。</strong></li>
         </ul>
 
         <h4>4.5 オートセーブ仕様</h4>
         <ul>
             <li>保存先：LocalStorage（キー: survey_app_autosave）</li>
             <li>写真はdataUrlを保存しない。メタ情報（tag・memo・azimuth・lat・lng・gpsAccuracy・gpsFixed）のみ保存。</li>
-            <li>復元時はメタ情報のみ復元。実画像はJZIP読み込みで復元する運用。</li>
+            <li>実画像はIndexedDB（survey_photo_db）に保存。アプリ起動時に自動復元。</li>
         </ul>
 
-        <h4>4.6 PWA・デプロイ</h4>
+        <h4>4.6 PWA・デプロイ（β版）</h4>
         <ul>
-            <li>GitHub Pages: <code>https://kspa-joho.github.io/shodo-chosa/</code></li>
-            <li>manifest.jsonのstart_url/scope: <code>/shodo-chosa/</code></li>
-            <li>Service Workerによる完全オフライン起動。更新確認ボタンでPhase番号比較・手動更新。</li>
+            <li>GitHub Pages: <code>https://kspa-joho.github.io/shodo-chosa-beta/</code></li>
+            <li>manifest.jsonのstart_url/scope: <code>/shodo-chosa-beta/</code></li>
+            <li>Service Workerによる完全オフライン起動。新バージョン検知時に確認ダイアログ→skip-waiting→自動リロード。</li>
+            <li>統合管理版DLリンク: <code>https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip</code></li>
+        </ul>
+
+        <h4>4.7 フルスクリーンモード</h4>
+        <ul>
+            <li>ヘッダー上段ロゴの右に⛶ボタン。toggleFullWidth()でmax-width:100%を切り替え。</li>
+            <li>地図があればinvalidateSize()を呼ぶ。iPadでの幅拡張用途。</li>
         </ul>
     </section>
 
@@ -604,11 +625,11 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <h3>5. 重要な決定事項</h3>
         <ul>
             <li><strong>カメラinput分離方針:</strong> iOSのmultiple不安定問題を根本解決。今後変更しない。</li>
-            <li><strong>位置情報の削除ボタン廃止:</strong> 誤操作防止のため削除ボタンは設けない。修正は地図タップ上書きのみ。</li>
-            <li><strong>EXIFはエクスポート時に書き込む:</strong> リサイズ時にEXIFが消えるため、JZIP生成時にpiexifjsで書き直す。</li>
+            <li><strong>位置情報の削除ボタン廃止:</strong> 誤操作防止。修正は地図タップ上書きのみ。</li>
+            <li><strong>EXIFはエクスポート時にマージ方式で書き込む:</strong> 既存EXIFを保持したままGPS/方位を追記。</li>
             <li><strong>地図タップ修正後はgpsFixed=true:</strong> gpsAccuracyはnull。表示は「修正済み（座標）」。</li>
-            <li><strong>地図キャッシュは自動蓄積方式:</strong> 意図的な一括先読みUIは搭載しない。キャッシュ開放のみUIで提供。</li>
             <li><strong>地図初期化はアコーディオンopen時:</strong> DOMサイズ0での初期化バグを防ぐため確定。今後変更しない。</li>
+            <li><strong>IndexedDBでの写真永続化:</strong> アプリ落ち対策。CleanAllでIndexedDBも削除する。</li>
             <li><strong>iPhone動作確認:</strong> 部会メンバーへのお披露目時に実機確認を行う。</li>
         </ul>
     </section>
@@ -616,10 +637,11 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <section>
         <h3>6. 次に行うタスクの積み残し</h3>
         <ul>
+            <li>GPS修正（地図タップ）の動作確認（Androidスマホ）</li>
             <li>iPhone実機での方位センサー・カメラ・GPS動作確認（部会お披露目時）</li>
-            <li>App B帳票への方位・GPS出力対応（要検討・AppBスレッドで実施）</li>
-            <li>試験運用後の現場フィードバック反映</li>
+            <li>App B帳票への方位・GPS出力対応（AppBスレッドで実施）</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
+            <li>試験運用後の現場フィードバック反映</li>
         </ul>
     </section>
 
@@ -627,7 +649,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <h3>7. PWA更新管理</h3>
         <div style="padding: 15px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px; margin-top: 10px;">
             <p style="margin:0 0 10px 0; font-weight:bold; color: #16a085;">アプリ更新管理</p>
-            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.78</strong></p>
+            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.79</strong></p>
             <div style="display:flex; align-items:center; gap:10px;">
                 <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="appControl.checkForUpdate()">更新を確認する</button>
                 <span id="update-status" style="font-size:0.9rem; color:#555;"></span>
