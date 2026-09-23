@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 5.90)</title>
+    <title>被災状況調査アプリ (Phase 5.93)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -117,7 +117,10 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
     </div>
     <nav class="header-tabs">
         <button class="tab-btn" data-target="content-manage">管理</button>
-        <button class="tab-btn active" data-target="content-app">現地調査</button>
+        <button class="tab-btn active" data-target="content-app" style="display:flex; flex-direction:column; line-height:1.2;">
+            <span>現地調査</span>
+            <span id="tab-disaster-no" style="font-size:0.65rem; font-weight:normal; opacity:0.85;"></span>
+        </button>
         <button class="tab-btn" data-target="content-dev">開発</button>
     </nav>
 </div>
@@ -151,7 +154,7 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <div class="input-group"><label>調査班長名</label><input type="text" name="leader_name"></div>
             <div class="input-group"><label>整理番号</label><input type="text" name="ref_no"></div>
             <div class="input-group"><label>調査日</label><input type="date" name="survey_date" id="default-date"></div>
-            <div class="input-group"><label>災害番号</label><input type="text" name="disaster_no"></div>
+            <div class="input-group"><label>災害番号</label><input type="text" name="disaster_no" oninput="syncDisasterNoTab(this.value)"></div>
             <div class="input-group">
                 <label>発注者名</label>
                 <input type="text" name="dept_name" placeholder="例：鹿児島県"
@@ -468,12 +471,12 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.90</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.93</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.90</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.93</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -492,8 +495,8 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 5.90)</h2>
-        <p><strong>Last Updated:</strong> Phase 5.90 (introduction.htmlの余分な閉じdivを削除・開発タブはみ出しの根本修正)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 5.93)</h2>
+        <p><strong>Last Updated:</strong> Phase 5.93 (現地調査タブに災害番号を常時表示・2段組み)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -550,7 +553,7 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td><td>introduction.html</td></tr>
             <tr><td>開発</td><td>content-dev</td><td>開発方針・アプリ化の手順</td><td>spec.html + install_guide.html</td></tr>
         </table>
-        <p style="margin-top:10px; font-size:0.9rem;">※ Phase 5.90時点では⑦複数現場管理は未実装。「管理」タブは⑦実装時に現場リスト方式に置き換え予定。タブ構成自体は変わらない。</p>
+        <p style="margin-top:10px; font-size:0.9rem;">※ Phase 5.93時点では⑦複数現場管理は未実装。「管理」タブは⑦実装時に現場リスト方式に置き換え予定。タブ構成自体は変わらない。</p>
     </div>
 
     <div class="spec-section">
@@ -593,18 +596,27 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <li>新バージョン検知時に確認ダイアログ→skip-waiting→自動リロード。</li>
             <li>統合管理版DLリンク: <code>https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip</code></li>
         </ul>
+
+        <h4>5.6 災害番号の常時表示（Phase 5.93）</h4>
+        <ul>
+            <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
+            <li>「災害番号：」等のラベルは付けない。値のみ表示。</li>
+            <li>未入力のときは何も表示しない。</li>
+            <li>タブボタンの横幅・「管理」「開発」タブの表示は変更しない。</li>
+            <li>管理タブの災害番号inputのoninputで<code>syncDisasterNoTab()</code>を呼び即時反映。storageManager.load()での復元時にも同期する。</li>
+        </ul>
     </div>
 
     <div class="spec-section">
         <h3>6. 重要な決定事項</h3>
         <ul>
-            <li><strong>3タブ構成（Phase 5.90確定）:</strong> 管理・現地調査・開発。⑦複数現場管理実装時も管理タブの中身を置き換えるだけでタブ構成は変わらない。</li>
+            <li><strong>3タブ構成（Phase 5.93確定）:</strong> 管理・現地調査・開発。⑦複数現場管理実装時も管理タブの中身を置き換えるだけでタブ構成は変わらない。</li>
             <li><strong>カメラinput分離方針:</strong> 今後変更しない。</li>
             <li><strong>位置情報の削除ボタン廃止:</strong> 誤操作防止。修正は地図タップのみ。</li>
             <li><strong>EXIFはエクスポート時にマージ方式で書き込む。</strong></li>
             <li><strong>地図初期化はアコーディオンopen時:</strong> 今後変更しない。</li>
             <li><strong>IndexedDBでの写真永続化:</strong> アプリ落ち対策。clearAll()でIndexedDBも削除する。</li>
-            <li><strong>HTML部品のタグバランス厳守（Phase 5.90）:</strong> manage.html・introduction.html・dev.html等の部品ファイルは、&lt;div&gt;の開き数と閉じ数を必ず一致させる。余分な&lt;/div&gt;が1つでもあると、ブラウザがapp-containerごと閉じてしまい、後続のタブ（開発タブ）が枠外に表示される。部品ファイルを分割・移動した際は開閉数を確認すること。</li>
+            <li><strong>HTML部品のタグバランス厳守（Phase 5.93）:</strong> manage.html・introduction.html・dev.html等の部品ファイルは、&lt;div&gt;の開き数と閉じ数を必ず一致させる。余分な&lt;/div&gt;が1つでもあると、ブラウザがapp-containerごと閉じてしまい、後続のタブ（開発タブ）が枠外に表示される。部品ファイルを分割・移動した際は開閉数を確認すること。</li>
             <li><strong>部品ファイルでのsection/headerタグ不使用:</strong> spec.html・header.htmlでは&lt;section&gt;&lt;header&gt;を使わず&lt;div&gt;で記述する。</li>
         </ul>
     </div>
@@ -612,7 +624,13 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
     <div class="spec-section">
         <h3>7. 次に行うタスクの積み残し（改修指示書準拠）</h3>
         <ul>
-            <li>【Step1-③】入力項目の初期値・階層設計（管理項目の初期値追加・災害番号常時表示等）</li>
+            <li>【Step1-③】入力項目の初期値・階層設計
+                <ul>
+                    <li>済：3タブ構成への移行（Phase 5.80）、発注者名の管理タブ移動と諸元へのreadonly表示（Phase 5.81）</li>
+                    <li>済：災害番号の常時表示（現地調査タブのボタンに2段組みで表示。Phase 5.93）</li>
+                    <li>残：管理項目の参照ボタン（下記設計。⑥複数現場管理と同時に実装する）</li>
+                </ul>
+            </li>
             <li>【Step2-①】真っ黒画像バグ（tainted canvas問題の修正）</li>
             <li>【Step2-②】位置図と帳票枠のサイズ不一致（縦横比の調整）</li>
             <li>【Step2-③】白紙メモのベクタ化（undo・文字移動・ブラウザバック対策）</li>
@@ -621,13 +639,32 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <li>iPhone実機での動作確認（部会お披露目時）</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
         </ul>
+
+        <h4>7.1 管理項目の参照ボタン（設計確定・⑥と同時実装）</h4>
+        <p>同一災害で複数現場を回る際、共通する管理項目を他の現場から引き継ぐための機能。⑥で現場データの持ち方が変わるため、⑥の実装時に合わせて作る（先行実装すると二度手間になるため）。</p>
+        <ul>
+            <li><strong>配置:</strong> 管理タブ「管理項目」アコーディオン内に参照ボタンを置く。</li>
+            <li><strong>選択肢（4択）:</strong>
+                <ul>
+                    <li>①指定した初期値を引用（「初期値として保存」で保存した値）</li>
+                    <li>②最後の現場を参照</li>
+                    <li>③それ以外の現場を指定して参照（⑥の現場リストから選択）</li>
+                    <li>④キャンセル</li>
+                </ul>
+            </li>
+            <li><strong>引き継ぐ項目:</strong> 災害番号・発注者名・被災日の3項目。</li>
+            <li><strong>整理番号の扱い（Phase 5.93確定）:</strong> 空欄にはせず、参照元の値をそのまま引き継ぐ。ただし現場ごとに異なるはずの項目なので、書き換え忘れに気づけるよう文字色を変えて表示する。</li>
+            <li><strong>前回値であることを示す文字色表示:</strong> 参照で引き継いだ災害番号・発注者名・被災日・整理番号の4項目は、引き継ぎ直後は目立つ色（オレンジ等）で表示する。ユーザーがその項目の値を実際に書き換えた時点で通常の文字色（黒）に戻す。フォーカスが入っただけ・クリックしただけでは色は変わらない（値の変更で判定する。inputイベントでのみ色を戻し、focus/blurイベントでは戻さない）。色が前回値のままでもその値は正式な入力値として採用される（未入力・無効という意味ではない）。</li>
+            <li><strong>調査日：</strong> 参照元の日付ではなく今日の日付のままとする（色表示の対象外）。</li>
+            <li><strong>①の前提:</strong> 「初期値として保存」の保存対象（survey_app_defaults）に災害番号・発注者名・被災日を追加する（整理番号は初期値保存の対象外。②③の現場参照でのみ引き継ぐ）。</li>
+        </ul>
     </div>
 
     <div class="spec-section">
         <h3>8. PWA更新管理</h3>
         <div style="padding: 15px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px; margin-top: 10px;">
             <p style="margin:0 0 10px 0; font-weight:bold; color: #16a085;">アプリ更新管理</p>
-            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.90</strong></p>
+            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.93</strong></p>
             <div style="display:flex; align-items:center; gap:10px;">
                 <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="appControl.checkForUpdate()">更新を確認する</button>
                 <span id="update-status" style="font-size:0.9rem; color:#555;"></span>
@@ -4511,6 +4548,10 @@ window.storageManager = {
             if (json.dept_name !== undefined && window.syncDeptName) {
                 window.syncDeptName(json.dept_name);
             }
+            // 災害番号が復元されたら現地調査タブのラベル表示も同期する
+            if (json.disaster_no !== undefined && window.syncDisasterNoTab) {
+                window.syncDisasterNoTab(json.disaster_no);
+            }
             // 【修正②】地図復元は mapApp.init() 後に mapApp.map が確実に存在する場合のみ実行。
             // アコーディオンが閉じていると地図DOMが非表示でinitが不完全になるケースがあるため、
             // map が null でも後続処理をクラッシュさせないよう安全に処理する。
@@ -4900,6 +4941,14 @@ window.syncDeptName = function(val) {
         readonly.value        = '';
         display.style.display = 'none';
     }
+};
+
+// 災害番号を管理タブ→現地調査タブのボタン下段ラベルに同期する
+// 値あり → 小さく表示、値なし → 何も表示しない（ラベルなし）
+window.syncDisasterNoTab = function(val) {
+    const label = document.getElementById('tab-disaster-no');
+    if (!label) return;
+    label.textContent = (val && val.trim() !== '') ? val : '';
 };
 </script>
 </body>
