@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 5.94)</title>
+    <title>被災状況調査アプリ (Phase 5.95)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -54,6 +54,14 @@ body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; d
 /* 地図のタッチアクション制御 */
 #map { touch-action: none; }
 
+/* ズームレベル表示（+とーの直下に数値を表示。Phase 5.95） */
+.zoom-level-display {
+    background: white; width: 26px; height: 26px; line-height: 26px;
+    text-align: center; font-size: 0.8rem; font-weight: bold; color: #2c3e50;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.4); border-radius: 4px; margin-top: 4px;
+    user-select: none;
+}
+
 /* ヘッダー */
 .app-header { background-color: var(--primary-color); color: white; padding: 10px; position: sticky; top: 0; z-index: 1000; }
 .header-top { display: flex; align-items: center; gap: 10px; height: auto; } 
@@ -103,7 +111,8 @@ body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; d
 .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 3px rgba(0,0,0,0.3); padding: 0; cursor: pointer; }
 .color-btn.active { transform: scale(1.2); border-color: #333; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
 .sketch-canvas-container { position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background: white; cursor: crosshair; touch-action: none; margin-bottom: 5px; }
-canvas.sketch-canvas { display: block; width: 100%; }</style>
+canvas.sketch-canvas { display: block; width: 100%; }
+</style>
 </head>
 <body>
     <div id="app-container">
@@ -500,12 +509,12 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.94</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.95</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.94</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.95</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -524,8 +533,8 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 5.94)</h2>
-        <p><strong>Last Updated:</strong> Phase 5.94 (introduction.html退行修正・PWA更新管理の重複節を削除)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 5.95)</h2>
+        <p><strong>Last Updated:</strong> Phase 5.95 (位置図にズームレベル数値表示を追加)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -633,7 +642,14 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <li>統合管理版DLリンク: <code>https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip</code></li>
         </ul>
 
-        <h4>5.6 災害番号の常時表示（Phase 5.93）</h4>
+        <h4>5.6 ズームレベル数値表示（Phase 5.95）</h4>
+        <ul>
+            <li>位置図の+/-ズームボタンの直下に、現在のズームレベルを数値で常時表示する（L.Control.ZoomLevelDisplay）。</li>
+            <li>目的：真っ黒画像バグ等、ズームレベル依存の不具合について、現場から具体的な数値で状況共有できるようにするため。</li>
+            <li>zoomendイベントで数値を更新。地図初期化時（init()内）に1回だけ追加する。</li>
+        </ul>
+
+        <h4>5.7 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
             <li>「災害番号：」等のラベルは付けない。値のみ表示。</li>
@@ -655,7 +671,7 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <li><strong>IndexedDBでの写真永続化:</strong> アプリ落ち対策。clearAll()でIndexedDBも削除する。</li>
             <li><strong>HTML部品のタグバランス厳守（Phase 5.90）:</strong> manage.html・introduction.html・dev.html等の部品ファイルは、&lt;div&gt;の開き数と閉じ数を必ず一致させる。余分な&lt;/div&gt;が1つでもあると、ブラウザがapp-containerごと閉じてしまい、後続のタブ（開発タブ）が枠外に表示される。部品ファイルを分割・移動した際は開閉数を確認すること。</li>
             <li><strong>部品ファイルでのsection/headerタグ不使用:</strong> spec.html・header.htmlでは&lt;section&gt;&lt;header&gt;を使わず&lt;div&gt;で記述する。</li>
-            <li><strong>アプリ更新UIは開発タブに1箇所のみ（Phase 5.94）:</strong> dev.htmlの「アプリ更新」アコーディオンが唯一の実装。spec.html側に重複した更新UIは置かない（id重複・二重表示を防ぐため）。</li>
+            <li><strong>アプリ更新UIは開発タブに1箇所のみ（Phase 5.95）:</strong> dev.htmlの「アプリ更新」アコーディオンが唯一の実装。spec.html側に重複した更新UIは置かない（id重複・二重表示を防ぐため）。</li>
             <li><strong>部品ファイルの差し替え漏れに注意:</strong> src配下のファイルは互いにバージョンがずれると症状の切り分けが難しくなる。改修のたびに影響する全ファイルを一式で提示・反映する。</li>
         </ul>
     </div>
@@ -3312,6 +3328,29 @@ const setupJapaneseDraw = () => {
     L.drawLocal.edit.handlers.remove.tooltip.text = '削除する図形をクリック';
 };
 
+// 【Phase 5.95追加】ズームレベル表示コントロール（+とーの間に現在のズーム数値を表示）
+// デバッグ・現場からの状況報告（「このズームで真っ黒になる」等）を数字で共有できるようにするため。
+L.Control.ZoomLevelDisplay = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd(map) {
+        const container = L.DomUtil.create('div', 'leaflet-bar zoom-level-display');
+        container.innerHTML = map.getZoom();
+        L.DomEvent.disableClickPropagation(container);
+        this._container = container;
+        this._map = map;
+        map.on('zoomend', this._update, this);
+        map.on('load', this._update, this);
+        return container;
+    },
+    onRemove(map) {
+        map.off('zoomend', this._update, this);
+        map.off('load', this._update, this);
+    },
+    _update() {
+        if (this._container && this._map) this._container.innerHTML = this._map.getZoom();
+    }
+});
+
 // --- 地図管理 ---
 window.mapApp = {
     map: null, allDrawnItems: null, drawControl: null, currentMode: 'main',
@@ -3328,6 +3367,8 @@ window.mapApp = {
         }).setView([31.5601, 130.5580], 16);
         
         L.control.zoom({ zoomInTitle: '', zoomOutTitle: '' }).addTo(this.map);
+        // ズームレベル数値表示（+とーの直下に並ぶ）
+        new L.Control.ZoomLevelDisplay().addTo(this.map);
 
         const layers = {
             "地理院 標準": L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', { attribution: "GSI", crossOrigin: 'anonymous', maxZoom: 25, maxNativeZoom: 18 }),
@@ -3525,6 +3566,7 @@ window.mapApp = {
         if (banner) banner.style.display = 'none';
     }
 };
+
 
 window.sketchApp = {
     canvas: null, ctx: null, isDrawing: false, startX: 0, startY: 0,
