@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 5.93)</title>
+    <title>被災状況調査アプリ (Phase 5.94)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -259,19 +259,59 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content no-padding">
-            <div class="map-mode-selector" style="display:flex; background:#444; color:white; font-size:0.8rem;">
-                <label style="flex:1; padding:10px; text-align:center; border-right:1px solid #666;">
-                    <input type="radio" name="map_mode" value="main" checked onchange="mapApp.setMode('main')"> メイン(位置)
-                </label>
-                <label style="flex:1; padding:10px; text-align:center;">
-                    <input type="radio" name="map_mode" value="sub" onchange="mapApp.setMode('sub')"> サブ(落書き)
-                </label>
+            <!-- GPS修正モードバナー（通常時は非表示） -->
+            <div id="gps-fix-banner" style="display:none; background:#e74c3c; color:white; padding:10px 15px; align-items:center; justify-content:space-between; font-size:0.85rem; font-weight:bold;">
+                <span>📍 位置情報を修正する場所をタップしてください</span>
+                <button type="button"
+                    style="background:rgba(255,255,255,0.25); border:1px solid white; color:white; padding:4px 12px; border-radius:4px; font-size:0.8rem; cursor:pointer;"
+                    onclick="mapApp.cancelGpsFixMode(); photoApp._restorePhotoTab();">キャンセル</button>
             </div>
-            <div id="map" style="height: 55vh; width: 100%;"></div>
-            <div class="map-controls">
-                <button type="button" onclick="mapApp.setCurrentLocation()">現在地</button>
-                <button type="button" style="background:#e67e22; color:white;" onclick="mapApp.captureToPhoto()">地図を写真に保存</button>
-                <button type="button" onclick="mapApp.clearLayers()">全て消去</button>
+            <!-- モード切替：メイン・サブ・白紙メモの3モード -->
+            <div style="display:flex; background:#444; color:white; font-size:0.8rem;">
+                <button id="mode-btn-map" class="sketch-btn active"
+                    style="flex:1; padding:10px; border:none; border-right:1px solid #666; color:white; font-size:0.8rem;"
+                    onclick="uiHelper.switchMapMode('map')">メイン(位置)</button>
+                <button id="mode-btn-draw" class="sketch-btn"
+                    style="flex:1; padding:10px; border:none; border-right:1px solid #666; color:white; font-size:0.8rem;"
+                    onclick="uiHelper.switchMapMode('draw')">サブ(落書き)</button>
+                <button id="mode-btn-sketch" class="sketch-btn"
+                    style="flex:1; padding:10px; border:none; color:white; font-size:0.8rem;"
+                    onclick="uiHelper.switchMapMode('sketch')">白紙メモ</button>
+            </div>
+            <!-- 地図エリア -->
+            <div id="map-container">
+                <div id="map" style="height: 55vh; width: 100%;"></div>
+                <div class="map-controls">
+                    <button type="button" onclick="mapApp.setCurrentLocation()">現在地</button>
+                    <button type="button" style="background:#e67e22; color:white;" onclick="mapApp.captureToPhoto()">地図を写真に保存</button>
+                    <button type="button" onclick="mapApp.clearLayers()">全て消去</button>
+                </div>
+            </div>
+            <!-- 白紙メモエリア -->
+            <div id="sketch-container" style="display:none;">
+                <div class="sketch-toolbar">
+                    <div class="sketch-tool-group">
+                        <button id="sk-free"   class="sketch-btn active" onclick="sketchApp.setTool('free')">ペン</button>
+                        <button id="sk-line"   class="sketch-btn"        onclick="sketchApp.setTool('line')">直線</button>
+                        <button id="sk-text"   class="sketch-btn"        onclick="sketchApp.setTool('text')">文字</button>
+                        <button id="sk-eraser" class="sketch-btn"        onclick="sketchApp.setTool('eraser')">消ゴム</button>
+                    </div>
+                    <div class="sketch-tool-group">
+                        <button class="color-btn active" style="background:black;" onclick="sketchApp.setColor('black',this)"></button>
+                        <button class="color-btn"        style="background:red;"   onclick="sketchApp.setColor('red',this)"></button>
+                        <button class="color-btn"        style="background:blue;"  onclick="sketchApp.setColor('blue',this)"></button>
+                    </div>
+                    <div class="sketch-tool-group">
+                        <button class="sketch-btn" onclick="sketchApp.undo()">戻る</button>
+                    </div>
+                </div>
+                <div class="sketch-canvas-container">
+                    <canvas id="sketch-canvas" class="sketch-canvas"></canvas>
+                </div>
+                <div style="display:flex; gap:5px; padding:5px;">
+                    <button class="btn-sub" style="flex:1; background:#c0392b;" onclick="sketchApp.clearAll()">全消去</button>
+                    <button class="btn-main" style="flex:1;" onclick="sketchApp.saveToPhoto()">写真に保存</button>
+                </div>
             </div>
         </div>
     </div>
@@ -374,30 +414,42 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
                     <button type="button" class="btn-sub" style="flex:1; background:#e74c3c;" onclick="photoApp.delete()">削除</button>
                 </div>
 
+                <!-- 【iPhone対応】inputを2つに分離。
+                     photo-camera-input: capture="environment"・multipleなし → カメラ直起動専用。
+                     photo-file-input: captureなし・multiple あり → ファイル選択専用（複数枚対応）。
+                     changeリスナーはDOMContentLoaded内でaddEventListenerで登録する（iOS対応）。 -->
+                <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none">
+                <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none">
+
+                <div style="display:flex; gap:6px; margin-bottom:8px;">
+                    <button type="button" id="photo-camera-btn" class="btn-main" style="flex:1; background:#2c3e50;"
+                        onclick="document.getElementById('photo-camera-input').click()">
+                        📷 撮影（GPS準備中）
+                    </button>
+                    <button type="button" class="btn-sub" style="flex:1;"
+                        onclick="document.getElementById('photo-file-input').click()">
+                        📁 ファイル選択
+                    </button>
+                </div>
+
                 <!-- 写真の備考 -->
                 <div class="input-group">
                     <label>写真の備考</label>
                     <textarea id="photo-memo" rows="2" oninput="photoApp.updateMemo(this.value)"></textarea>
                 </div>
 
-                <!-- ============================================================
-                     センサー情報エリア（方位・GPS）
-                     ・写真タブを開いた瞬間から常時リアルタイム表示。
-                     ・方位・GPSはそれぞれ独立。撮影前後どちらでも任意に記録可能。
-                     ・備考と同じ操作感：記録ボタンで付与、削除ボタンでnullに戻す。
-                     ・0と未記録(null)は別物として管理する。
-                     ============================================================ -->
+                <!-- センサー情報エリア（方位・GPS） -->
                 <div style="background:#f0f4f8; border:1px solid #dde3ea; border-radius:4px; padding:10px; margin-bottom:8px;">
 
                     <!-- リアルタイム方位 -->
                     <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
                         <span style="font-size:0.78rem; color:#666; white-space:nowrap;">🧭 現在の方位：</span>
-                        <span id="azimuth-live" style="font-size:0.82rem; font-weight:bold; color:#aaa;">（タブを開くと起動）</span>
+                        <span id="azimuth-live" style="font-size:0.82rem; font-weight:bold; color:#aaa;">--</span>
                     </div>
 
-                    <!-- この写真の方位（記録値） -->
+                    <!-- 撮影方向（記録値） -->
                     <div style="display:flex; align-items:center; gap:5px; margin-bottom:10px;">
-                        <label style="font-size:0.78rem; color:#666; white-space:nowrap; min-width:7em;">この写真の方位：</label>
+                        <label style="font-size:0.78rem; color:#666; white-space:nowrap; min-width:5em;">撮影方向：</label>
                         <input type="number" id="photo-azimuth-input" min="0" max="359" placeholder="未記録"
                             style="width:72px; padding:5px; border:1px solid #ccc; border-radius:4px; font-size:0.9rem;"
                             oninput="photoApp.updateAzimuth(this.value)">
@@ -411,40 +463,16 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
                     <!-- リアルタイムGPS -->
                     <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
                         <span style="font-size:0.78rem; color:#666; white-space:nowrap;">📍 現在のGPS：</span>
-                        <span id="gps-live" style="font-size:0.82rem; font-weight:bold; color:#aaa;">（タブを開くと起動）</span>
+                        <span id="gps-live" style="font-size:0.82rem; font-weight:bold; color:#aaa;">--</span>
                     </div>
 
-                    <!-- この写真のGPS（記録値） -->
+                    <!-- 位置情報（○m / 修正済み / 不明 / 未取得） -->
                     <div style="display:flex; align-items:center; gap:5px;">
-                        <label style="font-size:0.78rem; color:#666; white-space:nowrap; min-width:7em;">この写真のGPS：</label>
-                        <span id="photo-gps-recorded" style="flex:1; font-size:0.78rem; color:#aaa;">未記録</span>
+                        <label style="font-size:0.78rem; color:#666; white-space:nowrap; min-width:5em;">位置情報：</label>
+                        <span id="photo-gps-status" style="flex:1; font-size:0.82rem; font-weight:bold; color:#aaa;">未取得</span>
                         <button type="button" class="btn-main" style="flex:1; padding:6px; font-size:0.78rem; background:#2c3e50;"
-                            onclick="photoApp.recordGps()">記録</button>
-                        <button type="button" class="btn-sub" style="flex:1; padding:6px; font-size:0.78rem; background:#e74c3c;"
-                            onclick="photoApp.clearGps()">削除</button>
+                            onclick="photoApp.modifyGps()">修正</button>
                     </div>
-                </div>
-
-                <!-- 【iPhone対応】inputを2つに分離。
-                     photo-camera-input: capture="environment"・multipleなし → カメラ直起動専用。
-                       iOSでmultipleを付けると動作が不安定になるため1枚専用とする。
-                     photo-file-input: captureなし・multiple あり → ファイル選択専用（複数枚対応）。
-                     どちらも photoApp.handleFile(this) に渡す。処理は共通。 -->
-                <input type="file" id="photo-camera-input" accept="image/*" capture="environment" style="display:none"
-                    onchange="photoApp.handleFile(this)">
-                <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none"
-                    onchange="photoApp.handleFile(this)">
-
-                <div style="display:flex; gap:6px;">
-                    <!-- id="photo-camera-btn" を付けることで gpsManager._updateUI() がボタンラベルを動的に書き換える -->
-                    <button type="button" id="photo-camera-btn" class="btn-main" style="flex:1; background:#2c3e50;"
-                        onclick="document.getElementById('photo-camera-input').click()">
-                        📷 撮影（GPS準備中）
-                    </button>
-                    <button type="button" class="btn-sub" style="flex:1;"
-                        onclick="document.getElementById('photo-file-input').click()">
-                        📁 ファイル選択
-                    </button>
                 </div>
 
             </div>
@@ -464,19 +492,20 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <button type="button" class="btn-sub" onclick="appControl.exportCSV()" style="margin-bottom:10px;">日報用CSVエクスポート（写真なし）</button>
         </div>
     </div>
-</div></section>
+</div>
+</section>
             <!-- 開発タブ：アプリ更新・開発ログ・アプリ化の手順 -->
             <section id="content-dev"    class="tab-content"><div class="survey-app-ui">
 
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.93</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.94</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.93</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.94</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -495,8 +524,8 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 5.93)</h2>
-        <p><strong>Last Updated:</strong> Phase 5.93 (現地調査タブに災害番号を常時表示・2段組み)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 5.94)</h2>
+        <p><strong>Last Updated:</strong> Phase 5.94 (introduction.html退行修正・PWA更新管理の重複節を削除)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -524,21 +553,21 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
         <h3>3. ファイル構成 (File Manifest)</h3>
         <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
             <tr style="background:#eee;"><th>Filename</th><th>Role</th><th>Note</th></tr>
-            <tr><td><code>build.js</code></td><td>ビルドスクリプト</td><td>App A専用。piexif.jsを先頭に結合する。manage.htmlを追加読み込み。</td></tr>
+            <tr><td><code>build.js</code></td><td>ビルドスクリプト</td><td>App A専用。piexif.jsを先頭に結合する。manage.html・dev.htmlを追加読み込み。</td></tr>
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
             <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
-            <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン</td></tr>
+            <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
             <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>現場管理（仮）・管理項目（発注者名含む）・調査を実施した者・入出力データ操作</td></tr>
-            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td></tr>
+            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td></tr>
             <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
-            <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブに埋め込み）</td></tr>
+            <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
-            <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
-            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>Leaflet初期化・描画・モード切替・GPS修正モード。maxZoom:25</td></tr>
+            <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
+            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
-            <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>UIヘルパー・オートセーブ・JZIP入出力・更新通知・saveDefaults/loadDefaults・clearAll・toggleFullWidth</td></tr>
-            <tr><td><code>sw.js</code></td><td>Service Worker</td><td>自動キャッシュ・skip-waiting対応</td></tr>
+            <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・プリセット・更新確認・mapCacheManager・saveDefaults/loadDefaults・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
             <tr><td><code>rogo-AAA.txt</code></td><td>ロゴデータ</td><td>Base64エンコード画像（ビルド時にインライン埋め込み）</td></tr>
@@ -549,11 +578,11 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
         <h3>4. タブ構成</h3>
         <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
             <tr style="background:#eee;"><th>タブ</th><th>section ID</th><th>内容</th><th>ソースファイル</th></tr>
-            <tr><td>管理</td><td>content-manage</td><td>管理項目・調査を実施した者・端末設定</td><td>manage.html</td></tr>
+            <tr><td>管理</td><td>content-manage</td><td>現場管理（仮）・管理項目・調査を実施した者・入出力データ操作</td><td>manage.html</td></tr>
             <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td><td>introduction.html</td></tr>
-            <tr><td>開発</td><td>content-dev</td><td>開発方針・アプリ化の手順</td><td>spec.html + install_guide.html</td></tr>
+            <tr><td>開発</td><td>content-dev</td><td>アプリ更新・開発ログ・アプリ化の手順</td><td>dev.html（spec.html・install_guide.htmlを内包）</td></tr>
         </table>
-        <p style="margin-top:10px; font-size:0.9rem;">※ Phase 5.93時点では⑦複数現場管理は未実装。「管理」タブは⑦実装時に現場リスト方式に置き換え予定。タブ構成自体は変わらない。</p>
+        <p style="margin-top:10px; font-size:0.9rem;">※ ⑥複数現場管理は未実装。「現場管理」アコーディオンは準備中表示。実装時に管理タブ内のこの部分を現場リスト方式に置き換える（タブ構成自体は変わらない）。</p>
     </div>
 
     <div class="spec-section">
@@ -564,36 +593,43 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
 
         <h4>5.2 写真機能</h4>
         <ul>
-            <li><strong>写真エリアのUI配置順（確定）:</strong> ナビゲーション → プレビュー → タグ・削除 → 📷撮影・📁ファイル選択 → 写真の備考 → センサーエリア（撮影方向・位置情報）</li>
-            <li><strong>IndexedDB永続化（photoStorage）:</strong> 撮影・選択・削除・ソート時にsyncAll()。起動時にrestore()で復元。</li>
-            <li><strong>カメラinput分離（確定・変更禁止）:</strong> photo-camera-input→handleCameraFile() / photo-file-input→handleFileSelect()。changeリスナーはDOMContentLoaded内でaddEventListenerで登録。</li>
-            <li><strong>4:3強制クロップ:</strong> 縦を基準に左寄せで右側をカット。端末設定タブのチェックボックスで制御。</li>
+            <li><strong>写真エリアのUI配置順（確定）:</strong> ナビゲーション → プレビュー → タグ・削除 → 📷撮影・📁ファイル選択ボタン → 写真の備考 → センサーエリア（撮影方向・位置情報）</li>
+            <li><strong>カメラinput分離（確定・変更禁止）:</strong> photo-camera-input（handleCameraFile・GPS自動記録）/ photo-file-input（handleFileSelect・EXIF読み込み）。changeリスナーはDOMContentLoaded内でaddEventListenerで登録（iOS対応）。</li>
+            <li><strong>IndexedDB永続化（photoStorage）:</strong> 撮影・選択・削除・ソート・並び替え時にsyncAll()。アプリ起動時にrestore()でdataUrlを復元。アプリが落ちても写真が消えない。</li>
+            <li><strong>4:3強制クロップ:</strong> 縦を基準に左寄せで右側をカット。targetWは4:3後の横幅が基準。管理タブのチェックボックスで制御。</li>
             <li><strong>撮影ボタンのGPS表示:</strong> 「誤差○m」を直接表示。未取得時は点滅。GPS起動はDOMContentLoadedで実施。</li>
-            <li><strong>位置情報4状態:</strong> ○m / 修正済み（青・座標表示）/ 不明（EXIFから）/ 未取得</li>
-            <li><strong>GPS修正フロー:</strong> 修正ボタン→位置図タブ開く（現在ズーム+2）→地図タップ→写真タブに戻る。gpsFixed=true。</li>
-            <li><strong>方位センサー優先順位:</strong> webkitCompassHeading（iOS）→ deviceorientationabsolute（Android）→ deviceorientation</li>
-            <li><strong>JZIPエクスポート時のEXIF書き込み:</strong> 既存EXIFにマージしてGPS座標・方位・精度を書き込む。</li>
+            <li><strong>位置情報4状態:</strong> ○m（精度あり）/ 修正済み（地図タップ後・青・座標表示）/ 不明（EXIFから）/ 未取得</li>
+            <li><strong>GPS修正フロー:</strong> 修正ボタン→写真タブ閉じ→位置図タブ開く（現在ズーム+2）→地図タップ→写真タブに戻る。gpsFixed=true。</li>
+            <li><strong>方位センサー優先順位:</strong> webkitCompassHeading（iOS・真北基準）→ deviceorientationabsolute（Android等・真北基準）→ deviceorientation（フォールバック）</li>
+            <li><strong>撮影方向は記録/削除ボタン方式のまま（GPSのみ修正ボタンに一本化）。</strong></li>
+            <li><strong>JZIPエクスポート時のEXIF書き込み:</strong> piexifjsで既存EXIFにマージしてGPS座標・方位・精度を書き込む。エラー時フォールバック。</li>
+            <li><strong>リサイズ横幅指定:</strong> 管理タブで800/1200/1600/2000px・なしを選択。デフォルト1200px。</li>
         </ul>
 
         <h4>5.3 地図機能</h4>
         <ul>
-            <li>モード：メイン(位置)・サブ(落書き)・白紙メモの3モード。</li>
-            <li>maxZoom:25（オーバーズーム対応）。地図初期化はアコーディオンopen時（確定・変更禁止）。</li>
-            <li>地図キャッシュは自動蓄積方式。開放ボタンは端末設定タブ内。</li>
+            <li>ポリライン描画の完了はボタン専用（マーカータップ無効）。</li>
+            <li>モード：メイン(位置)・サブ(落書き)・白紙メモの3モード。モード切替ボタンはCSS activeクラスで色制御（インラインstyle禁止）。</li>
+            <li><strong>maxZoom:25（オーバーズーム対応）:</strong> maxNativeZoom:18（地理院）/19（ESRI）でタイルを拡大表示。</li>
+            <li><strong>地図初期化タイミング（確定・変更禁止）:</strong> storageManager.load()では初期化せず、アコーディオンを開いたときにinvalidateSize()→ペンディングデータ復元の順で実行。DOMサイズ0での初期化を防ぐ。</li>
+            <li><strong>地図キャッシュ:</strong> 表示したタイルを自動でCache Storageに蓄積（Stale-While-Revalidate方式）。管理タブに「地図キャッシュを開放する」ボタンあり（LocalStorageには影響しない）。</li>
         </ul>
 
         <h4>5.4 初期値・クリア機能</h4>
         <ul>
-            <li>保存先：LocalStorage（キー: survey_app_defaults）。起動時にloadDefaults()で自動読み込み。</li>
-            <li>端末設定タブに：初期値として保存・クリア（初期値を残す）・クリア（全未入力）・初期値の読み込み・地図キャッシュ開放</li>
-            <li>クリア時はフォーム・写真・地図・白紙メモ・オートセーブ・IndexedDBを全消去。初期値のLocalStorageは削除しない。</li>
+            <li><strong>保存内容:</strong> 会社情報（company_id/leader_name/company_name/tel/fax/person_name/email）・fn1〜fn5・photo_resize_width・photo_force_43</li>
+            <li><strong>保存先:</strong> LocalStorage（キー: survey_app_defaults）。起動時にloadDefaults()で自動読み込み。</li>
+            <li><strong>クリア（初期値を残す）:</strong> フォーム・写真・地図・白紙メモ・オートセーブ・IndexedDBを全消去→初期値を適用。確認ダイアログあり。</li>
+            <li><strong>クリア（全未入力）:</strong> 同上だが初期値を適用しない。確認ダイアログあり。</li>
+            <li><strong>初期値の読み込み:</strong> 入力内容はそのまま・初期値フィールドだけ上書き。</li>
+            <li><strong>初期値のLocalStorageはクリア操作では削除しない。</strong></li>
         </ul>
 
         <h4>5.5 PWA・デプロイ（β版）</h4>
         <ul>
             <li>GitHub Pages: <code>https://kspa-joho.github.io/shodo-chosa-beta/</code></li>
             <li>manifest.jsonのstart_url/scope: <code>/shodo-chosa-beta/</code></li>
-            <li>新バージョン検知時に確認ダイアログ→skip-waiting→自動リロード。</li>
+            <li>新バージョン検知時に確認ダイアログ→skip-waiting→自動リロード。「アプリ更新」アコーディオンは開発タブ内に1箇所のみ（dev.html）。</li>
             <li>統合管理版DLリンク: <code>https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip</code></li>
         </ul>
 
@@ -610,14 +646,17 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
     <div class="spec-section">
         <h3>6. 重要な決定事項</h3>
         <ul>
-            <li><strong>3タブ構成（Phase 5.93確定）:</strong> 管理・現地調査・開発。⑦複数現場管理実装時も管理タブの中身を置き換えるだけでタブ構成は変わらない。</li>
-            <li><strong>カメラinput分離方針:</strong> 今後変更しない。</li>
-            <li><strong>位置情報の削除ボタン廃止:</strong> 誤操作防止。修正は地図タップのみ。</li>
-            <li><strong>EXIFはエクスポート時にマージ方式で書き込む。</strong></li>
-            <li><strong>地図初期化はアコーディオンopen時:</strong> 今後変更しない。</li>
+            <li><strong>カメラinput分離方針:</strong> iOSのmultiple不安定問題を根本解決。今後変更しない。</li>
+            <li><strong>位置情報の削除ボタン廃止:</strong> 誤操作防止のため削除ボタンは設けない。修正は地図タップ上書きのみ。</li>
+            <li><strong>EXIFはエクスポート時にマージ方式で書き込む:</strong> 既存EXIFを保持したままGPS/方位を追記する。</li>
+            <li><strong>地図タップ修正後はgpsFixed=true:</strong> gpsAccuracyはnull。表示は「修正済み（座標）」。</li>
+            <li><strong>地図キャッシュは自動蓄積方式:</strong> 意図的な一括先読みUIは搭載しない。キャッシュ開放のみUIで提供。</li>
+            <li><strong>地図初期化はアコーディオンopen時:</strong> DOMサイズ0での初期化バグを防ぐため確定。今後変更しない。</li>
             <li><strong>IndexedDBでの写真永続化:</strong> アプリ落ち対策。clearAll()でIndexedDBも削除する。</li>
-            <li><strong>HTML部品のタグバランス厳守（Phase 5.93）:</strong> manage.html・introduction.html・dev.html等の部品ファイルは、&lt;div&gt;の開き数と閉じ数を必ず一致させる。余分な&lt;/div&gt;が1つでもあると、ブラウザがapp-containerごと閉じてしまい、後続のタブ（開発タブ）が枠外に表示される。部品ファイルを分割・移動した際は開閉数を確認すること。</li>
+            <li><strong>HTML部品のタグバランス厳守（Phase 5.90）:</strong> manage.html・introduction.html・dev.html等の部品ファイルは、&lt;div&gt;の開き数と閉じ数を必ず一致させる。余分な&lt;/div&gt;が1つでもあると、ブラウザがapp-containerごと閉じてしまい、後続のタブ（開発タブ）が枠外に表示される。部品ファイルを分割・移動した際は開閉数を確認すること。</li>
             <li><strong>部品ファイルでのsection/headerタグ不使用:</strong> spec.html・header.htmlでは&lt;section&gt;&lt;header&gt;を使わず&lt;div&gt;で記述する。</li>
+            <li><strong>アプリ更新UIは開発タブに1箇所のみ（Phase 5.94）:</strong> dev.htmlの「アプリ更新」アコーディオンが唯一の実装。spec.html側に重複した更新UIは置かない（id重複・二重表示を防ぐため）。</li>
+            <li><strong>部品ファイルの差し替え漏れに注意:</strong> src配下のファイルは互いにバージョンがずれると症状の切り分けが難しくなる。改修のたびに影響する全ファイルを一式で提示・反映する。</li>
         </ul>
     </div>
 
@@ -631,7 +670,7 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
                     <li>残：管理項目の参照ボタン（下記設計。⑥複数現場管理と同時に実装する）</li>
                 </ul>
             </li>
-            <li>【Step2-①】真っ黒画像バグ（tainted canvas問題の修正）</li>
+            <li>【Step2-①】真っ黒画像バグ（tainted canvas問題の修正）※調査中。crossOriginは設定済みだが、最大拡大前でも再現するため原因を精査中。</li>
             <li>【Step2-②】位置図と帳票枠のサイズ不一致（縦横比の調整）</li>
             <li>【Step2-③】白紙メモのベクタ化（undo・文字移動・ブラウザバック対策）</li>
             <li>【Step2-⑤】GPS・方位取得のUI調整（説明表示・8方位手入力追加）</li>
@@ -652,24 +691,12 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
                     <li>④キャンセル</li>
                 </ul>
             </li>
-            <li><strong>引き継ぐ項目:</strong> 災害番号・発注者名・被災日の3項目。</li>
-            <li><strong>整理番号の扱い（Phase 5.93確定）:</strong> 空欄にはせず、参照元の値をそのまま引き継ぐ。ただし現場ごとに異なるはずの項目なので、書き換え忘れに気づけるよう文字色を変えて表示する。</li>
+            <li><strong>引き継ぐ項目:</strong> 災害番号・発注者名・被災日・整理番号の4項目。</li>
+            <li><strong>整理番号の扱い（Phase 5.92確定）:</strong> 空欄にはせず、参照元の値をそのまま引き継ぐ。ただし現場ごとに異なるはずの項目なので、書き換え忘れに気づけるよう文字色を変えて表示する。</li>
             <li><strong>前回値であることを示す文字色表示:</strong> 参照で引き継いだ災害番号・発注者名・被災日・整理番号の4項目は、引き継ぎ直後は目立つ色（オレンジ等）で表示する。ユーザーがその項目の値を実際に書き換えた時点で通常の文字色（黒）に戻す。フォーカスが入っただけ・クリックしただけでは色は変わらない（値の変更で判定する。inputイベントでのみ色を戻し、focus/blurイベントでは戻さない）。色が前回値のままでもその値は正式な入力値として採用される（未入力・無効という意味ではない）。</li>
             <li><strong>調査日：</strong> 参照元の日付ではなく今日の日付のままとする（色表示の対象外）。</li>
             <li><strong>①の前提:</strong> 「初期値として保存」の保存対象（survey_app_defaults）に災害番号・発注者名・被災日を追加する（整理番号は初期値保存の対象外。②③の現場参照でのみ引き継ぐ）。</li>
         </ul>
-    </div>
-
-    <div class="spec-section">
-        <h3>8. PWA更新管理</h3>
-        <div style="padding: 15px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px; margin-top: 10px;">
-            <p style="margin:0 0 10px 0; font-weight:bold; color: #16a085;">アプリ更新管理</p>
-            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.93</strong></p>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="appControl.checkForUpdate()">更新を確認する</button>
-                <span id="update-status" style="font-size:0.9rem; color:#555;"></span>
-            </div>
-        </div>
     </div>
 </div>
 
