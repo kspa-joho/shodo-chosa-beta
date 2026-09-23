@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.8)</title>
+    <title>被災状況調査アプリ (Phase 6.9)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -491,6 +491,17 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
                 <!-- センサー情報エリア（方位・GPS） -->
                 <div style="background:#f0f4f8; border:1px solid #dde3ea; border-radius:4px; padding:10px; margin-bottom:8px;">
 
+                    <!-- GPS・方位の使い方（任意項目である旨・磁気センサー非搭載時の代替手段）を折りたたみで表示 -->
+                    <div style="margin-bottom:8px;">
+                        <span style="font-size:0.75rem; color:#3498db; cursor:pointer; text-decoration:underline;"
+                            onclick="uiHelper.toggleSensorInfo()">ⓘ GPS・方位の使い方</span>
+                        <div id="sensor-info-text" style="display:none; font-size:0.72rem; color:#666; background:#fffbe6; border:1px solid #f0e6b3; border-radius:4px; padding:6px 8px; margin-top:4px; line-height:1.5;">
+                            GPS・方位はどちらも任意項目です（未入力でも調査に支障はありません）。<br>
+                            ・GPS：端末のGPS機能を使用します。電波状況により取得に時間がかかったり、取得できない場合があります。<br>
+                            ・方位：端末に磁気センサー（コンパス）が無い場合は自動取得できません。その場合は「撮影方向」欄に数値を直接入力してください（目安：北=0° 東=90° 南=180° 西=270°）。
+                        </div>
+                    </div>
+
                     <!-- リアルタイム方位 -->
                     <div style="display:flex; align-items:center; gap:6px; margin-bottom:6px;">
                         <span style="font-size:0.78rem; color:#666; white-space:nowrap;">🧭 現在の方位：</span>
@@ -550,12 +561,12 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.8</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.9</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.8</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.9</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -574,8 +585,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.08)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.08 (Step2-⑤着手：撮影方向欄に8方位のライブ表示)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.09)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.09 (Step2-⑤解決：GPS・方位の使い方説明を追加)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -826,6 +837,20 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>残り（Step2-⑤の他の項目）:</strong> GPSは搭載端末推奨の案内表示、方位が任意機能である旨の明記は未着手。</li>
         </ul>
 
+        <h4>5.20 GPS・方位の使い方説明を追加（Phase 6.09・Step2-⑤解決）</h4>
+        <ul>
+            <li><strong>対応内容:</strong> 改修指示書Step2-⑤の残り2点（GPSは搭載端末の使用を推奨する案内、方位は必須ではない旨の明記）に対応した。</li>
+            <li><strong>実装:</strong> 写真タブのセンサー情報エリア上部に「ⓘ GPS・方位の使い方」という小さい折りたたみ表示を追加。普段は畳んでおき、タップすると以下の説明が開く：
+                <ul>
+                    <li>GPS・方位はどちらも任意項目（未入力でも調査に支障はない旨）</li>
+                    <li>GPS：端末のGPS機能を使用する。電波状況により取得に時間がかかる／取得できない場合がある旨</li>
+                    <li>方位：磁気センサー非搭載の端末では自動取得できない旨、その場合は「撮影方向」欄に数値を直接入力すればよい旨（目安：北=0° 東=90° 南=180° 西=270°）</li>
+                </ul>
+            </li>
+            <li><strong>開閉:</strong> uiHelper.toggleSensorInfo()でdisplay切替。折りたたみ式にしたのは、普段使う人の邪魔にならないようにするため。</li>
+            <li>これでStep2-⑤（GPS・方位取得のUI調整）は完了。8方位ライブ表示（5.19）とあわせて対応済み。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -877,7 +902,7 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
                     <li>済：段階4 ブラウザバック対策（Phase 6.07）</li>
                 </ul>
             </li>
-            <li>【Step2-⑤】GPS・方位取得のUI調整（説明表示・8方位手入力追加）</li>
+            <li>【Step2-⑤】GPS・方位取得のUI調整：解決（Phase 6.08・6.09）。詳細は5.19・5.20参照。</li>
             <li>【Step2-⑥】複数現場管理の再設計（管理タブを現場リスト方式に置き換え）</li>
             <li>iPhone実機での動作確認（部会お披露目時）</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
@@ -5112,6 +5137,12 @@ window.uiHelper = {
         t.textContent = msg;
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 3000);
+    },
+    // 【Phase 6.09】GPS・方位の使い方説明の開閉（Step2-⑤）
+    toggleSensorInfo() {
+        const el = document.getElementById('sensor-info-text');
+        if (!el) return;
+        el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
     },
     openSaveModal() {
         const m = document.getElementById('modal-preset-save');
