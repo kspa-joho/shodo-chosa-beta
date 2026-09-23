@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 5.96)</title>
+    <title>被災状況調査アプリ (Phase 5.97)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -509,12 +509,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.96</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.97</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.96</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.97</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -533,8 +533,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 5.96)</h2>
-        <p><strong>Last Updated:</strong> Phase 5.96 (Step2-①真っ黒画像バグ解決：html2canvas方式に変更)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 5.97)</h2>
+        <p><strong>Last Updated:</strong> Phase 5.97 (Step2-①真っ黒画像バグ：自前タイル転写方式で最終解決)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -642,22 +642,35 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li>統合管理版DLリンク: <code>https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip</code></li>
         </ul>
 
-        <h4>5.6 ズームレベル数値表示（Phase 5.96）</h4>
+        <h4>5.6 ズームレベル数値表示（Phase 5.97）</h4>
         <ul>
             <li>位置図の+/-ズームボタンの直下に、現在のズームレベルを数値で常時表示する（L.Control.ZoomLevelDisplay）。</li>
             <li>目的：真っ黒画像バグ等、ズームレベル依存の不具合について、現場から具体的な数値で状況共有できるようにするため。</li>
             <li>zoomendイベントで数値を更新。地図初期化時（init()内）に1回だけ追加する。</li>
         </ul>
 
-        <h4>5.8 地図を写真に保存：html2canvas方式への変更（Phase 5.96・Step2-①解決）</h4>
+        <h4>5.8 地図を写真に保存：自前タイル転写方式への変更（Phase 5.97・Step2-①解決）</h4>
         <ul>
-            <li><strong>不具合の内容:</strong> 位置図を拡大して「地図を写真に保存」すると、真っ黒な画像として保存される場合があった。</li>
-            <li><strong>原因:</strong> 従来はleaflet-imageを使用。これはタイル画像を再取得して合成する方式のため、地理院タイルのmaxNativeZoom(18)を超えるオーバーズーム状態（Leafletが18のタイルを画面上で引き伸ばして見せているだけで、実タイルが存在しないズームレベル）では、その場に無いタイルの再取得に失敗し、失敗箇所が透明のまま残る。それをJPEGに変換する際、JPEGは透明を持てないため黒く塗りつぶされていた。実機確認：ズーム18は正常、ズーム19から真っ黒（地理院標準・地理院写真とも同じ境目）。</li>
-            <li><strong>対応方針:</strong> leaflet-imageをhtml2canvasに置き換えた。html2canvasは画面に実際に表示されているピクセルをそのままキャプチャする方式のため、オーバーズーム状態でも「見えている通りの粗さ」の画像としてそのまま保存でき、真っ黒にはならない。</li>
-            <li><strong>キャプチャ対象:</strong> #map要素のみ。.map-controls（現在地・地図を写真に保存・全て消去ボタンの行）は#mapの外側にあるため元々写り込まない。</li>
-            <li><strong>コントロールの隠蔽:</strong> #map内部にLeafletが重ねて描画しているズームボタン・ズームレベル数値表示・レイヤー切替・描画ツールバー（.leaflet-control-container配下）は、キャプチャの瞬間だけstyle.displayをnoneにして隠し、キャプチャ完了直後に元の表示へ戻す。</li>
-            <li><strong>テキスト注記・サブレイヤー除外ロジックは維持:</strong> 注記（circlemarkerで置いたテキスト）は一旦地図から除去し、html2canvas完了後に同じ座標計算でcanvas上に手描きし直す（従来と同じ吹き出し風の見た目を維持するため）。メインモードで保存する際にサブ(落書き)モードの図形を含めない、という既存の除外ルールも変更していない。</li>
-            <li><strong>仕様として確定した挙動:</strong> 19以上に拡大した状態で保存すると、地理院タイルの実解像度（18相当）を超えて引き伸ばされた粗い見た目が、その粗さのまま保存される。粗いかどうかはユーザー自身が画面を見て判断し、必要なら少しズームを戻してから保存する。アプリ側で18に自動的に戻す・19以上の保存を禁止する、といった制御は行わない。</li>
+            <li><strong>不具合の内容:</strong> 位置図を拡大して「地図を写真に保存」すると、真っ黒な画像として保存される場合があった。実機確認：ズーム18は正常、ズーム19から真っ黒（地理院標準・地理院写真とも同じ境目）。</li>
+            <li><strong>検討した経緯（3案）:</strong>
+                <ul>
+                    <li>①leaflet-image（旧方式）：タイル画像をサーバーへ再取得して合成する方式のため、地理院タイルのmaxNativeZoom(18)を超えるオーバーズーム状態（Leafletが18のタイルを画面上で引き伸ばして見せているだけで、実タイルが存在しないズームレベル）では、その場に無いタイルの再取得に失敗し、失敗箇所が透明のまま残る。JPEG変換時に透明部分が黒く塗りつぶされていた。</li>
+                    <li>②html2canvas（Phase 5.97で一時採用→撤回）：画面全体をキャプチャする汎用ライブラリ。内部でクロスオリジン画像を安全に読めるか検証するために画像を読み直す挙動があり、地理院タイルサーバー側でエラー（404）になり、同じく黒くなることを実機で確認。地理院タイルサーバーとの相性が悪く採用を見送った。</li>
+                    <li>③自前タイル転写方式（採用）：①②はどちらも「タイル画像をもう一度サーバーから取り直す」ことが失敗の根本原因だったため、新規の通信を一切せず、画面に既に読み込み済み・表示済みのタイル&lt;img&gt;要素をそのままcanvasへ描き写す方式に変更した。</li>
+                </ul>
+            </li>
+            <li><strong>実装内容:</strong>
+                <ul>
+                    <li>タイル：#map内の.leaflet-tile-pane配下、読み込み済み（img.complete）の&lt;img class="leaflet-tile"&gt;要素を、その要素自身のgetBoundingClientRect()に基づく位置・サイズでcanvasへdrawImage()する。</li>
+                    <li>メイン(赤)・サブ(青)の図形：allDrawnItemsの緯度経度情報から、map.latLngToContainerPointで自前に座標変換して描き直す（円・ポリライン・ポリゴンに対応）。円の半径(メートル)は、中心から実距離ぶん東へ移動した地点を同じ座標系に投影して画面上のpx半径を算出する（外部プラグイン不要）。</li>
+                    <li>注記（テキスト）：従来通り、位置を計算してcanvas上に吹き出し風のボックスとして手描きする。</li>
+                    <li>サブレイヤー除外ロジックは維持：メインモードで保存する際はcurrentMode==='main'かつisMain===falseの図形を対象から除く、という既存ルールをそのまま踏襲。</li>
+                    <li>Leafletコントロール（ズームボタン・ズームレベル数値・レイヤー切替・描画ツールバー等）はそもそも合成対象に含めていないため、隠す処理自体が不要になった（＝確実に写り込まない）。</li>
+                </ul>
+            </li>
+            <li><strong>仕様として確定した挙動:</strong> 19以上に拡大した状態で保存すると、地理院タイルの実解像度（18相当）を超えて引き伸ばされた粗い見た目が、その粗さのまま保存される。図形・線・文字はピクセルサイズを維持したまま正確な位置に描画されるため、大きさが不自然に変わることはない。粗いかどうかはユーザー自身が画面を見て判断し、必要なら少しズームを戻してから保存する。アプリ側で18に自動的に戻す・19以上の保存を禁止する、といった制御は行わない。</li>
+            <li><strong>既知の簡略化:</strong> サブ(落書き)モードで置いた素のマーカー（旗揚げ用途）は、Leafletの標準ピン画像そのものではなく、色付きの丸として簡略描画する。</li>
+            <li><strong>依存ライブラリの削除:</strong> leaflet-image・html2canvasのいずれもindex.html.templateから削除した。地図画像化は外部ライブラリ非依存になった。</li>
             <li><strong>地理院地図Vector（ベクトルタイル）は今回の対応範囲外:</strong> Vector化すれば地理院標準は理論上どのズームでも実データを描き直せるが、地理院写真（航空写真）・ESRI衛星は実写真のタイル画像であるためVector化できず、同じ問題が残る。今後の検討課題として残す（実装は別スレッドで大きめの改修になる想定）。</li>
         </ul>
 
@@ -683,8 +696,9 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>IndexedDBでの写真永続化:</strong> アプリ落ち対策。clearAll()でIndexedDBも削除する。</li>
             <li><strong>HTML部品のタグバランス厳守（Phase 5.90）:</strong> manage.html・introduction.html・dev.html等の部品ファイルは、&lt;div&gt;の開き数と閉じ数を必ず一致させる。余分な&lt;/div&gt;が1つでもあると、ブラウザがapp-containerごと閉じてしまい、後続のタブ（開発タブ）が枠外に表示される。部品ファイルを分割・移動した際は開閉数を確認すること。</li>
             <li><strong>部品ファイルでのsection/headerタグ不使用:</strong> spec.html・header.htmlでは&lt;section&gt;&lt;header&gt;を使わず&lt;div&gt;で記述する。</li>
-            <li><strong>アプリ更新UIは開発タブに1箇所のみ（Phase 5.96）:</strong> dev.htmlの「アプリ更新」アコーディオンが唯一の実装。spec.html側に重複した更新UIは置かない（id重複・二重表示を防ぐため）。</li>
+            <li><strong>アプリ更新UIは開発タブに1箇所のみ（Phase 5.97）:</strong> dev.htmlの「アプリ更新」アコーディオンが唯一の実装。spec.html側に重複した更新UIは置かない（id重複・二重表示を防ぐため）。</li>
             <li><strong>部品ファイルの差し替え漏れに注意:</strong> src配下のファイルは互いにバージョンがずれると症状の切り分けが難しくなる。改修のたびに影響する全ファイルを一式で提示・反映する。</li>
+            <li><strong>地図の画像化は「タイルを再取得しない」方式で確定（Phase 5.97）:</strong> leaflet-image・html2canvasはいずれも地理院タイルサーバーとの相性問題（オーバーズーム時の404・CORS絡みの再取得失敗）で真っ黒画像を引き起こした。既に画面へ読み込み済みのDOM要素（&lt;img&gt;タイル）をそのまま転写する自前実装に統一し、新規のタイル取得を一切発生させない方針とする。今後、地図の画像化まわりを触る際もこの方針を踏襲する。</li>
         </ul>
     </div>
 
@@ -698,7 +712,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>残：管理項目の参照ボタン（下記設計。⑥複数現場管理と同時に実装する）</li>
                 </ul>
             </li>
-            <li>【Step2-①】真っ黒画像バグ：解決（Phase 5.96）。地図を写真に保存の実装をhtml2canvas方式に変更。詳細は5.8参照。</li>
+            <li>【Step2-①】真っ黒画像バグ：解決（Phase 5.97）。地図を写真に保存の実装を自前のタイル転写方式に変更。詳細は5.8参照。</li>
             <li>【Step2-②】位置図と帳票枠のサイズ不一致（縦横比の調整）</li>
             <li>【Step2-③】白紙メモのベクタ化（undo・文字移動・ブラウザバック対策）</li>
             <li>【Step2-⑤】GPS・方位取得のUI調整（説明表示・8方位手入力追加）</li>
@@ -3461,59 +3475,117 @@ window.mapApp = {
         return { start: f(flat[0]), end: f(flat[flat.length - 1]) };
     },
 
-    // 【Phase 5.96】leaflet-image → html2canvas に変更。
-    // 理由：leaflet-imageはタイル画像を再取得して合成する方式のため、
-    //       maxNativeZoomを超えたオーバーズーム状態（実タイルが存在しないズームレベル）で
-    //       タイル取得に失敗し、真っ黒画像になる不具合があった（Step2-①）。
-    //       html2canvasは画面に見えている状態をそのままキャプチャするため、
-    //       オーバーズーム時も「粗いなりの見たまま」の画像として正しく保存できる。
-    // 保存対象は#map要素のみ（.map-controls等、地図の外側のボタン行は含まれない）。
-    // Leafletの操作コントロール（ズーム・ズームレベル数値・レイヤー切替・描画ツールバー等）は
-    // 写り込ませないよう、キャプチャの瞬間だけ非表示にして直後に戻す。
+    // 【Phase 5.97】地図タイルの自前合成方式に変更（Step2-①真っ黒画像バグ 最終対応）。
+    // 経緯：
+    //   1. leaflet-image → maxNativeZoomを超えたオーバーズーム時、実在しないタイルを
+    //      サーバーへ再取得しに行き失敗。透明のままJPEG変換され黒くなる。
+    //   2. html2canvas → 画面全体をキャプチャする汎用ライブラリのため、内部で画像を
+    //      再取得しようとする際に地理院サーバー側で404になり、同じく黒くなる。
+    //   3. 今回：どちらも「タイル画像をもう一度サーバーから取りに行く」ことが原因なので、
+    //      新規の通信を一切せず、画面に既に読み込み済み・表示済みのタイル<img>要素を
+    //      そのままcanvasへ描き写す方式に変更。19以上のオーバーズーム状態でも、
+    //      Leafletが実際に画面へ貼り付けている「粗いなりの見たまま」の絵を、
+    //      失敗しようがない形でそのまま保存できる。
+    // 対象は地図のタイル・描画レイヤー（メイン/サブの図形・注記）のみ。
+    // ズームボタン・ズームレベル数値・レイヤー切替・描画ツールバー等のLeafletコントロールは
+    // そもそも合成対象に含めていないため、保存画像には一切写り込まない。
     captureToPhoto() {
-        if (!window.html2canvas) return alert("ライブラリ未ロード");
         const mapEl = document.getElementById('map');
-        if (!mapEl) return;
+        if (!mapEl || !this.map) return;
 
-        const textLayers = [], subLayers = [];
+        const size = this.map.getSize();
+        const canvas = document.createElement('canvas');
+        canvas.width = size.x;
+        canvas.height = size.y;
+        const ctx = canvas.getContext('2d');
+        // 背景（タイルが読み込み中で隙間がある場合に真っ黒ではなく白にするため）
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // --- 1. タイル画像を描き写す ---
+        // Leafletが既に画面へ配置済みの<img class="leaflet-tile">を、そのままの見た目で転写する。
+        // 新規のネットワークリクエストは発生しない（読み込み済み画像を流用するのみ）。
+        const mapRect = mapEl.getBoundingClientRect();
+        const tileImgs = mapEl.querySelectorAll('.leaflet-tile-pane img.leaflet-tile');
+        tileImgs.forEach((img) => {
+            if (!img.complete || img.naturalWidth === 0) return; // 未読込・読込失敗タイルはスキップ（白背景のまま残る）
+            const r = img.getBoundingClientRect();
+            try {
+                ctx.drawImage(img, r.left - mapRect.left, r.top - mapRect.top, r.width, r.height);
+            } catch (e) {
+                // 個別タイルの描画に失敗しても他のタイルの描画は継続する
+                console.warn('タイル描画スキップ:', e);
+            }
+        });
+
+        // --- 2. メイン/サブの図形・注記を描き写す ---
+        // allDrawnItemsの緯度経度情報から、現在の地図の変換（zoom/中心）に基づき自前で座標変換する。
+        const textLayers = [], drawLayers = [];
         this.allDrawnItems.eachLayer(l => {
-            if (l.options && l.options.isText) textLayers.push(l);
-            if (this.currentMode === 'main' && l.options && !l.options.isMain) subLayers.push(l);
+            if (l.options && l.options.isText) { textLayers.push(l); return; }
+            // メインモードで保存する際はサブ(落書き)の図形は含めない（従来の挙動を維持）
+            if (this.currentMode === 'main' && l.options && !l.options.isMain) return;
+            drawLayers.push(l);
         });
-        [...textLayers, ...subLayers].forEach(l => this.allDrawnItems.removeLayer(l));
 
-        const controlContainer = mapEl.querySelector('.leaflet-control-container');
-        const prevDisplay = controlContainer ? controlContainer.style.display : '';
-        if (controlContainer) controlContainer.style.display = 'none';
-
-        const restore = () => {
-            if (controlContainer) controlContainer.style.display = prevDisplay;
-            [...textLayers, ...subLayers].forEach(l => this.allDrawnItems.addLayer(l));
-        };
-
-        html2canvas(mapEl, { useCORS: true }).then((canvas) => {
-            restore();
-            const ctx = canvas.getContext('2d');
-            textLayers.forEach(l => {
-                const point = this.map.latLngToContainerPoint(l.getLatLng());
-                const txt = l.options.textVal;
-                ctx.font = "bold 14px sans-serif";
-                const metrics = ctx.measureText(txt);
-                ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
-                ctx.fillRect(point.x - (metrics.width/2) - 8, point.y - 25, metrics.width + 16, 22);
-                ctx.strokeStyle = "#0000ff"; ctx.strokeRect(point.x - (metrics.width/2) - 8, point.y - 25, metrics.width + 16, 22);
-                ctx.fillStyle = "#0000ff"; ctx.textAlign = "center"; ctx.fillText(txt, point.x, point.y - 8);
-            });
-            window.photoApp.photos.push({ dataUrl: canvas.toDataURL('image/jpeg', 0.8), memo: `地図メモ`, tag: "地図メモ" });
-            window.photoApp.currentIndex = window.photoApp.photos.length - 1;
-            photoApp.render();
-            photoApp.updateHeaderSummary();
-            if (window.uiHelper) uiHelper.showToast("地図を写真に追加しました"); else alert("写真に追加しました");
-        }).catch((err) => {
-            restore();
-            console.warn("画像化失敗:", err);
-            alert("画像化失敗");
+        drawLayers.forEach(l => {
+            const isMain = !!(l.options && l.options.isMain);
+            const color = isMain ? '#ff0000' : '#0000ff';
+            if (l instanceof L.Circle) {
+                // 中心から実距離(メートル)ぶん東へ移動した地点を求め、
+                // 両点を同じcontainerPoint座標系に投影して画面上の半径(px)を算出する
+                // （外部プラグイン不要・他の描画と同じ座標系で完結させるため）
+                const center = l.getLatLng();
+                const radiusM = l.getRadius();
+                const dLng = (radiusM / (111320 * Math.cos(center.lat * Math.PI / 180)));
+                const edgeLatLng = L.latLng(center.lat, center.lng + dLng);
+                const c = this.map.latLngToContainerPoint(center);
+                const edge = this.map.latLngToContainerPoint(edgeLatLng);
+                const r = Math.max(4, Math.hypot(edge.x - c.x, edge.y - c.y) || 8);
+                ctx.beginPath(); ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
+                ctx.lineWidth = 6; ctx.strokeStyle = color; ctx.stroke();
+            } else if (l instanceof L.Marker) {
+                const p = this.map.latLngToContainerPoint(l.getLatLng());
+                ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+                ctx.fillStyle = color; ctx.fill();
+                ctx.lineWidth = 2; ctx.strokeStyle = '#ffffff'; ctx.stroke();
+            } else if (l.getLatLngs) {
+                const latlngsRaw = l.getLatLngs();
+                const rings = Array.isArray(latlngsRaw[0]) ? latlngsRaw : [latlngsRaw];
+                rings.forEach(ring => {
+                    if (!ring || ring.length === 0) return;
+                    ctx.beginPath();
+                    ring.forEach((latlng, i) => {
+                        const pt = this.map.latLngToContainerPoint(latlng);
+                        if (i === 0) ctx.moveTo(pt.x, pt.y); else ctx.lineTo(pt.x, pt.y);
+                    });
+                    if (l instanceof L.Polygon) {
+                        ctx.closePath();
+                        ctx.fillStyle = color.replace(')', ',0.4)').replace('rgb', 'rgba') || color;
+                        ctx.globalAlpha = 0.4; ctx.fillStyle = color; ctx.fill(); ctx.globalAlpha = 1;
+                    }
+                    ctx.lineWidth = isMain ? 6 : 4; ctx.strokeStyle = color; ctx.stroke();
+                });
+            }
         });
+
+        // --- 3. 注記（テキスト）を描き写す ---
+        textLayers.forEach(l => {
+            const point = this.map.latLngToContainerPoint(l.getLatLng());
+            const txt = l.options.textVal;
+            ctx.font = "bold 14px sans-serif";
+            const metrics = ctx.measureText(txt);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+            ctx.fillRect(point.x - (metrics.width/2) - 8, point.y - 25, metrics.width + 16, 22);
+            ctx.strokeStyle = "#0000ff"; ctx.strokeRect(point.x - (metrics.width/2) - 8, point.y - 25, metrics.width + 16, 22);
+            ctx.fillStyle = "#0000ff"; ctx.textAlign = "center"; ctx.fillText(txt, point.x, point.y - 8);
+        });
+
+        window.photoApp.photos.push({ dataUrl: canvas.toDataURL('image/jpeg', 0.8), memo: `地図メモ`, tag: "地図メモ" });
+        window.photoApp.currentIndex = window.photoApp.photos.length - 1;
+        photoApp.render();
+        photoApp.updateHeaderSummary();
+        if (window.uiHelper) uiHelper.showToast("地図を写真に追加しました"); else alert("写真に追加しました");
     },
     setCurrentLocation() { if (this.map) this.map.locate({setView: true, maxZoom: 16}); },
 
