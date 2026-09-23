@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.7)</title>
+    <title>被災状況調査アプリ (Phase 6.8)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -550,12 +550,12 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.7</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.8</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.7</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.8</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -574,8 +574,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.07)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.07 (Step2-③ 段階4：ブラウザバック対策。白紙メモのベクタ化改修は一区切り)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.08)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.08 (Step2-⑤着手：撮影方向欄に8方位のライブ表示)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -816,6 +816,14 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>実装:</strong> アプリ起動時にhistory.pushState()でダミーの履歴を1つ積んでおく。popstateイベント（戻る操作）が発生するたびに、再度ダミー履歴を積み直すことで、実質的にページ離脱そのものを防止する。戻るたびにトースト通知（「入力中のデータを守るため、戻る操作は無効にしています」）を出す。</li>
             <li><strong>影響範囲:</strong> 白紙メモに限らず、管理項目・諸元・写真等すべての入力データが対象になる（データ保護の仕組みとしてアプリ全体にかかるため）。</li>
             <li><strong>SW更新・更新確認との切り分け:</strong> checkForUpdate()やSW更新時のlocation.reload()はプログラムによる明示的な画面遷移であり、popstate（戻る操作）とは別物のため、この対策の影響を受けず従来通り動作する。</li>
+        </ul>
+
+        <h4>5.19 撮影方向欄に8方位のライブ表示（Phase 6.08・Step2-⑤着手）</h4>
+        <ul>
+            <li><strong>経緯:</strong> 改修指示書Step2-⑤（GPS・方位取得のUI調整）のうち「使い方が不明」「8方位程度で手入力できる代替手段」に対応する。撮影方向欄は元々数値の手入力ができたため、8方位ボタンを新設するのではなく、数値を入力した際にその場で8方位の文字（北・北東・東・南東・南・南西・西・北西）を表示するだけの、既存スペースを使った軽い対応とした。</li>
+            <li><strong>実装:</strong> photoApp.updateAzimuth()（撮影方向inputのoninput）で、既存の#photo-azimuth-dir枠に8方位の文字をその場で反映するようにした。従来は写真を切り替えたとき（renderAzimuthField）にしか反映されず、入力中は空欄のままだった。</li>
+            <li><strong>8方位・16方位の使い分け:</strong> 新設したphotoApp._dir8()は8方位専用。既存のazimuthManager._dir()（16方位：北北東等）は、現在の方位のライブ表示・記録時のトースト通知など、別の場所でそのまま使い続ける。同じ#photo-azimuth-dir枠は、入力中・写真切替時のどちらもphotoApp._dir8()（8方位）に統一し、表示形式が場面によって16方位⇔8方位に切り替わって紛らわしくなることを防いだ。</li>
+            <li><strong>残り（Step2-⑤の他の項目）:</strong> GPSは搭載端末推奨の案内表示、方位が任意機能である旨の明記は未着手。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -4789,14 +4797,31 @@ window.photoApp = {
         window.uiHelper && uiHelper.showToast("方位を削除しました");
     },
 
+    // 【Phase 6.08】数字を打つたびにその場で8方位の文字を表示する（改修指示書Step2-⑤）。
+    // 「撮影方向」欄は8方位（北・北東・東・南東・南・南西・西・北西）で表示する。
+    // より細かい16方位（北北東等）はazimuthManager._dir()側（現在の方位のライブ表示・
+    // 記録時のトースト通知）で使う。同じ枠を使い回すだけなので新規UI要素は追加していない。
     updateAzimuth(v) {
         if (this.currentIndex === -1) return;
         const trimmed = v.trim();
-        if (trimmed === '') { this.photos[this.currentIndex].azimuth = null; return; }
+        const dirEl = document.getElementById('photo-azimuth-dir');
+        if (trimmed === '') {
+            this.photos[this.currentIndex].azimuth = null;
+            if (dirEl) dirEl.textContent = '';
+            return;
+        }
         const num = parseFloat(trimmed);
         if (!isNaN(num)) {
-            this.photos[this.currentIndex].azimuth = Math.round(((num % 360) + 360) % 360);
+            const az = Math.round(((num % 360) + 360) % 360);
+            this.photos[this.currentIndex].azimuth = az;
+            if (dirEl) dirEl.textContent = this._dir8(az);
         }
+    },
+
+    // 8方位の文字を返す（撮影方向欄の表示専用）
+    _dir8(az) {
+        const dirs = ["北","北東","東","南東","南","南西","西","北西"];
+        return dirs[Math.floor(((az + 22.5) % 360) / 45)];
     },
 
     renderAzimuthField() {
@@ -4808,7 +4833,7 @@ window.photoApp = {
             inp.value = ''; if (dir) dir.textContent = '';
         } else {
             inp.value = p.azimuth;
-            if (dir) dir.textContent = azimuthManager._dir(p.azimuth);
+            if (dir) dir.textContent = this._dir8(p.azimuth);
         }
     },
 
