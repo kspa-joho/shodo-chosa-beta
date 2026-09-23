@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.5)</title>
+    <title>被災状況調査アプリ (Phase 6.7)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -550,12 +550,12 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.5</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.7</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.5</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.7</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -574,8 +574,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.05)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.05 (線の頂点単体削除・作図中の点の可視化)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.07)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.07 (Step2-③ 段階4：ブラウザバック対策。白紙メモのベクタ化改修は一区切り)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -801,6 +801,23 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>作図中の点の可視化:</strong> 「線」モードでタップして頂点を追加していく間、置いた各点に小さい丸印（要素の色で塗りつぶし、白い縁取り）を表示するようにした。1点目を置いた直後は線がまだ引かれていない（点が1つしかないため）ため見えづらかったが、この丸印により1点目の位置も確認しながら2点目以降を打てるようになった。確定後の線には丸印は表示されない（作図中のみのプレビュー）。</li>
         </ul>
 
+        <h4>5.17 段階3（拡大して細部記入）は見送り（Phase 6.06判断）</h4>
+        <ul>
+            <li><strong>見送りの理由:</strong> 白紙メモは地図や写真のような下地画像の上に描くものではなく、真っ白な紙に描くだけのものである。地図の拡大とは違い、「実際の地形を見て正確な位置を確認したい」という強い理由が存在しない。</li>
+            <li>元の要望「拡大して細部を記入したい」は、段階1〜2で編集（あとから位置を選んで直せる）ができなかった時代に、「最初から正確に描くしかない」という制約から来ていたと考えられる。段階2までの対応（文字・線の選択移動、頂点単体の位置調整）により、大まかに描いてから後で位置を整える、という形でこのニーズには実質的に応えられていると判断した。</li>
+            <li>あわせて、フルスクリーン(⛶)ボタンにより画面自体を大きくして描く選択肢も既にある（Step2-②で4:3固定にした際にも維持済み）。</li>
+            <li>ズームしながら描く仕組み自体（1本指=描画/2本指=ピンチズームの共存）は、実装コストの割に誤操作のリスクが大きいため見送る。将来、白紙メモに下地画像を貼る機能等が追加され、下地を細かく見る必要が生じた場合は、改めて検討する。</li>
+        </ul>
+
+        <h4>5.18 ブラウザバック対策（Phase 6.07・Step2-③段階4）</h4>
+        <ul>
+            <li><strong>不具合の内容:</strong> 端末・ブラウザの「戻る」操作（ジェスチャー・戻るボタン）で意図せず離脱すると、ページごとリロードされ、白紙メモを含む入力中のデータが全て失われる。</li>
+            <li><strong>対応方針:</strong> 改修指示書で挙げられた2案（確認ダイアログを出す／history操作を制御して離脱を抑止する）のうち、後者を採用した。確認ダイアログはうっかり誤タップで進んでしまうリスクが残るため、より確実な抑止方式を選んだ。</li>
+            <li><strong>実装:</strong> アプリ起動時にhistory.pushState()でダミーの履歴を1つ積んでおく。popstateイベント（戻る操作）が発生するたびに、再度ダミー履歴を積み直すことで、実質的にページ離脱そのものを防止する。戻るたびにトースト通知（「入力中のデータを守るため、戻る操作は無効にしています」）を出す。</li>
+            <li><strong>影響範囲:</strong> 白紙メモに限らず、管理項目・諸元・写真等すべての入力データが対象になる（データ保護の仕組みとしてアプリ全体にかかるため）。</li>
+            <li><strong>SW更新・更新確認との切り分け:</strong> checkForUpdate()やSW更新時のlocation.reload()はプログラムによる明示的な画面遷移であり、popstate（戻る操作）とは別物のため、この対策の影響を受けず従来通り動作する。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -848,8 +865,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
                     <li>済：段階2続き 消しゴム廃止・編集モードで文字/直線/ペンを選択・移動（Phase 6.05）</li>
                     <li>済：直線を連続線（折れ線）に変更。全頂点を編集可能に（Phase 6.05）</li>
                     <li>済：線の頂点1点だけを削除する機能、作図中の点の可視化（Phase 6.05）</li>
-                    <li>残：段階3 拡大(ズーム)して細部記入</li>
-                    <li>残：段階4 ブラウザバック対策（編集中データの保護）</li>
+                    <li>見送り：段階3 拡大(ズーム)して細部記入。理由は5.17参照。</li>
+                    <li>済：段階4 ブラウザバック対策（Phase 6.07）</li>
                 </ul>
             </li>
             <li>【Step2-⑤】GPS・方位取得のUI調整（説明表示・8方位手入力追加）</li>
@@ -5039,6 +5056,28 @@ document.addEventListener('click', (e) => {
     }
 });
 
+
+// =============================================================================
+// 【Phase 6.07】ブラウザバック対策（改修指示書Step2-③ 段階4）
+// =============================================================================
+// 背景：このアプリはページ遷移を持たない単一ページのPWAのため、
+//       端末・ブラウザの「戻る」操作（ジェスチャー・戻るボタン）で意図せず離脱すると
+//       ページごとリロードされ、白紙メモを含む入力中のデータが全て失われる不具合があった。
+// 対策：起動時にダミーの履歴を1つ積んでおき、popstate（戻る操作）が発生するたびに
+//       再度ダミー履歴を積み直すことで、実質的にページ離脱そのものを防止する
+//       （改修指示書に挙げられた2案のうち「history操作を制御して離脱を抑止する」を採用）。
+// 注意：SW更新時のlocation.reload()やcheckForUpdate()でのページ遷移は、
+//       プログラムによる明示的な画面遷移であり、popstate（戻る操作）とは別物のため、
+//       この対策の影響を受けず従来通り動作する。
+(function() {
+    history.pushState({ appGuard: true }, '', location.href);
+    window.addEventListener('popstate', function() {
+        history.pushState({ appGuard: true }, '', location.href);
+        if (window.uiHelper && typeof uiHelper.showToast === 'function') {
+            uiHelper.showToast('入力中のデータを守るため、戻る操作は無効にしています');
+        }
+    });
+})();
 
 // --- UIヘルパー ---
 window.uiHelper = {
