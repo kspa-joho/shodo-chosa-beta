@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 5.87)</title>
+    <title>被災状況調査アプリ (Phase 5.89)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -14,16 +14,16 @@
     --bg-color: #f4f7f6;
     --app-max-width: 480px;
 }
-body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; display: flex; justify-content: flex-start; }
+body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; }
 #app-container { width: 100%; max-width: var(--app-max-width); min-height: 100vh; background-color: var(--bg-color); box-shadow: 2px 0 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; position: relative; transition: max-width 0.3s ease; }
 /* フルスクリーンモード */
 #app-container.fullwidth { max-width: 100% !important; }
-#main-content { width: 100%; overflow: hidden; }
-.tab-content { width: 100%; overflow: hidden; }
+#main-content { width: 100%; overflow: hidden; flex: 1; min-width: 0; }
+.tab-content { width: 100%; overflow: hidden; min-width: 0; }
 
 /* タブ制御 */
 .tab-content { display: none !important; }
-.tab-content.active { display: block !important; animation: fadeIn 0.2s; }
+.tab-content.active { display: block !important; width: 100%; animation: fadeIn 0.2s; }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
 /* マーカー・地図UI */
@@ -472,12 +472,12 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.87</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 5.89</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.87</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 5.89</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -496,8 +496,8 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 5.87)</h2>
-        <p><strong>Last Updated:</strong> Phase 5.87 (header.htmlのheaderタグをdivに変更・開発タブはみ出し根本修正)
+        <h2>被災状況調査システム 開発仕様書 (Phase 5.89)</h2>
+        <p><strong>Last Updated:</strong> Phase 5.89 (body display:flex削除・レイアウト修正)
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -554,7 +554,7 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
             <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td><td>introduction.html</td></tr>
             <tr><td>開発</td><td>content-dev</td><td>開発方針・アプリ化の手順</td><td>spec.html + install_guide.html</td></tr>
         </table>
-        <p style="margin-top:10px; font-size:0.9rem;">※ Phase 5.87時点では⑦複数現場管理は未実装。「管理」タブは⑦実装時に現場リスト方式に置き換え予定。タブ構成自体は変わらない。</p>
+        <p style="margin-top:10px; font-size:0.9rem;">※ Phase 5.89時点では⑦複数現場管理は未実装。「管理」タブは⑦実装時に現場リスト方式に置き換え予定。タブ構成自体は変わらない。</p>
     </div>
 
     <div class="spec-section">
@@ -602,7 +602,7 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
     <div class="spec-section">
         <h3>6. 重要な決定事項</h3>
         <ul>
-            <li><strong>3タブ構成（Phase 5.87確定）:</strong> 管理・現地調査・開発。⑦複数現場管理実装時も管理タブの中身を置き換えるだけでタブ構成は変わらない。</li>
+            <li><strong>3タブ構成（Phase 5.89確定）:</strong> 管理・現地調査・開発。⑦複数現場管理実装時も管理タブの中身を置き換えるだけでタブ構成は変わらない。</li>
             <li><strong>カメラinput分離方針:</strong> 今後変更しない。</li>
             <li><strong>位置情報の削除ボタン廃止:</strong> 誤操作防止。修正は地図タップのみ。</li>
             <li><strong>EXIFはエクスポート時にマージ方式で書き込む。</strong></li>
@@ -629,7 +629,7 @@ canvas.sketch-canvas { display: block; width: 100%; }</style>
         <h3>8. PWA更新管理</h3>
         <div style="padding: 15px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px; margin-top: 10px;">
             <p style="margin:0 0 10px 0; font-weight:bold; color: #16a085;">アプリ更新管理</p>
-            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.87</strong></p>
+            <p style="margin:0 0 5px 0; font-size:0.9rem;">現在のバージョン: <strong id="current-version-display">Phase 5.89</strong></p>
             <div style="display:flex; align-items:center; gap:10px;">
                 <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="appControl.checkForUpdate()">更新を確認する</button>
                 <span id="update-status" style="font-size:0.9rem; color:#555;"></span>
