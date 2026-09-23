@@ -3393,26 +3393,42 @@ const setupJapaneseDraw = () => {
     L.drawLocal.edit.handlers.remove.tooltip.text = '削除する図形をクリック';
 };
 
-// 【Phase 5.95追加】ズームレベル表示コントロール（+とーの間に現在のズーム数値を表示）
-// デバッグ・現場からの状況報告（「このズームで真っ黒になる」等）を数字で共有できるようにするため。
-L.Control.ZoomLevelDisplay = L.Control.extend({
-    options: { position: 'topleft' },
+// 【Phase 5.98】+ / - ボタンと現在のズーム数値表示を1つの自作コントロールにまとめる。
+// （Phase 5.95では別枠のコントロールとして追加していたため、Leafletの並び順の都合で
+//   +/-ボタンの下に来てしまっていた。+とーの間に数字を挟む見た目にするため作り直す。）
+L.Control.ZoomWithLevel = L.Control.extend({
+    options: { position: 'topleft', zoomInTitle: '', zoomOutTitle: '' },
     onAdd(map) {
-        const container = L.DomUtil.create('div', 'leaflet-bar zoom-level-display');
-        container.innerHTML = map.getZoom();
-        L.DomEvent.disableClickPropagation(container);
-        this._container = container;
+        const container = L.DomUtil.create('div', 'leaflet-bar zoom-with-level');
         this._map = map;
+
+        this._zoomInBtn = this._createButton('+', this.options.zoomInTitle, 'zoom-with-level-in', container,
+            () => map.zoomIn());
+        this._levelLabel = L.DomUtil.create('div', 'zoom-with-level-num', container);
+        this._zoomOutBtn = this._createButton('−', this.options.zoomOutTitle, 'zoom-with-level-out', container,
+            () => map.zoomOut());
+
         map.on('zoomend', this._update, this);
         map.on('load', this._update, this);
+        this._update();
         return container;
     },
     onRemove(map) {
         map.off('zoomend', this._update, this);
         map.off('load', this._update, this);
     },
+    _createButton(html, title, className, container, onClick) {
+        const link = L.DomUtil.create('a', className, container);
+        link.innerHTML = html;
+        link.href = '#';
+        link.title = title;
+        link.setAttribute('role', 'button');
+        L.DomEvent.on(link, 'click', L.DomEvent.stop).on(link, 'click', onClick, this);
+        L.DomEvent.disableClickPropagation(link);
+        return link;
+    },
     _update() {
-        if (this._container && this._map) this._container.innerHTML = this._map.getZoom();
+        if (this._levelLabel) this._levelLabel.innerHTML = this._map.getZoom();
     }
 });
 
@@ -3431,9 +3447,8 @@ window.mapApp = {
             maxZoom: 25
         }).setView([31.5601, 130.5580], 16);
         
-        L.control.zoom({ zoomInTitle: '', zoomOutTitle: '' }).addTo(this.map);
-        // ズームレベル数値表示（+とーの直下に並ぶ）
-        new L.Control.ZoomLevelDisplay().addTo(this.map);
+        // +ボタン・現在のズーム数値・-ボタンを1つのコントロールとして追加
+        new L.Control.ZoomWithLevel().addTo(this.map);
 
         const layers = {
             "地理院 標準": L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', { attribution: "GSI", crossOrigin: 'anonymous', maxZoom: 25, maxNativeZoom: 18 }),
