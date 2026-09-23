@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.2)</title>
+    <title>被災状況調査アプリ (Phase 6.3)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -319,7 +319,7 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
                         <button id="sk-free"   class="sketch-btn active" onclick="sketchApp.setTool('free')">ペン</button>
                         <button id="sk-line"   class="sketch-btn"        onclick="sketchApp.setTool('line')">直線</button>
                         <button id="sk-text"   class="sketch-btn"        onclick="sketchApp.setTool('text')">文字</button>
-                        <button id="sk-eraser" class="sketch-btn"        onclick="sketchApp.setTool('eraser')">消ゴム</button>
+                        <button id="sk-edit"   class="sketch-btn"        onclick="sketchApp.setTool('edit')">編集</button>
                     </div>
                     <div class="sketch-tool-group">
                         <button class="color-btn active" style="background:black;" onclick="sketchApp.setColor('black',this)"></button>
@@ -334,10 +334,10 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
                     <canvas id="sketch-canvas" class="sketch-canvas"></canvas>
                     <!-- 文字要素を選択中に表示する浮動ツールバー（回転・編集・削除） -->
                     <div id="sketch-text-toolbar" style="display:none; position:absolute; background:white; border-radius:20px; box-shadow:0 2px 8px rgba(0,0,0,0.3); padding:4px 8px; gap:6px; z-index:50; align-items:center;">
-                        <button type="button" onclick="sketchApp.rotateSelected(-15)" style="border:none;background:none;font-size:1.1rem;cursor:pointer;">↺</button>
-                        <button type="button" onclick="sketchApp.rotateSelected(15)" style="border:none;background:none;font-size:1.1rem;cursor:pointer;">↻</button>
-                        <button type="button" onclick="sketchApp.editSelectedText()" style="border:none;background:none;font-size:1.1rem;cursor:pointer;">✏️</button>
-                        <button type="button" onclick="sketchApp.deleteSelectedText()" style="border:none;background:none;font-size:1.1rem;cursor:pointer;">🗑</button>
+                        <button id="sk-tb-rotate-l" type="button" onclick="sketchApp.rotateSelected(-15)" style="border:none;background:none;font-size:1.1rem;cursor:pointer;">↺</button>
+                        <button id="sk-tb-rotate-r" type="button" onclick="sketchApp.rotateSelected(15)" style="border:none;background:none;font-size:1.1rem;cursor:pointer;">↻</button>
+                        <button id="sk-tb-edit" type="button" onclick="sketchApp.editSelectedText()" style="border:none;background:none;font-size:1.1rem;cursor:pointer;">✏️</button>
+                        <button id="sk-tb-delete" type="button" onclick="sketchApp.deleteSelected()" style="border:none;background:none;font-size:1.1rem;cursor:pointer;">🗑</button>
                     </div>
                 </div>
                 <!-- 文字入力モーダル（複数行対応。従来のprompt()に代わるもの） -->
@@ -544,12 +544,12 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.2</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.3</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.2</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.3</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -568,8 +568,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.02)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.02 (白紙メモのベクタ化 段階2：文字の選択・移動・回転・複数行入力)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.03)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.03 (白紙メモ：消しゴム廃止・編集モードで文字/直線/ペンを選択・移動)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -677,20 +677,20 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li>統合管理版DLリンク: <code>https://github.com/kspa-joho/shodo-chosa-beta/raw/main/manager_app.zip</code></li>
         </ul>
 
-        <h4>5.6 ズームレベル数値表示（Phase 6.02）</h4>
+        <h4>5.6 ズームレベル数値表示（Phase 6.03）</h4>
         <ul>
             <li>位置図の+/-ズームボタンの直下に、現在のズームレベルを数値で常時表示する（L.Control.ZoomLevelDisplay）。</li>
             <li>目的：真っ黒画像バグ等、ズームレベル依存の不具合について、現場から具体的な数値で状況共有できるようにするため。</li>
             <li>zoomendイベントで数値を更新。地図初期化時（init()内）に1回だけ追加する。</li>
         </ul>
 
-        <h4>5.8 地図を写真に保存：自前タイル転写方式への変更（Phase 6.02・Step2-①解決）</h4>
+        <h4>5.8 地図を写真に保存：自前タイル転写方式への変更（Phase 6.03・Step2-①解決）</h4>
         <ul>
             <li><strong>不具合の内容:</strong> 位置図を拡大して「地図を写真に保存」すると、真っ黒な画像として保存される場合があった。実機確認：ズーム18は正常、ズーム19から真っ黒（地理院標準・地理院写真とも同じ境目）。</li>
             <li><strong>検討した経緯（3案）:</strong>
                 <ul>
                     <li>①leaflet-image（旧方式）：タイル画像をサーバーへ再取得して合成する方式のため、地理院タイルのmaxNativeZoom(18)を超えるオーバーズーム状態（Leafletが18のタイルを画面上で引き伸ばして見せているだけで、実タイルが存在しないズームレベル）では、その場に無いタイルの再取得に失敗し、失敗箇所が透明のまま残る。JPEG変換時に透明部分が黒く塗りつぶされていた。</li>
-                    <li>②html2canvas（Phase 6.02で一時採用→撤回）：画面全体をキャプチャする汎用ライブラリ。内部でクロスオリジン画像を安全に読めるか検証するために画像を読み直す挙動があり、地理院タイルサーバー側でエラー（404）になり、同じく黒くなることを実機で確認。地理院タイルサーバーとの相性が悪く採用を見送った。</li>
+                    <li>②html2canvas（Phase 6.03で一時採用→撤回）：画面全体をキャプチャする汎用ライブラリ。内部でクロスオリジン画像を安全に読めるか検証するために画像を読み直す挙動があり、地理院タイルサーバー側でエラー（404）になり、同じく黒くなることを実機で確認。地理院タイルサーバーとの相性が悪く採用を見送った。</li>
                     <li>③自前タイル転写方式（採用）：①②はどちらも「タイル画像をもう一度サーバーから取り直す」ことが失敗の根本原因だったため、新規の通信を一切せず、画面に既に読み込み済み・表示済みのタイル&lt;img&gt;要素をそのままcanvasへ描き写す方式に変更した。</li>
                 </ul>
             </li>
@@ -709,14 +709,14 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>地理院地図Vector（ベクトルタイル）は今回の対応範囲外:</strong> Vector化すれば地理院標準は理論上どのズームでも実データを描き直せるが、地理院写真（航空写真）・ESRI衛星は実写真のタイル画像であるためVector化できず、同じ問題が残る。今後の検討課題として残す（実装は別スレッドで大きめの改修になる想定）。</li>
         </ul>
 
-        <h4>5.7 ズームレベル数値の表示位置（Phase 6.02）</h4>
+        <h4>5.7 ズームレベル数値の表示位置（Phase 6.03）</h4>
         <ul>
             <li>Phase 5.95では独立した別コントロールとして追加したため、Leafletの並び順の都合で+/-ボタンの下に表示されていた。</li>
             <li>L.Control.ZoomWithLevelとして作り直し、+ボタン・ズーム数値・-ボタンを1つの部品にまとめた。要望通り「+とーの間」に数値が挟まる配置になる。</li>
             <li>標準のL.control.zoom()は使わず、この自作コントロール1つに統一する（重複表示を避けるため）。</li>
         </ul>
 
-        <h4>5.10 位置図の縦横比を4:3に固定（Phase 6.02・Step2-②解決）</h4>
+        <h4>5.10 位置図の縦横比を4:3に固定（Phase 6.03・Step2-②解決）</h4>
         <ul>
             <li><strong>不具合の内容:</strong> 位置図（#map）の画面表示が画面の高さに対する割合（55vh）で決まっていたため、帳票側の位置図の枠と縦横比が一致せず、帳票にフルサイズで収まらなかった。</li>
             <li><strong>検討の経緯:</strong> 当初はExcel帳票の位置図セルの実測値（幅12.86cm×高さ6.64cm、約1.94:1）に合わせる案で検討したが、この比率は横に長すぎてスマホでの地図操作が窮屈になる懸念があった。写真（全景・近景等）は4:3で統一されていることもあり、位置図も4:3で統一する方針に変更。帳票側のセルサイズはAppB側で4:3に合わせて調整する（AppBスレッドで対応、本スレッドの対応範囲外）。</li>
@@ -732,14 +732,14 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>白紙メモ（#sketch-container）は対象外:</strong> 帳票の位置図枠とは無関係の自由記述キャンバスのため、従来通り window.innerHeight*0.55 ベースのサイズのまま変更していない。</li>
         </ul>
 
-        <h4>5.9.1 白紙メモのツールボタンとモードタブのクラス名衝突を修正（Phase 6.02）</h4>
+        <h4>5.9.1 白紙メモのツールボタンとモードタブのクラス名衝突を修正（Phase 6.03）</h4>
         <ul>
             <li><strong>不具合の内容:</strong> 白紙メモでペン・消しゴム等のツールを選ぶと、位置図の「白紙メモ」モードタブの色（active時の青）が消えて黒くなっていた。</li>
             <li><strong>原因:</strong> 白紙メモのツールバー内ボタン（ペン・直線・文字・消しゴム）と、メイン/サブ/白紙メモのモード切替タブ（mode-btn-map等）が、どちらも共通のCSSクラス名sketch-btnを使っていた。sketchApp.setTool()がdocument.querySelectorAll('.sketch-btn')でページ全体からactiveクラスを一括除去していたため、ツール選択のたびにモードタブのactive状態まで巻き込まれて消えていた。</li>
             <li><strong>対応:</strong> setTool()の対象を.sketch-toolbar .sketch-btn（白紙メモのツールバー内のみ）に限定した。</li>
         </ul>
 
-        <h4>5.12 白紙メモのベクタ化 段階1（Phase 6.02・Step2-③着手）</h4>
+        <h4>5.12 白紙メモのベクタ化 段階1（Phase 6.03・Step2-③着手）</h4>
         <ul>
             <li><strong>設計方針:</strong> ペン・直線・文字を、Canvasへ直接ピクセルを塗るのではなく、sketchApp.elements配列に要素として個別に保持する方式に変更した。
                 <ul>
@@ -754,7 +754,7 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>今回は含めない（段階2以降）:</strong> 文字要素の移動・回転・複数行入力、拡大(ズーム)した状態での記入、ブラウザバック対策。elements配列という土台ができたため、これらは同じ土台の上に追加していく形で対応する。</li>
         </ul>
 
-        <h4>5.13 白紙メモのベクタ化 段階2（Phase 6.02）</h4>
+        <h4>5.13 白紙メモのベクタ化 段階2（Phase 6.03）</h4>
         <ul>
             <li><strong>文字要素に持たせたデータを拡張:</strong> <code>{ type:'text', x, y, color, text, rotation }</code>。rotationはラジアン、初期値0。textは改行\nを含む複数行に対応。</li>
             <li><strong>選択・移動:</strong> 白紙メモモードで既存の文字をタップすると選択され（新規作成にはならない）、そのままドラッグで移動できる。何もない場所をタップした場合のみ新規文字入力になる。</li>
@@ -763,6 +763,21 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>複数行入力:</strong> 従来のwindow.prompt()（1行しか入力できない）を廃止し、textareaを持つ専用モーダル（#sketch-text-modal）に変更した。新規入力・既存文字の編集（✏️ボタン）の両方で共通利用する。</li>
             <li><strong>削除:</strong> 選択中の浮動ツールバーの🗑ボタンで、その文字要素だけを削除できる（undoを使わずピンポイントで消せる）。</li>
             <li><strong>選択枠・浮動ツールバーは保存前に解除:</strong> saveToPhoto()実行時に選択を解除してから描き直すため、青い点線の選択枠やツールバーが保存画像に写り込むことはない。</li>
+        </ul>
+
+        <h4>5.14 白紙メモ：消しゴム廃止・編集モードへの統合（Phase 6.03）</h4>
+        <ul>
+            <li><strong>ツール構成の変更:</strong> ペン(free)・直線(line)・文字(text)・編集(edit)の4つに変更。消しゴム(eraser)は廃止した。</li>
+            <li><strong>編集モードでの選択・操作:</strong>
+                <ul>
+                    <li>文字：タップで選択→ドラッグで移動。浮動ツールバーで回転(±15度)・内容編集(✏️)・削除(🗑)。</li>
+                    <li>直線：始点・終点それぞれに丸いつまみ(半径14px判定)を表示し、個別に位置を直せる。つまみ以外の線上(線分までの距離12px以内)をつまむと線全体を平行移動できる。浮動ツールバーは削除のみ。</li>
+                    <li>ペンの線：バウンディングボックス(余白15px)内のタップで選択し、そのまま平行移動する。形は変えない・拡大縮小もしない。浮動ツールバーは削除のみ。</li>
+                </ul>
+            </li>
+            <li><strong>消しゴム廃止の理由:</strong> 個々の要素を選んで🗑で消せるようになったため、面で塗りつぶして隠す方式の消しゴムは不要と判断し廃止した。</li>
+            <li><strong>移動の実装:</strong> ドラッグ中は直前の位置との差分(dx, dy)を毎回加算していく増分方式。文字はx,y、直線・ペンは全ての点に同じ差分を加える。</li>
+            <li><strong>選択中の見た目:</strong> 文字・ペンの線は点線の枠、直線は始点・終点に半透明の丸いつまみを表示する。保存前(saveToPhoto())には選択を解除して描き直すため、これらの表示は保存画像に写り込まない。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -787,9 +802,9 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>IndexedDBでの写真永続化:</strong> アプリ落ち対策。clearAll()でIndexedDBも削除する。</li>
             <li><strong>HTML部品のタグバランス厳守（Phase 5.90）:</strong> manage.html・introduction.html・dev.html等の部品ファイルは、&lt;div&gt;の開き数と閉じ数を必ず一致させる。余分な&lt;/div&gt;が1つでもあると、ブラウザがapp-containerごと閉じてしまい、後続のタブ（開発タブ）が枠外に表示される。部品ファイルを分割・移動した際は開閉数を確認すること。</li>
             <li><strong>部品ファイルでのsection/headerタグ不使用:</strong> spec.html・header.htmlでは&lt;section&gt;&lt;header&gt;を使わず&lt;div&gt;で記述する。</li>
-            <li><strong>アプリ更新UIは開発タブに1箇所のみ（Phase 6.02）:</strong> dev.htmlの「アプリ更新」アコーディオンが唯一の実装。spec.html側に重複した更新UIは置かない（id重複・二重表示を防ぐため）。</li>
+            <li><strong>アプリ更新UIは開発タブに1箇所のみ（Phase 6.03）:</strong> dev.htmlの「アプリ更新」アコーディオンが唯一の実装。spec.html側に重複した更新UIは置かない（id重複・二重表示を防ぐため）。</li>
             <li><strong>部品ファイルの差し替え漏れに注意:</strong> src配下のファイルは互いにバージョンがずれると症状の切り分けが難しくなる。改修のたびに影響する全ファイルを一式で提示・反映する。</li>
-            <li><strong>地図の画像化は「タイルを再取得しない」方式で確定（Phase 6.02）:</strong> leaflet-image・html2canvasはいずれも地理院タイルサーバーとの相性問題（オーバーズーム時の404・CORS絡みの再取得失敗）で真っ黒画像を引き起こした。既に画面へ読み込み済みのDOM要素（&lt;img&gt;タイル）をそのまま転写する自前実装に統一し、新規のタイル取得を一切発生させない方針とする。今後、地図の画像化まわりを触る際もこの方針を踏襲する。</li>
+            <li><strong>地図の画像化は「タイルを再取得しない」方式で確定（Phase 6.03）:</strong> leaflet-image・html2canvasはいずれも地理院タイルサーバーとの相性問題（オーバーズーム時の404・CORS絡みの再取得失敗）で真っ黒画像を引き起こした。既に画面へ読み込み済みのDOM要素（&lt;img&gt;タイル）をそのまま転写する自前実装に統一し、新規のタイル取得を一切発生させない方針とする。今後、地図の画像化まわりを触る際もこの方針を踏襲する。</li>
         </ul>
     </div>
 
@@ -803,12 +818,13 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
                     <li>残：管理項目の参照ボタン（下記設計。⑥複数現場管理と同時に実装する）</li>
                 </ul>
             </li>
-            <li>【Step2-①】真っ黒画像バグ：解決（Phase 6.02）。地図を写真に保存の実装を自前のタイル転写方式に変更。詳細は5.8参照。</li>
-            <li>【Step2-②】位置図と帳票枠のサイズ不一致：解決（Phase 6.02）。位置図の画面表示自体を4:3に固定。詳細は5.10参照。</li>
-            <li>【Step2-③】白紙メモのベクタ化：段階1完了（Phase 6.02）。詳細は5.12参照。
+            <li>【Step2-①】真っ黒画像バグ：解決（Phase 6.03）。地図を写真に保存の実装を自前のタイル転写方式に変更。詳細は5.8参照。</li>
+            <li>【Step2-②】位置図と帳票枠のサイズ不一致：解決（Phase 6.03）。位置図の画面表示自体を4:3に固定。詳細は5.10参照。</li>
+            <li>【Step2-③】白紙メモのベクタ化：段階1完了（Phase 6.03）。詳細は5.12参照。
                 <ul>
                     <li>済：要素ベース(elements配列)への書き換え。undo・全消去・キャンバスの4:3固定。</li>
-                    <li>済：段階2 文字要素の選択・移動・回転・複数行入力（Phase 6.02）</li>
+                    <li>済：段階2 文字要素の選択・移動・回転・複数行入力（Phase 6.03）</li>
+                    <li>済：段階2続き 消しゴム廃止・編集モードで文字/直線/ペンを選択・移動（Phase 6.03）</li>
                     <li>残：段階3 拡大(ズーム)して細部記入</li>
                     <li>残：段階4 ブラウザバック対策（編集中データの保護）</li>
                 </ul>
@@ -3794,16 +3810,16 @@ window.mapApp = {
 // =============================================================================
 // 白紙メモ (sketchApp)
 // =============================================================================
-// 【Phase 6.02 段階2】文字要素の選択・移動・回転・複数行入力（改修指示書Step2-③）
-// 段階1（Phase 6.01）で作った要素ベースの土台の上に、以下を追加する：
-//   ・白紙メモモードで既存の文字要素をタップすると「選択」される（新規作成にはならない）
-//   ・選択中は指でドラッグして移動できる
-//   ・選択中は近くに浮動ツールバー（回転±15度・編集・削除）が表示される
-//   ・文字入力は複数行対応の専用モーダル（textarea）に変更。従来のprompt()は1行しか
-//     入力できなかったため廃止した。
-//   ・回転はテキスト要素にrotation（ラジアン）を持たせ、ctx.rotateで描画する。
-//     選択の当たり判定は、タップ位置を要素の回転角の逆回転で戻してから、
-//     未回転のバウンディングボックスと比較することで、回転後も正しく判定できるようにしている。
+// 【Phase 6.03 段階2続き】消しゴムを廃止し「編集」モードに統合（改修指示書Step2-③）。
+// ツールは ペン(free) / 直線(line) / 文字(text) / 編集(edit) の4つ。
+// 編集モードでは、既存の要素（文字・直線・ペンの線）をタップして選択し、
+// 種類ごとに異なる操作を行う：
+//   ・文字　　：選択して移動。浮動ツールバーで回転(±15度)・内容編集・削除。
+//   ・直線　　：始点・終点それぞれに丸いつまみを表示し、個別に位置を直せる。
+//               つまみ以外の線上をつまむと線全体を平行移動できる。浮動ツールバーは削除のみ。
+//   ・ペンの線：形は変えず、線全体をそのまま平行移動するだけ（点の個別編集はしない）。
+//               浮動ツールバーは削除のみ。
+// 個々の要素を選んで🗑で消せるようになったため、消しゴム（面で塗りつぶして隠す方式）は廃止した。
 // =============================================================================
 window.sketchApp = {
     canvas: null, ctx: null, isDrawing: false, startX: 0, startY: 0,
@@ -3811,12 +3827,17 @@ window.sketchApp = {
     elements: [],
     currentStroke: null,
 
-    // 文字要素の選択・ドラッグ・入力モーダル用の状態
+    // 選択・ドラッグ共通の状態
     selectedIndex: null,
-    isDraggingText: false,
-    dragOffset: null,
-    _pendingTextPos: null, // 新規文字を置く位置（モーダル確定時に使う）
-    _editingIndex: null,   // 既存文字を編集中の場合のインデックス
+    dragType: null,       // 'text' | 'line-endpoint' | 'line-whole' | 'stroke-whole'
+    dragPointIndex: null, // 'line-endpoint'のときの対象点（0=始点, 1=終点）
+    lastPos: null,        // 直前のタップ/ドラッグ位置（増分移動の基準）
+    _pendingTextPos: null,
+    _editingIndex: null,
+
+    HANDLE_R: 14,     // 直線の端点つまみの当たり判定半径(px)
+    LINE_HIT_TOL: 12, // 直線の「線上」判定の許容距離(px)
+    BBOX_PAD: 15,      // ペンの線のバウンディングボックス判定の余白(px)
 
     init() {
         const canvas = document.getElementById('sketch-canvas');
@@ -3852,10 +3873,9 @@ window.sketchApp = {
     },
 
     setTool(t) {
-        // textモードから離れるときは選択状態を解除する
-        if (this.mode === 'text' && t !== 'text') {
+        if (this.mode === 'edit' && t !== 'edit') {
             this.selectedIndex = null;
-            this.hideTextToolbar();
+            this.hideFloatingToolbar();
         }
         this.mode = t;
         document.querySelectorAll('.sketch-toolbar .sketch-btn').forEach(b => b.classList.remove('active'));
@@ -3867,51 +3887,33 @@ window.sketchApp = {
         this.color = c;
         document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
-        if (this.mode === 'eraser') this.setTool('free');
     },
 
     getPos(e) {
         const rect = this.canvas.getBoundingClientRect();
         return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     },
+    dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); },
 
-    // --- 描画・選択の入口 ---
+    // --- 入口：モードに応じて振り分け ---
     start(pos) {
         if (this.mode === 'text') {
-            const idx = this.hitTestText(pos);
-            if (idx !== null) {
-                // 既存の文字をタップ → 選択してドラッグ開始
-                this.selectedIndex = idx;
-                const el = this.elements[idx];
-                this.dragOffset = { dx: pos.x - el.x, dy: pos.y - el.y };
-                this.isDraggingText = true;
-                this.redrawAll();
-                this.updateTextToolbarPosition();
-            } else {
-                // 何もない場所をタップ → 新規文字入力モーダルを開く
-                this.selectedIndex = null;
-                this.hideTextToolbar();
-                this._pendingTextPos = pos;
-                this._editingIndex = null;
-                this.openTextModal('');
-            }
+            this._pendingTextPos = pos;
+            this._editingIndex = null;
+            this.openTextModal('');
             return;
         }
+        if (this.mode === 'edit') {
+            this.startEdit(pos);
+            return;
+        }
+        // ペン・直線の新規作成
         this.isDrawing = true;
         this.startX = pos.x; this.startY = pos.y;
         this.currentStroke = { type: 'stroke', mode: this.mode, color: this.color, points: [{ x: pos.x, y: pos.y }] };
     },
     move(pos) {
-        if (this.mode === 'text') {
-            if (this.isDraggingText && this.selectedIndex !== null) {
-                const el = this.elements[this.selectedIndex];
-                el.x = pos.x - this.dragOffset.dx;
-                el.y = pos.y - this.dragOffset.dy;
-                this.redrawAll();
-                this.updateTextToolbarPosition();
-            }
-            return;
-        }
+        if (this.mode === 'edit') { this.moveEdit(pos); return; }
         if (!this.isDrawing || !this.currentStroke) return;
         if (this.mode === 'line') {
             this.currentStroke.points = [{ x: this.startX, y: this.startY }, { x: pos.x, y: pos.y }];
@@ -3922,7 +3924,7 @@ window.sketchApp = {
         this.drawStroke(this.currentStroke);
     },
     end() {
-        if (this.mode === 'text') { this.isDraggingText = false; return; }
+        if (this.mode === 'edit') { this.dragType = null; return; }
         if (this.isDrawing && this.currentStroke && this.currentStroke.points.length > 1) {
             this.elements.push(this.currentStroke);
         }
@@ -3931,8 +3933,78 @@ window.sketchApp = {
         this.redrawAll();
     },
 
-    // --- 文字要素の当たり判定・座標変換 ---
-    // タップ位置を要素の回転角の逆回転で戻し、未回転のバウンディングボックスと比較する
+    // --- 編集モード：選択開始 ---
+    startEdit(pos) {
+        for (let i = this.elements.length - 1; i >= 0; i--) {
+            const el = this.elements[i];
+            if (el.type === 'text') {
+                if (this.hitTestOneText(pos, el)) {
+                    this.selectedIndex = i; this.dragType = 'text'; this.lastPos = pos;
+                    this.redrawAll(); this.updateFloatingToolbar();
+                    return;
+                }
+            } else if (el.type === 'stroke' && el.mode === 'line') {
+                const p0 = el.points[0], p1 = el.points[el.points.length - 1];
+                if (this.dist(pos, p0) <= this.HANDLE_R) {
+                    this.selectedIndex = i; this.dragType = 'line-endpoint'; this.dragPointIndex = 0; this.lastPos = pos;
+                    this.redrawAll(); this.updateFloatingToolbar();
+                    return;
+                }
+                if (this.dist(pos, p1) <= this.HANDLE_R) {
+                    this.selectedIndex = i; this.dragType = 'line-endpoint'; this.dragPointIndex = 1; this.lastPos = pos;
+                    this.redrawAll(); this.updateFloatingToolbar();
+                    return;
+                }
+                if (this.pointToSegmentDist(pos, p0, p1) <= this.LINE_HIT_TOL) {
+                    this.selectedIndex = i; this.dragType = 'line-whole'; this.lastPos = pos;
+                    this.redrawAll(); this.updateFloatingToolbar();
+                    return;
+                }
+            } else if (el.type === 'stroke' && el.mode === 'free') {
+                if (this.hitTestBBox(pos, el)) {
+                    this.selectedIndex = i; this.dragType = 'stroke-whole'; this.lastPos = pos;
+                    this.redrawAll(); this.updateFloatingToolbar();
+                    return;
+                }
+            }
+        }
+        // 何にも当たらなければ選択解除
+        this.selectedIndex = null; this.dragType = null;
+        this.hideFloatingToolbar();
+        this.redrawAll();
+    },
+    moveEdit(pos) {
+        if (this.selectedIndex === null || !this.dragType || !this.lastPos) return;
+        const dx = pos.x - this.lastPos.x, dy = pos.y - this.lastPos.y;
+        const el = this.elements[this.selectedIndex];
+        if (this.dragType === 'text') {
+            el.x += dx; el.y += dy;
+        } else if (this.dragType === 'line-endpoint') {
+            el.points[this.dragPointIndex].x += dx; el.points[this.dragPointIndex].y += dy;
+        } else if (this.dragType === 'line-whole' || this.dragType === 'stroke-whole') {
+            el.points.forEach(p => { p.x += dx; p.y += dy; });
+        }
+        this.lastPos = pos;
+        this.redrawAll();
+        this.updateFloatingToolbar();
+    },
+
+    // --- 当たり判定ヘルパー ---
+    pointToSegmentDist(p, a, b) {
+        const abx = b.x - a.x, aby = b.y - a.y;
+        const len2 = abx * abx + aby * aby;
+        if (len2 === 0) return this.dist(p, a);
+        let t = ((p.x - a.x) * abx + (p.y - a.y) * aby) / len2;
+        t = Math.max(0, Math.min(1, t));
+        const proj = { x: a.x + t * abx, y: a.y + t * aby };
+        return this.dist(p, proj);
+    },
+    hitTestBBox(pos, el) {
+        const xs = el.points.map(p => p.x), ys = el.points.map(p => p.y);
+        const minX = Math.min(...xs) - this.BBOX_PAD, maxX = Math.max(...xs) + this.BBOX_PAD;
+        const minY = Math.min(...ys) - this.BBOX_PAD, maxY = Math.max(...ys) + this.BBOX_PAD;
+        return pos.x >= minX && pos.x <= maxX && pos.y >= minY && pos.y <= maxY;
+    },
     rotatePoint(p, center, angle) {
         const dx = p.x - center.x, dy = p.y - center.y;
         const cos = Math.cos(angle), sin = Math.sin(angle);
@@ -3946,48 +4018,61 @@ window.sketchApp = {
         lines.forEach(line => { const w = this.ctx.measureText(line).width; if (w > maxW) maxW = w; });
         return { x: el.x - 4, y: el.y - lineHeight + 2, w: maxW + 8, h: lines.length * lineHeight + 6 };
     },
-    hitTestText(pos) {
-        for (let i = this.elements.length - 1; i >= 0; i--) {
-            const el = this.elements[i];
-            if (el.type !== 'text') continue;
-            const angle = el.rotation || 0;
-            const local = this.rotatePoint(pos, { x: el.x, y: el.y }, -angle);
-            const b = this.getTextBounds(el);
-            if (local.x >= b.x && local.x <= b.x + b.w && local.y >= b.y && local.y <= b.y + b.h) return i;
-        }
-        return null;
+    hitTestOneText(pos, el) {
+        const angle = el.rotation || 0;
+        const local = this.rotatePoint(pos, { x: el.x, y: el.y }, -angle);
+        const b = this.getTextBounds(el);
+        return local.x >= b.x && local.x <= b.x + b.w && local.y >= b.y && local.y <= b.y + b.h;
     },
 
-    // --- 選択中の文字への操作 ---
+    // --- 選択中の要素への操作（文字・直線・ペン共通） ---
     rotateSelected(deg) {
         if (this.selectedIndex === null) return;
         const el = this.elements[this.selectedIndex];
+        if (el.type !== 'text') return;
         el.rotation = (el.rotation || 0) + deg * Math.PI / 180;
         this.redrawAll();
-        this.updateTextToolbarPosition();
+        this.updateFloatingToolbar();
     },
     editSelectedText() {
         if (this.selectedIndex === null) return;
+        const el = this.elements[this.selectedIndex];
+        if (el.type !== 'text') return;
         this._editingIndex = this.selectedIndex;
-        this.openTextModal(this.elements[this.selectedIndex].text);
+        this.openTextModal(el.text);
     },
-    deleteSelectedText() {
+    deleteSelected() {
         if (this.selectedIndex === null) return;
         this.elements.splice(this.selectedIndex, 1);
-        this.selectedIndex = null;
-        this.hideTextToolbar();
+        this.selectedIndex = null; this.dragType = null;
+        this.hideFloatingToolbar();
         this.redrawAll();
     },
-    updateTextToolbarPosition() {
+    updateFloatingToolbar() {
         const el = this.elements[this.selectedIndex];
         const toolbar = document.getElementById('sketch-text-toolbar');
         if (!el || !toolbar) return;
-        const b = this.getTextBounds(el);
+        const isText = el.type === 'text';
+        // 文字のときだけ回転・内容編集ボタンを見せる。線・ペンは削除のみ。
+        const rl = document.getElementById('sk-tb-rotate-l');
+        const rr = document.getElementById('sk-tb-rotate-r');
+        const ed = document.getElementById('sk-tb-edit');
+        if (rl) rl.style.display = isText ? 'inline-block' : 'none';
+        if (rr) rr.style.display = isText ? 'inline-block' : 'none';
+        if (ed) ed.style.display = isText ? 'inline-block' : 'none';
+
+        let b;
+        if (isText) {
+            b = this.getTextBounds(el);
+        } else {
+            const xs = el.points.map(p => p.x), ys = el.points.map(p => p.y);
+            b = { x: Math.min(...xs), y: Math.min(...ys) };
+        }
         toolbar.style.left = Math.max(0, b.x) + 'px';
         toolbar.style.top = Math.max(0, b.y - 40) + 'px';
         toolbar.style.display = 'flex';
     },
-    hideTextToolbar() {
+    hideFloatingToolbar() {
         const toolbar = document.getElementById('sketch-text-toolbar');
         if (toolbar) toolbar.style.display = 'none';
     },
@@ -4019,40 +4104,33 @@ window.sketchApp = {
         } else if (this._pendingTextPos) {
             const newEl = { type: 'text', x: this._pendingTextPos.x, y: this._pendingTextPos.y, color: this.color, text, rotation: 0 };
             this.elements.push(newEl);
-            this.selectedIndex = this.elements.length - 1;
         }
         this._pendingTextPos = null;
         this._editingIndex = null;
         this.redrawAll();
-        this.updateTextToolbarPosition();
     },
 
-    // --- undo・全消去（段階1のまま） ---
     undo() {
         if (this.elements.length === 0) return;
         this.elements.pop();
-        this.selectedIndex = null;
-        this.hideTextToolbar();
+        this.selectedIndex = null; this.dragType = null;
+        this.hideFloatingToolbar();
         this.redrawAll();
     },
     clearAll() {
         if (confirm("メモを全消去しますか？")) {
             this.elements = [];
-            this.selectedIndex = null;
-            this.hideTextToolbar();
+            this.selectedIndex = null; this.dragType = null;
+            this.hideFloatingToolbar();
             this.redrawAll();
         }
     },
 
-    // --- 1要素分を描く ---
+    // --- 描画 ---
     drawStroke(el) {
         if (!el.points || el.points.length < 2) return;
         this.ctx.lineCap = 'round'; this.ctx.lineJoin = 'round';
-        if (el.mode === 'eraser') {
-            this.ctx.strokeStyle = '#ffffff'; this.ctx.lineWidth = 20;
-        } else {
-            this.ctx.strokeStyle = el.color; this.ctx.lineWidth = 3;
-        }
+        this.ctx.strokeStyle = el.color; this.ctx.lineWidth = 3;
         this.ctx.beginPath();
         this.ctx.moveTo(el.points[0].x, el.points[0].y);
         if (el.mode === 'line') {
@@ -4063,7 +4141,6 @@ window.sketchApp = {
         }
         this.ctx.stroke();
     },
-    // 複数行・回転対応。(el.x, el.y)を原点として回転させ、1行目のベースライン基準で下に行を重ねる
     drawText(el) {
         const angle = el.rotation || 0;
         const lines = (el.text || '').split('\n');
@@ -4076,18 +4153,32 @@ window.sketchApp = {
         lines.forEach((line, i) => { this.ctx.fillText(line, 0, i * lineHeight); });
         this.ctx.restore();
     },
-    drawSelectionBox(el) {
-        const angle = el.rotation || 0;
-        const b = this.getTextBounds(el);
+    // 選択中の要素の見た目のフィードバック（点線の枠、直線は端点つまみ）
+    drawSelectionUI(el) {
         this.ctx.save();
-        this.ctx.translate(el.x, el.y);
-        this.ctx.rotate(angle);
-        this.ctx.strokeStyle = '#3498db';
-        this.ctx.lineWidth = 1;
-        this.ctx.setLineDash([4, 3]);
-        this.ctx.strokeRect(b.x - el.x, b.y - el.y, b.w, b.h);
+        this.ctx.strokeStyle = '#3498db'; this.ctx.lineWidth = 1;
+        if (el.type === 'text') {
+            const b = this.getTextBounds(el);
+            this.ctx.translate(el.x, el.y);
+            this.ctx.rotate(el.rotation || 0);
+            this.ctx.setLineDash([4, 3]);
+            this.ctx.strokeRect(b.x - el.x, b.y - el.y, b.w, b.h);
+        } else if (el.mode === 'line') {
+            this.ctx.setLineDash([]);
+            [el.points[0], el.points[el.points.length - 1]].forEach(p => {
+                this.ctx.beginPath();
+                this.ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+                this.ctx.fillStyle = 'rgba(52,152,219,0.3)';
+                this.ctx.fill();
+                this.ctx.stroke();
+            });
+        } else {
+            const xs = el.points.map(p => p.x), ys = el.points.map(p => p.y);
+            this.ctx.setLineDash([4, 3]);
+            this.ctx.strokeRect(Math.min(...xs) - this.BBOX_PAD, Math.min(...ys) - this.BBOX_PAD,
+                (Math.max(...xs) - Math.min(...xs)) + this.BBOX_PAD * 2, (Math.max(...ys) - Math.min(...ys)) + this.BBOX_PAD * 2);
+        }
         this.ctx.restore();
-        this.ctx.setLineDash([]);
     },
 
     clearCanvas() {
@@ -4101,16 +4192,15 @@ window.sketchApp = {
             if (el.type === 'stroke') this.drawStroke(el);
             else if (el.type === 'text') this.drawText(el);
         });
-        if (this.selectedIndex !== null && this.elements[this.selectedIndex]) {
-            this.drawSelectionBox(this.elements[this.selectedIndex]);
+        if (this.mode === 'edit' && this.selectedIndex !== null && this.elements[this.selectedIndex]) {
+            this.drawSelectionUI(this.elements[this.selectedIndex]);
         }
     },
 
     saveToPhoto() {
         if (!window.photoApp) return;
-        // 保存前に選択枠・浮動ツールバーが写り込まないよう、選択解除してから描き直す
-        this.selectedIndex = null;
-        this.hideTextToolbar();
+        this.selectedIndex = null; this.dragType = null;
+        this.hideFloatingToolbar();
         this.redrawAll();
         const dataUrl = this.canvas.toDataURL('image/jpeg', 0.8);
         window.photoApp.photos.push({ dataUrl: dataUrl, memo: "手書きメモ", tag: "地図メモ" });
