@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.9)</title>
+    <title>被災状況調査アプリ (Phase 6.10)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -561,12 +561,12 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.9</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.10</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.9</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.10</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -585,8 +585,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.09)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.09 (Step2-⑤解決：GPS・方位の使い方説明を追加)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.10)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.10 (3_script_main.jsの土台立て直し。⑥複数現場管理の着手前提)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -849,6 +849,33 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             </li>
             <li><strong>開閉:</strong> uiHelper.toggleSensorInfo()でdisplay切替。折りたたみ式にしたのは、普段使う人の邪魔にならないようにするため。</li>
             <li>これでStep2-⑤（GPS・方位取得のUI調整）は完了。8方位ライブ表示（5.19）とあわせて対応済み。</li>
+        </ul>
+
+        <h4>5.21 3_script_main.jsの土台立て直し（Phase 6.10）</h4>
+        <ul>
+            <li><strong>経緯:</strong> ⑥複数現場管理の実装に入る前に、実際にsrcへ配置されている3_script_main.jsを確認してもらったところ、複数の過去の改修が反映されないまま古い状態が長く続いていたことが判明した。原因は、開発側（Claude）が複数のフェーズにわたり、実際のファイルではなく手元の古いスナップショット（Phase 5.93相当）を「最新」として土台に使い回してしまっていたこと。⑥は getFormData・exportZip・importZip・オートセーブという、まさにこの古い部分と同じ箇所に手を入れる改修のため、先にここを正しい状態に揃えてから⑥に進むこととした。</li>
+            <li><strong>直っていた不具合:</strong> manage.htmlの「初期値として保存」「クリア（初期値を残す／全未入力）」「初期値の読み込み」ボタンが、対応する関数（appControl.saveDefaults/clearAll/applyDefaults）が存在せず、押してもエラーになるだけの状態だった（実質的に壊れたボタン）。</li>
+            <li><strong>復元・修正した内容:</strong>
+                <ul>
+                    <li>appControl.saveDefaults() / loadDefaults() / clearAll(fullClear) / applyDefaults() を復元（Phase 5.61〜5.63相当）。clearAll()はIndexedDB（photoStorage）・白紙メモ（sketchApp.elements）も対象に含める。</li>
+                    <li>storageManager.load()の末尾でwindow.photoStorage.restore()を呼び、IndexedDBに保存済みの写真本体（dataUrl）を復元するようにした（Phase 5.65相当）。</li>
+                    <li>storageManager.save()・load()、appControl.exportZip()・importZip()のphotoList入出力に、gpsFixedフィールドを追加（Phase 5.51〜5.71相当。今まで欠落しており、地図タップで修正した位置情報がJZIPに保存されていなかった）。</li>
+                    <li>appControl._embedExif()を、既存EXIFを読み込んでからGPS・方位を追記するマージ方式に修正（Phase 5.77相当。従来は毎回空のGPS情報から書き込んでおり、カメラ本体が記録した撮影日時等のEXIFが上書きで消えていた）。</li>
+                    <li>DOMContentLoaded末尾に、window.gpsManager.start()（GPSの起動）、window.appControl.loadDefaults()（初期値の自動読み込み）、カメラ・ファイル選択inputへのaddEventListener登録（Phase 5.64のiOS対応）を追加。</li>
+                    <li>位置図アコーディオンを開いたときのモード判定を、廃止済みの.map-mode-selectorラッパーを参照する古いセレクタから、現行の#mode-btn-map/draw/sketchボタンを直接見る形に修正。</li>
+                </ul>
+            </li>
+            <li><strong>削除した古い仕組み:</strong> 現行のUI（manage.html・header.html・introduction.html）のどこからも呼ばれていないことを確認したうえで、以下を削除した。
+                <ul>
+                    <li>presetManager（旧プリセット機能一式）</li>
+                    <li>uiHelper.openSaveModal() / openResetModal() / confirmSavePreset() / confirmReset()</li>
+                    <li>appControl.executeClear()（saveDefaults/clearAll系に置き換え済みのため）</li>
+                    <li>appControl.exportCurrentApp()（「この内容を初期値として保存(html)」機能。Phase 5.61で既に役目を終えていた）</li>
+                    <li>index.html.template内の#modal-preset-save・#modal-reset-confirm（対応するボタンが無く開かれることのないモーダルマークアップ）</li>
+                </ul>
+                uiHelper.closeModal()は汎用ユーティリティとして残した。
+            </li>
+            <li><strong>再発防止:</strong> 今後、規模の大きい改修に入る前は、開発側の手元スナップショットではなく、実際にsrcへ配置されているファイルを都度アップロードしてもらってから着手する。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -5144,29 +5171,8 @@ window.uiHelper = {
         if (!el) return;
         el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
     },
-    openSaveModal() {
-        const m = document.getElementById('modal-preset-save');
-        const inp = document.getElementById('preset-name-input');
-        if (m && inp) { inp.value = ""; m.style.display = 'flex'; inp.focus(); }
-    },
     closeModal() {
         document.querySelectorAll('.custom-modal-overlay').forEach(m => m.style.display = 'none');
-    },
-    openResetModal() {
-        const m = document.getElementById('modal-reset-confirm');
-        if (m) m.style.display = 'flex';
-    },
-    confirmSavePreset() {
-        const inp = document.getElementById('preset-name-input');
-        if (!inp) return;
-        const name = inp.value.trim();
-        if (!name) { alert("名前を入力してください"); return; }
-        this.closeModal();
-        presetManager.executeSave(name);
-    },
-    confirmReset(keepSurveyor) {
-        this.closeModal();
-        appControl.executeClear(keepSurveyor);
     },
     switchMapMode(mode) {
         const mapContainer = document.getElementById('map-container');
@@ -5229,72 +5235,6 @@ window.mapCacheManager = {
     }
 };
 
-// --- プリセット管理 ---
-window.presetManager = {
-    executeSave(name) {
-        try { localStorage.setItem('__test__', 'ok'); localStorage.removeItem('__test__'); } 
-        catch (e) { alert("エラー: 保存機能が使えません。\nWebサーバー(http/https)上で実行してください。"); return; }
-        const d = {};
-        ['company_name', 'tel', 'fax', 'person_name', 'email'].forEach(key => {
-            const el = document.querySelector(`[name="${key}"]`);
-            if (el) d[key] = el.value;
-        });
-        try {
-            const presets = JSON.parse(localStorage.getItem('survey_app_presets') || '{}');
-            presets[name] = d;
-            localStorage.setItem('survey_app_presets', JSON.stringify(presets));
-            this.updateSelect();
-            window.uiHelper.showToast(`プリセット「${name}」を保存しました`);
-        } catch (e) { alert("保存に失敗しました: " + e.message); }
-    },
-    load() {
-        const select = document.getElementById('preset-select');
-        const name = select.value;
-        if (!name) return;
-        try {
-            const presets = JSON.parse(localStorage.getItem('survey_app_presets') || '{}');
-            const d = presets[name];
-            if (d) {
-                Object.keys(d).forEach(k => {
-                    const el = document.querySelector(`[name="${k}"]`);
-                    if (el) { el.value = d[k]; el.dispatchEvent(new Event('input')); }
-                });
-                window.storageManager.save();
-                window.uiHelper.showToast(`読み込み完了: ${name}`);
-            }
-        } catch(e) { console.error(e); }
-    },
-    delete() {
-        const select = document.getElementById('preset-select');
-        const name = select.value;
-        if (!name) { alert("削除するプリセットを選択してください"); return; }
-        if (!confirm(`プリセット「${name}」を削除してもよろしいですか？`)) return;
-        try {
-            const presets = JSON.parse(localStorage.getItem('survey_app_presets') || '{}');
-            if (presets[name]) {
-                delete presets[name];
-                localStorage.setItem('survey_app_presets', JSON.stringify(presets));
-                this.updateSelect();
-                window.uiHelper.showToast(`プリセット「${name}」を削除しました`);
-            }
-        } catch (e) { alert("削除に失敗しました: " + e.message); }
-    },
-    updateSelect() {
-        const select = document.getElementById('preset-select');
-        if (!select) return;
-        select.innerHTML = '<option value="">選択してください...</option>';
-        try {
-            const presets = JSON.parse(localStorage.getItem('survey_app_presets') || '{}');
-            Object.keys(presets).forEach(name => {
-                const opt = document.createElement('option');
-                opt.value = name;
-                opt.textContent = name;
-                select.appendChild(opt);
-            });
-        } catch(e) { console.warn("Storage access failed"); }
-    }
-};
-
 // --- オートセーブ ---
 window.storageManager = {
     KEY: 'survey_app_autosave',
@@ -5312,7 +5252,8 @@ window.storageManager = {
                     azimuth:     p.azimuth     ?? null,
                     lat:         p.lat         ?? null,
                     lng:         p.lng         ?? null,
-                    gpsAccuracy: p.gpsAccuracy ?? null
+                    gpsAccuracy: p.gpsAccuracy ?? null,
+                    gpsFixed:    p.gpsFixed    ?? false
                     // dataUrlは保存しない
                 }));
                 localStorage.setItem(this.KEY, JSON.stringify(data));
@@ -5373,12 +5314,15 @@ window.storageManager = {
                     azimuth:     p.azimuth     ?? null,
                     lat:         p.lat         ?? null,
                     lng:         p.lng         ?? null,
-                    gpsAccuracy: p.gpsAccuracy ?? null
+                    gpsAccuracy: p.gpsAccuracy ?? null,
+                    gpsFixed:    p.gpsFixed    ?? false
                 }));
                 window.photoApp.currentIndex = 0;
                 window.photoApp.render();
                 window.photoApp.updateHeaderSummary();
             }
+            // IndexedDBに保存済みの写真本体（dataUrl）があれば復元する
+            window.photoStorage && window.photoStorage.restore();
         } catch (e) { console.error("Auto-load failed", e); }
     }
 };
@@ -5425,7 +5369,8 @@ window.appControl = {
                 azimuth:     p.azimuth     ?? null,
                 lat:         p.lat         ?? null,
                 lng:         p.lng         ?? null,
-                gpsAccuracy: p.gpsAccuracy ?? null
+                gpsAccuracy: p.gpsAccuracy ?? null,
+                gpsFixed:    p.gpsFixed    ?? false
             };
         });
 
@@ -5440,23 +5385,27 @@ window.appControl = {
 
     // JPEG の dataUrl に GPS・方位 EXIF を書き込んで返す
     // piexifjs が読み込まれていない場合・dataUrlが空の場合はそのまま返す
+    // JZIPエクスポート時にphotoListの情報をEXIFに書き込む
+    // 既存のEXIFはマージする（カメラ設定・撮影日時等を保持）
     _embedExif(p) {
         if (!p.dataUrl) return p.dataUrl;
         if (typeof piexif === 'undefined') return p.dataUrl;
 
         try {
-            const exifObj = { "GPS": {} };
+            let exifObj;
+            try {
+                exifObj = piexif.load(p.dataUrl);
+            } catch(e) {
+                exifObj = { "0th": {}, "Exif": {}, "GPS": {}, "1st": {} };
+            }
+            if (!exifObj["GPS"]) exifObj["GPS"] = {};
 
-            // 方位（GPSImgDirection）
-            // piexifjs は分数 [分子, 分母] 形式で受け取る
             if (p.azimuth !== null && p.azimuth !== undefined) {
                 exifObj["GPS"][piexif.GPSIFD.GPSImgDirection]    = [p.azimuth * 100, 100];
-                exifObj["GPS"][piexif.GPSIFD.GPSImgDirectionRef] = "T"; // T=真北基準
+                exifObj["GPS"][piexif.GPSIFD.GPSImgDirectionRef] = "T";
             }
 
-            // GPS座標（緯度・経度）
-            if (p.lat !== null && p.lng !== null) {
-                // 十進数 → 度分秒（DMS）変換してから分数形式に変換する
+            if (p.lat !== null && p.lat !== undefined && p.lng !== null && p.lng !== undefined) {
                 const toDMS = (val) => {
                     const abs = Math.abs(val);
                     const deg = Math.floor(abs);
@@ -5467,17 +5416,13 @@ window.appControl = {
                 exifObj["GPS"][piexif.GPSIFD.GPSLatitude]     = toDMS(p.lat);
                 exifObj["GPS"][piexif.GPSIFD.GPSLatitudeRef]  = p.lat  >= 0 ? "N" : "S";
                 exifObj["GPS"][piexif.GPSIFD.GPSLongitude]    = toDMS(p.lng);
-                exifObj["GPS"][piexif.GPSIFD.GPSLongitudeRef] = p.lng >= 0 ? "E" : "W";
-
-                // 精度情報（GPSHPositioningError）があれば記録
+                exifObj["GPS"][piexif.GPSIFD.GPSLongitudeRef] = p.lng  >= 0 ? "E" : "W";
                 if (p.gpsAccuracy !== null && p.gpsAccuracy !== undefined) {
                     exifObj["GPS"][piexif.GPSIFD.GPSDOP] = [p.gpsAccuracy * 100, 100];
                 }
             }
 
-            // EXIFに書き込むものがなければそのまま返す
-            const hasData = Object.keys(exifObj["GPS"]).length > 0;
-            if (!hasData) return p.dataUrl;
+            if (Object.keys(exifObj["GPS"]).length === 0) return p.dataUrl;
 
             const exifBytes = piexif.dump(exifObj);
             return piexif.insert(exifBytes, p.dataUrl);
@@ -5532,51 +5477,136 @@ window.appControl = {
                     azimuth:     p.azimuth     ?? null,
                     lat:         p.lat         ?? null,
                     lng:         p.lng         ?? null,
-                    gpsAccuracy: p.gpsAccuracy ?? null
+                    gpsAccuracy: p.gpsAccuracy ?? null,
+                    gpsFixed:    p.gpsFixed    ?? false
                 });
             }
-            photoApp.currentIndex = 0; photoApp.render(); photoApp.updateHeaderSummary(); 
+            photoApp.currentIndex = 0; photoApp.render(); photoApp.updateHeaderSummary();
+            // IndexedDBにも同期しておく（アプリが落ちても読み込んだ写真が復元できるように）
+            window.photoStorage && window.photoStorage.syncAll(photoApp.photos);
             storageManager.save(); 
             uiHelper.showToast("インポート完了");
         });
     },
-    executeClear(keepSurveyor) {
-        const surveyorData = {};
-        if (keepSurveyor) {
-            ['company_name', 'tel', 'fax', 'person_name', 'email'].forEach(name => {
-                const el = document.querySelector(`[name="${name}"]`);
-                if (el) surveyorData[name] = el.value;
-            });
-        }
-        document.querySelectorAll('input, select, textarea').forEach(el => {
-            if (el.type !== 'button' && el.type !== 'file' && el.type !== 'radio') el.value = '';
-            if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    // ---- 初期値をLocalStorageに保存 ----
+    saveDefaults() {
+        const DEFAULTS_KEY = 'survey_app_defaults';
+        const d = {};
+        ['company_id','leader_name','company_name','tel','fax','person_name','email'].forEach(k => {
+            const el = document.querySelector(`[name="${k}"]`);
+            if (el) d[k] = el.value;
         });
-        const defaults = ['survey_date', 'disaster_no', 'none', 'none', 'none'];
-        for(let i=1; i<=5; i++) {
-            const sel = document.getElementById('fn'+i);
-            if(sel) sel.value = defaults[i-1];
+        ['fn1','fn2','fn3','fn4','fn5'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) d[id] = el.value;
+        });
+        const resizeSel = document.getElementById('photo-resize-width');
+        if (resizeSel) d.photo_resize_width = resizeSel.value;
+        const force43cb = document.getElementById('photo-force-43');
+        if (force43cb) d.photo_force_43 = force43cb.checked;
+        try {
+            localStorage.setItem(DEFAULTS_KEY, JSON.stringify(d));
+            window.uiHelper && uiHelper.showToast("初期値を保存しました");
+        } catch(e) { alert("保存に失敗しました: " + e.message); }
+    },
+
+    // ---- 全クリア ----
+    // fullClear=true → 全未入力、false → クリア後に初期値を適用
+    // 初期値のLocalStorageは削除しない
+    clearAll(fullClear) {
+        const msg = fullClear
+            ? "全ての入力内容・写真・地図を消去します。\n本当に消しますか？"
+            : "入力内容・写真・地図を消去し、初期値を適用します。\n本当に消しますか？";
+        if (!confirm(msg)) return;
+
+        document.querySelectorAll('.accordion-item input, .accordion-item select, .accordion-item textarea').forEach(el => {
+            if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return;
+            if (el.tagName === 'SELECT') el.selectedIndex = 0;
+            else el.value = '';
+        });
+
+        if (window.photoApp) {
+            photoApp.photos = [];
+            photoApp.currentIndex = -1;
+            photoApp.render();
+            photoApp.updateHeaderSummary();
         }
-        mapApp.init(); mapApp.allDrawnItems.clearLayers(); mapApp.updateMapSummary();
-        photoApp.photos = []; photoApp.currentIndex = -1; photoApp.render(); photoApp.updateHeaderSummary();
-        if (keepSurveyor) {
-            Object.keys(surveyorData).forEach(k => {
-                const el = document.querySelector(`[name="${k}"]`);
-                if (el) el.value = surveyorData[k];
-            });
+        // IndexedDBの写真も削除
+        window.photoStorage && photoStorage.clearAll();
+
+        if (window.mapApp && mapApp.allDrawnItems) {
+            mapApp.allDrawnItems.clearLayers();
+            mapApp.updateMapSummary();
         }
+
+        if (window.sketchApp) {
+            sketchApp.elements = [];
+            sketchApp.selectedIndex = null;
+            if (sketchApp.hideFloatingToolbar) sketchApp.hideFloatingToolbar();
+            if (sketchApp.redrawAll) sketchApp.redrawAll();
+        }
+
+        try { localStorage.removeItem(storageManager.KEY); } catch(e) {}
+
         const d = document.getElementById('default-date'); if (d) d.value = new Date().toISOString().split('T')[0];
+
         document.querySelectorAll('.accordion-item').forEach(item => {
             const s = item.querySelector('.summary-text');
-            if (s && !['map-area', 'photo-area', 'io-area', 'sketch-area'].includes(item.dataset.group)) {
-                s.textContent = '未入力'; s.classList.replace('filled', 'empty');
-            }
-            if (item.dataset.group === 'surveyor-info' && keepSurveyor) {
-                item.querySelectorAll('input').forEach(i => i.dispatchEvent(new Event('input')));
+            if (s && !['map-area','photo-area','io-area','device-settings','site-manage','app-update','dev-log','install-guide'].includes(item.dataset.group)) {
+                s.textContent = '未入力';
+                s.classList.remove('filled');
+                s.classList.add('empty');
             }
         });
+
+        if (!fullClear) {
+            this.loadDefaults();
+            window.uiHelper && uiHelper.showToast("クリアしました（初期値を適用）");
+        } else {
+            window.uiHelper && uiHelper.showToast("全てクリアしました");
+        }
         storageManager.save();
-        uiHelper.showToast("新規調査を開始します");
+    },
+
+    // ---- 初期値の読み込み（入力内容はそのまま・初期値フィールドのみ上書き） ----
+    applyDefaults() {
+        const DEFAULTS_KEY = 'survey_app_defaults';
+        try {
+            const jsonStr = localStorage.getItem(DEFAULTS_KEY);
+            if (!jsonStr) { window.uiHelper && uiHelper.showToast("初期値が保存されていません"); return; }
+            this.loadDefaults();
+            window.uiHelper && uiHelper.showToast("初期値を読み込みました");
+        } catch(e) { console.warn("applyDefaults failed:", e); }
+    },
+
+    // ---- 初期値をLocalStorageから読み込む ----
+    loadDefaults() {
+        const DEFAULTS_KEY = 'survey_app_defaults';
+        try {
+            const jsonStr = localStorage.getItem(DEFAULTS_KEY);
+            if (!jsonStr) return;
+            const d = JSON.parse(jsonStr);
+            ['company_id','leader_name','company_name','tel','fax','person_name','email'].forEach(k => {
+                if (d[k] !== undefined) {
+                    const el = document.querySelector(`[name="${k}"]`);
+                    if (el) { el.value = d[k]; el.dispatchEvent(new Event('input')); }
+                }
+            });
+            ['fn1','fn2','fn3','fn4','fn5'].forEach(id => {
+                if (d[id] !== undefined) {
+                    const el = document.getElementById(id);
+                    if (el) el.value = d[id];
+                }
+            });
+            if (d.photo_resize_width !== undefined) {
+                const el = document.getElementById('photo-resize-width');
+                if (el) el.value = d.photo_resize_width;
+            }
+            if (d.photo_force_43 !== undefined) {
+                const el = document.getElementById('photo-force-43');
+                if (el) el.checked = d.photo_force_43;
+            }
+        } catch(e) { console.warn("loadDefaults failed:", e); }
     },
     checkForUpdate() {
         const btn = document.getElementById('update-app-btn');
@@ -5619,17 +5649,6 @@ window.appControl = {
                 if (btn) btn.disabled = false;
             });
     },
-    exportCurrentApp() {
-        document.querySelectorAll('input, select, textarea').forEach(el => {
-            if (el.tagName === 'TEXTAREA') el.innerText = el.value;
-            else if (el.tagName === 'SELECT') Array.from(el.options).forEach(o => o.selected ? o.setAttribute('selected','selected') : o.removeAttribute('selected'));
-            else if (el.type !== 'file') el.setAttribute('value', el.value);
-        });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob([`<!DOCTYPE html>\n` + document.documentElement.outerHTML], {type: 'text/html'}));
-        a.download = "configured_app.html";
-        a.click();
-    },
     getFn() {
         // 【修正③続き】getFormData()ではなく直接フォーム値を取得することで、
         // fn_config_*のname属性混入問題を完全に切り離す。
@@ -5671,7 +5690,9 @@ document.addEventListener('DOMContentLoaded', () => {
             h.querySelector('.icon').textContent = '-'; 
             if (h.parentElement.dataset.group === 'map-area') { 
                 window.mapApp.init();
-                const activeBtn = document.querySelector('.map-mode-selector .sketch-btn.active');
+                // 【修正】以前の .map-mode-selector ラッパーは廃止済み。
+                // 現行の3ボタン（#mode-btn-map/draw/sketch）から直接activeなものを判定する。
+                const activeBtn = document.querySelector('#mode-btn-map.active, #mode-btn-draw.active, #mode-btn-sketch.active');
                 const mode = activeBtn ? activeBtn.id.replace('mode-btn-', '') : 'map';
                 uiHelper.switchMapMode(mode);
             } 
@@ -5695,10 +5716,29 @@ document.addEventListener('DOMContentLoaded', () => {
         mapDiv.addEventListener('mouseup', () => window.storageManager.save());
         mapDiv.addEventListener('touchend', () => window.storageManager.save());
     }
-    window.presetManager.updateSelect();
     window.storageManager.load();
     document.querySelectorAll('.accordion-item').forEach(item => updateS(item));
     uiHelper.switchMapMode('map');
+    // GPSはアプリ起動時から取り始める
+    window.gpsManager && window.gpsManager.start();
+    // 初期値をLocalStorageから読み込む（会社情報・ファイル名構成・写真設定）
+    window.appControl.loadDefaults();
+
+    // 【iOS対応】カメラ・ファイル選択のchangeリスナーをaddEventListenerで登録する。
+    // iOSのSafariではinputのinline onchangeが capture="environment" と組み合わせると
+    // 発火しないケースがあるため、DOMContentLoaded後にaddEventListenerで登録する。
+    const cameraInput = document.getElementById('photo-camera-input');
+    const fileInput   = document.getElementById('photo-file-input');
+    if (cameraInput) {
+        cameraInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) window.photoApp.handleCameraFile(this);
+        });
+    }
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) window.photoApp.handleFileSelect(this);
+        });
+    }
 });
 
 // フルスクリーンモード切替
