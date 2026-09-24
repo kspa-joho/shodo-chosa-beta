@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.10)</title>
+    <title>被災状況調査アプリ (Phase 6.11)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -561,12 +561,12 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.10</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.11</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.10</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.11</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -585,8 +585,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.10)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.10 (3_script_main.jsの土台立て直し。⑥複数現場管理の着手前提)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.11)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.11 (Step2-⑥ 段階1：現場データの持ち方・保存の仕組み)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -878,6 +878,22 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>再発防止:</strong> 今後、規模の大きい改修に入る前は、開発側の手元スナップショットではなく、実際にsrcへ配置されているファイルを都度アップロードしてもらってから着手する。</li>
         </ul>
 
+        <h4>5.22 複数現場管理 段階1：データの持ち方・保存の仕組み（Phase 6.11）</h4>
+        <ul>
+            <li><strong>現場データ（siteManager・3_script_main.js）:</strong>
+                <ul>
+                    <li>survey_sites（LocalStorage）：現場の配列。各要素 <code>{ siteId, siteName, createdAt, formData:{...}, photoList:[...] }</code>。写真本体（dataUrl）は含まない。</li>
+                    <li>survey_app_current_site（LocalStorage）：現在開いている現場のsiteId。</li>
+                    <li>siteId採番：日付＋連番（例：2026-09-24-001）。あくまで端末内の目印で、正式な識別子は整理番号(ref_no)。他社のJZIPを読み込んでsiteIdが被っても気にしない。</li>
+                </ul>
+            </li>
+            <li><strong>保存タイミング（壁打ちで確定）:</strong> 画面の入力内容は常時は現場データへ自動保存しない（＝上書きし続けない）。現場データへ実際に書き込まれる（確定する）のは、①現場を切り替える／新規作成するときの確認で「保存する」を選んだとき、②JZIPエクスポート時、の2つだけ。既存のsurvey_app_autosave（アプリが落ちたときの保険）は今まで通り残す。これは「保存」とは別物。</li>
+            <li><strong>二重の安全策:</strong> 現地調査タブに常時表示される災害番号（Phase 5.93）により、誤って別の現場に切り替えても気づけるようにしてある。</li>
+            <li><strong>写真本体（photoStorage・2_script_photo.js）:</strong> IndexedDBのレコードにsiteIdを持たせ、キーを「siteId::インデックス番号」の複合キーに変更した。syncAll(photos, siteId)・restoreForSite(siteId)・clearAllForSite(siteId)を新設。siteId省略時はsiteManager.getCurrentSiteId()（無ければ'default'）を自動で使うため、既存の呼び出し（syncAll(this.photos)等）はそのまま動く。</li>
+            <li><strong>既存ユーザーの移行:</strong> survey_sitesがまだ無く、旧survey_app_autosaveだけある場合、起動時にsiteManager.migrateIfNeeded()が自動で「現場1」を1件作成する。IndexedDBの旧レコード（siteIdタグ無し・idが整数）も、getAllForSite()側で「現在の現場のもの」として後方互換的に扱う。</li>
+            <li><strong>今回は含めない（段階2以降）:</strong> 現場リストのUI（一覧表示・新規作成ボタン・切替操作・保存確認ダイアログ）、参照ボタン（7.1）、JZIP入出力の現場単位への整理。現時点ではsiteManagerの関数群は用意されているが、画面から呼び出す導線はまだない。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -930,7 +946,14 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
                 </ul>
             </li>
             <li>【Step2-⑤】GPS・方位取得のUI調整：解決（Phase 6.08・6.09）。詳細は5.19・5.20参照。</li>
-            <li>【Step2-⑥】複数現場管理の再設計（管理タブを現場リスト方式に置き換え）</li>
+            <li>【Step2-⑥】複数現場管理の再設計：段階1完了（Phase 6.11）。詳細は5.22参照。
+                <ul>
+                    <li>済：段階1 データの持ち方・保存の仕組み（siteManager・photoStorageのsiteId対応）</li>
+                    <li>残：段階2 現場リストのUI（一覧・新規作成・切替）</li>
+                    <li>残：段階3 管理項目の参照ボタン（設計済み・7.1参照）</li>
+                    <li>残：段階4 JZIP入出力を現場単位に整理</li>
+                </ul>
+            </li>
             <li>iPhone実機での動作確認（部会お披露目時）</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
             <li>AppB側：帳票の位置図セル（現状12.86×6.64cm）を4:3の比率に合わせて再調整（AppBスレッドで対応）</li>
@@ -4410,15 +4433,21 @@ document.addEventListener('click', (e) => {
 //   ・写真のdataUrlをIndexedDBに保存することで、アプリが落ちても写真が消えない。
 //   ・LocalStorage（5MB上限）では写真を保存できないため、IndexedDBを使う。
 //   ・iOSはPWAとしてインストールすれば7日以上データが保持される。
-//   ・DBキー = インデックス番号（0,1,2...）で管理する。
 //   ・photoApp.photos[]の操作と連動して自動で保存・削除・復元を行う。
+//
+// 【Phase 6.11】複数現場管理（改修指示書Step2-⑥）に対応するため、レコードに
+// siteId（現場ID）を持たせ、キーを "siteId::インデックス番号" の複合キーに変更した。
+// これにより、同じDBの中で現場ごとに写真を区別して持てる。
+// siteIdを省略した呼び出しは、window.siteManagerの現在の現場（無ければ'default'）を
+// 自動で使うため、⑥導入前の古い呼び出し方（引数なし）とも互換性がある。
+// 旧形式（siteIdタグ無し・idが単なる整数）のレコードは、後方互換のため
+// 「現在の現場のもの」として扱う（既存ユーザーの現場移行時に問題が出ないように）。
 // =============================================================================
 window.photoStorage = {
     DB_NAME: 'survey_photo_db',
     STORE:   'photos',
     _db: null,
 
-    // DBを開く（初回は作成）
     open() {
         return new Promise((resolve, reject) => {
             if (this._db) { resolve(this._db); return; }
@@ -4431,33 +4460,25 @@ window.photoStorage = {
         });
     },
 
-    // 写真を保存（id=インデックス番号）
-    async save(id, dataUrl) {
+    _currentSiteId() {
+        return (window.siteManager && window.siteManager.getCurrentSiteId()) || 'default';
+    },
+    _key(siteId, index) { return `${siteId}::${index}`; },
+
+    // 写真を保存（siteId + インデックス番号）
+    async save(siteId, index, dataUrl) {
         try {
             const db = await this.open();
             return new Promise((resolve, reject) => {
                 const tx = db.transaction(this.STORE, 'readwrite');
-                tx.objectStore(this.STORE).put({ id, dataUrl });
+                tx.objectStore(this.STORE).put({ id: this._key(siteId, index), siteId, index, dataUrl });
                 tx.oncomplete = resolve;
                 tx.onerror    = reject;
             });
         } catch(e) { console.warn("photoStorage.save failed:", e); }
     },
 
-    // 写真を削除
-    async delete(id) {
-        try {
-            const db = await this.open();
-            return new Promise((resolve, reject) => {
-                const tx = db.transaction(this.STORE, 'readwrite');
-                tx.objectStore(this.STORE).delete(id);
-                tx.oncomplete = resolve;
-                tx.onerror    = reject;
-            });
-        } catch(e) { console.warn("photoStorage.delete failed:", e); }
-    },
-
-    // 全件取得
+    // 全件取得（DB内の全現場ぶん）
     async getAll() {
         try {
             const db = await this.open();
@@ -4470,35 +4491,48 @@ window.photoStorage = {
         } catch(e) { console.warn("photoStorage.getAll failed:", e); return []; }
     },
 
-    // 全件削除
-    async clearAll() {
+    // 指定した現場ぶんだけを取得する（旧形式の未タグレコードも現在の現場として扱う）
+    async getAllForSite(siteId) {
+        const all = await this.getAll();
+        return all.filter(r => r.siteId === siteId || (r.siteId === undefined && typeof r.id === 'number'));
+    },
+
+    // 指定した現場ぶんだけを削除する
+    async clearAllForSite(siteId) {
         try {
             const db = await this.open();
+            const records = await this.getAllForSite(siteId);
             return new Promise((resolve, reject) => {
                 const tx = db.transaction(this.STORE, 'readwrite');
-                tx.objectStore(this.STORE).clear();
+                const store = tx.objectStore(this.STORE);
+                records.forEach(r => store.delete(r.id));
                 tx.oncomplete = resolve;
                 tx.onerror    = reject;
             });
-        } catch(e) { console.warn("photoStorage.clearAll failed:", e); }
+        } catch(e) { console.warn("photoStorage.clearAllForSite failed:", e); }
+    },
+    // 後方互換：siteId省略時は現在の現場ぶんだけを削除する
+    async clearAll() {
+        return this.clearAllForSite(this._currentSiteId());
     },
 
-    // photos[]全体をDBに同期する（並び替え後など）
-    async syncAll(photos) {
+    // photos[]全体を、指定した現場のぶんとしてDBに同期する（並び替え後など）
+    async syncAll(photos, siteId) {
+        const sid = siteId || this._currentSiteId();
         try {
-            await this.clearAll();
+            await this.clearAllForSite(sid);
             for (let i = 0; i < photos.length; i++) {
-                await this.save(i, photos[i].dataUrl);
+                await this.save(sid, i, photos[i].dataUrl);
             }
         } catch(e) { console.warn("photoStorage.syncAll failed:", e); }
     },
 
-    // アプリ起動時にDBから写真を復元する
-    async restore() {
-        const records = await this.getAll();
+    // 指定した現場の写真をDBから復元する（現場切替・起動時に使う）
+    async restoreForSite(siteId) {
+        const sid = siteId || this._currentSiteId();
+        const records = await this.getAllForSite(sid);
         if (!records.length) return;
-        // IDでソートして順番を保持
-        records.sort((a, b) => a.id - b.id);
+        records.sort((a, b) => (a.index ?? a.id) - (b.index ?? b.id));
         records.forEach((rec, i) => {
             if (window.photoApp.photos[i]) {
                 window.photoApp.photos[i].dataUrl = rec.dataUrl;
@@ -4506,6 +4540,10 @@ window.photoStorage = {
         });
         window.photoApp.render();
         window.photoApp.updateHeaderSummary();
+    },
+    // 後方互換：siteId省略時は現在の現場ぶんを復元する
+    async restore() {
+        return this.restoreForSite(this._currentSiteId());
     }
 };
 
@@ -5156,6 +5194,179 @@ document.addEventListener('click', (e) => {
     });
 })();
 
+// =============================================================================
+// 【Phase 6.11 段階1】複数現場管理（改修指示書Step2-⑥）データの持ち方・保存の仕組み
+// =============================================================================
+// 設計方針（壁打ちで確定した内容）：
+//   ・現場データは survey_sites というキーに配列で持つ。
+//     各要素: { siteId, siteName, createdAt, formData:{...}, photoList:[...] }
+//     写真の実データ(dataUrl)はここには含めない。IndexedDB(photoStorage)側で
+//     siteIdごとに区別して持つ（本体は容量が大きいため）。
+//   ・siteIdは「日付＋連番」の自動採番（例：2026-09-24-001）。あくまで端末内の
+//     目印であり、正式な識別子は整理番号(ref_no)。他社のJZIPを読み込んでsiteIdが
+//     被っても気にしない（現場ごとに別レコードとして扱う）。
+//   ・現在開いている現場のIDは survey_app_current_site という別キーで覚える。
+//   ・画面の入力内容は、常時は自動保存しない（＝上書きし続けない）。
+//     現場データ(survey_sites)へ実際に書き込まれる（確定する）のは、
+//     現場を切り替える・新規作成するときの確認で「保存する」を選んだとき、
+//     またはJZIPエクスポート時だけ。
+//   ・survey_app_autosave（アプリが落ちたときの保険）は今まで通り残す。これは
+//     「保存」とは別物で、うっかり閉じても直前の状態に戻せるだけの下書き。
+//   ・既存ユーザー向けの移行：survey_sitesがまだ無く、survey_app_autosaveだけ
+//     ある場合は、起動時に自動で「現場1」として1件だけ作成する。
+// =============================================================================
+window.siteManager = {
+    LIST_KEY: 'survey_sites',
+    CURRENT_KEY: 'survey_app_current_site',
+
+    getSites() {
+        try { return JSON.parse(localStorage.getItem(this.LIST_KEY) || '[]'); }
+        catch(e) { return []; }
+    },
+    saveSites(sites) {
+        try { localStorage.setItem(this.LIST_KEY, JSON.stringify(sites)); }
+        catch(e) { console.warn('現場リストの保存に失敗:', e); }
+    },
+    getCurrentSiteId() {
+        return localStorage.getItem(this.CURRENT_KEY) || null;
+    },
+    setCurrentSiteId(id) {
+        if (id) localStorage.setItem(this.CURRENT_KEY, id);
+        else localStorage.removeItem(this.CURRENT_KEY);
+    },
+    getSite(siteId) {
+        return this.getSites().find(s => s.siteId === siteId) || null;
+    },
+
+    // 日付＋連番で仮の管理番号を採番する（同日内で連番が増える）
+    generateSiteId() {
+        const today = new Date().toISOString().split('T')[0];
+        const sites = this.getSites();
+        const todays = sites.filter(s => s.siteId && s.siteId.startsWith(today));
+        let seq = 1;
+        if (todays.length > 0) {
+            const nums = todays.map(s => parseInt(s.siteId.split('-').pop(), 10)).filter(n => !isNaN(n));
+            seq = (nums.length ? Math.max(...nums) : 0) + 1;
+        }
+        return `${today}-${String(seq).padStart(3, '0')}`;
+    },
+
+    // 新規現場を作成する（現場名は必須。呼び出し側で入力を求めてから渡すこと）
+    createSite(siteName) {
+        const siteId = this.generateSiteId();
+        const sites = this.getSites();
+        sites.push({
+            siteId,
+            siteName: siteName && siteName.trim() ? siteName.trim() : '(名称未設定)',
+            createdAt: new Date().toISOString(),
+            formData: {},
+            photoList: []
+        });
+        this.saveSites(sites);
+        return siteId;
+    },
+
+    // 現在の画面の入力内容を、現在開いている現場のレコードへ確定保存する
+    // （現場を切り替える／新規作成する直前に、確認で「保存する」を選んだときに呼ぶ）
+    commitCurrentToSite() {
+        const currentId = this.getCurrentSiteId();
+        if (!currentId) return false;
+        const sites = this.getSites();
+        const idx = sites.findIndex(s => s.siteId === currentId);
+        if (idx === -1) return false;
+        sites[idx].formData = window.appControl.getFormData();
+        sites[idx].photoList = window.photoApp.photos.map(p => ({
+            memo:        p.memo        || "",
+            tag:         p.tag         || "補足",
+            azimuth:     p.azimuth     ?? null,
+            lat:         p.lat         ?? null,
+            lng:         p.lng         ?? null,
+            gpsAccuracy: p.gpsAccuracy ?? null,
+            gpsFixed:    p.gpsFixed    ?? false
+        }));
+        this.saveSites(sites);
+        // 写真本体（IndexedDB）もこの現場のsiteIdに紐づけて同期しておく
+        window.photoStorage && window.photoStorage.syncAll(window.photoApp.photos, currentId);
+        return true;
+    },
+
+    // 現場レコードのformData・写真を画面へ反映する（切替・起動時の読み込み）
+    loadSiteIntoForm(siteId) {
+        const site = this.getSite(siteId);
+        if (!site) return false;
+        const d = site.formData || {};
+
+        Object.keys(d).forEach(k => {
+            const el = document.querySelector(`[name="${k}"]`);
+            if (el) { el.value = d[k]; el.dispatchEvent(new Event('input')); }
+        });
+        if (d.dept_name !== undefined && window.syncDeptName) window.syncDeptName(d.dept_name);
+        if (d.disaster_no !== undefined && window.syncDisasterNoTab) window.syncDisasterNoTab(d.disaster_no);
+
+        if (window.mapApp) {
+            mapApp.init();
+            if (mapApp.map && mapApp.allDrawnItems) {
+                mapApp.allDrawnItems.clearLayers();
+                const restoreGeom = (geom, isM) => {
+                    if (!geom) return;
+                    L.geoJSON(geom, {
+                        pointToLayer: (feature, latlng) => (isM && !feature.properties.isText) ? L.circle(latlng, { radius: 10, color: '#ff0000', weight: 6, fillOpacity: 0 }) : L.marker(latlng)
+                    }).eachLayer(l => {
+                        if(!l.options) l.options = {}; l.options.isMain = isM;
+                        if (l.feature.properties && l.feature.properties.isText) {
+                            mapApp.allDrawnItems.addLayer(mapApp.createTextLayer(l.getLatLng(), l.feature.properties.textVal));
+                        } else {
+                            if (l.setStyle && !(l instanceof L.Circle)) l.setStyle({ color: isM ? '#ff0000' : '#0000ff', weight: 6, opacity: 0.7 });
+                            if (isM && l instanceof L.Marker) { l.options.icon = new L.Icon.Default(); l.on('add', () => { if(l._icon) l._icon.classList.add('marker-red'); }); }
+                            mapApp.allDrawnItems.addLayer(l);
+                        }
+                    });
+                };
+                restoreGeom(d.mainGeom, true);
+                restoreGeom(d.subGeom, false);
+                mapApp.updateMapSummary();
+            }
+        }
+
+        window.photoApp.photos = (site.photoList || []).map(p => ({
+            dataUrl:     '',
+            memo:        p.memo        || '',
+            tag:         p.tag         || '補足',
+            azimuth:     p.azimuth     ?? null,
+            lat:         p.lat         ?? null,
+            lng:         p.lng         ?? null,
+            gpsAccuracy: p.gpsAccuracy ?? null,
+            gpsFixed:    p.gpsFixed    ?? false
+        }));
+        window.photoApp.currentIndex = window.photoApp.photos.length ? 0 : -1;
+        window.photoApp.render();
+        window.photoApp.updateHeaderSummary();
+        window.photoStorage && window.photoStorage.restoreForSite(siteId);
+
+        this.setCurrentSiteId(siteId);
+        return true;
+    },
+
+    // 既存ユーザーの移行：現場リストがまだ無ければ、旧オートセーブから「現場1」を1件作る
+    migrateIfNeeded() {
+        if (this.getSites().length > 0) return;
+        const autosaveStr = localStorage.getItem(window.storageManager.KEY);
+        if (!autosaveStr) return;
+        try {
+            const d = JSON.parse(autosaveStr);
+            const siteId = this.generateSiteId();
+            const siteName = d.ref_no || d.disaster_no || '現場1';
+            const photoList = (d.photoList || []).map(p => ({
+                memo: p.memo || "", tag: p.tag || "補足",
+                azimuth: p.azimuth ?? null, lat: p.lat ?? null, lng: p.lng ?? null,
+                gpsAccuracy: p.gpsAccuracy ?? null, gpsFixed: p.gpsFixed ?? false
+            }));
+            this.saveSites([{ siteId, siteName, createdAt: new Date().toISOString(), formData: d, photoList }]);
+            this.setCurrentSiteId(siteId);
+        } catch(e) { console.warn('現場データの移行に失敗:', e); }
+    }
+};
+
 // --- UIヘルパー ---
 window.uiHelper = {
     showToast(msg) {
@@ -5716,6 +5927,8 @@ document.addEventListener('DOMContentLoaded', () => {
         mapDiv.addEventListener('mouseup', () => window.storageManager.save());
         mapDiv.addEventListener('touchend', () => window.storageManager.save());
     }
+    // 既存ユーザーの現場データ移行（現場リストがまだ無ければ旧オートセーブから1件作る）
+    window.siteManager.migrateIfNeeded();
     window.storageManager.load();
     document.querySelectorAll('.accordion-item').forEach(item => updateS(item));
     uiHelper.switchMapMode('map');
