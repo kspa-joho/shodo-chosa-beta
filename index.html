@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.11)</title>
+    <title>被災状況調査アプリ (Phase 6.12)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -154,17 +154,18 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <!-- 管理タブ：管理項目・調査を実施した者・端末設定 -->
             <section id="content-manage" class="tab-content"><div class="survey-app-ui">
 
-    <!-- 現場管理（⑥複数現場管理の仮置き。Phase 5.xx で現場リスト方式に置き換え予定） -->
+    <!-- 現場管理（Step2-⑥ 段階2：現場リストUI） -->
     <div class="accordion-item" data-group="site-manage">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">現場管理</span><span class="summary-text">現場リスト（準備中）</span></div>
+            <div class="header-label"><span class="main-title">現場管理</span><span class="summary-text" id="site-manage-summary">現場リスト</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
-            <p style="font-size:0.85rem; color:#888; margin:0;">
-                複数現場の切り替え機能は今後実装予定です。<br>
-                現在は1現場ずつJZIPで保存・読み込みしてください。
+            <p style="font-size:0.78rem; color:#888; margin:0 0 8px 0;">
+                現場を切り替える・新規に作成すると、その時点の入力内容を保存するか確認します。
             </p>
+            <button type="button" class="btn-main" style="margin-bottom:10px;" onclick="siteManager.promptCreateSite()">＋ 新規現場を作成</button>
+            <div id="site-list-container"></div>
         </div>
     </div>
 
@@ -561,12 +562,12 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.11</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.12</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.11</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.12</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -585,8 +586,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.11)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.11 (Step2-⑥ 段階1：現場データの持ち方・保存の仕組み)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.12)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.12 (Step2-⑥ 段階2：現場リストUI・新規作成・切替)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -894,6 +895,16 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>今回は含めない（段階2以降）:</strong> 現場リストのUI（一覧表示・新規作成ボタン・切替操作・保存確認ダイアログ）、参照ボタン（7.1）、JZIP入出力の現場単位への整理。現時点ではsiteManagerの関数群は用意されているが、画面から呼び出す導線はまだない。</li>
         </ul>
 
+        <h4>5.23 複数現場管理 段階2：現場リストUI（Phase 6.12）</h4>
+        <ul>
+            <li><strong>manage.htmlの「現場管理」アコーディオン:</strong> 「準備中」プレースホルダーを廃止し、「＋ 新規現場を作成」ボタンと現場一覧（#site-list-container）に置き換えた。</li>
+            <li><strong>一覧表示:</strong> siteManager.renderSiteList()が、現場を新しい順に並べて表示する。現在開いている現場は●印・青枠・薄い青背景で強調表示、それ以外は○印。タップで切り替わる。</li>
+            <li><strong>新規作成（siteManager.promptCreateSite）:</strong> 現場名の入力を求め（空なら作成しない）、confirmAndProceed()を経てから、新しいsiteIdで現場を作成する。作成後は画面の全入力・地図・写真・白紙メモを空の状態にリセットする（前の現場の内容を引きずらないように）。</li>
+            <li><strong>切り替え（siteManager.switchToSite）:</strong> confirmAndProceed()を経てから、loadSiteIntoForm()で選んだ現場のデータを画面に反映する。</li>
+            <li><strong>保存確認（siteManager.confirmAndProceed）:</strong> 現在の現場が既にある場合、「今の入力内容を保存してから移動しますか？」を確認する（壁打ちで決めた案B）。OK＝commitCurrentToSite()で保存してから続行、キャンセル＝保存せず続行。どちらを選んでも切替・作成自体は行われる（引き止める確認ではなく、保存するかどうかだけの確認）。現在の現場がまだ無い（初回等）場合は確認せずそのまま続行する。</li>
+            <li><strong>誤操作への配慮:</strong> 現地調査タブに常時表示される災害番号（Phase 5.93）と、現場一覧の●印強調表示の2つで、「今どの現場を開いているか」を確認しやすくしてある。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -949,7 +960,7 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li>【Step2-⑥】複数現場管理の再設計：段階1完了（Phase 6.11）。詳細は5.22参照。
                 <ul>
                     <li>済：段階1 データの持ち方・保存の仕組み（siteManager・photoStorageのsiteId対応）</li>
-                    <li>残：段階2 現場リストのUI（一覧・新規作成・切替）</li>
+                    <li>済：段階2 現場リストのUI（一覧・新規作成・切替）（Phase 6.12）</li>
                     <li>残：段階3 管理項目の参照ボタン（設計済み・7.1参照）</li>
                     <li>残：段階4 JZIP入出力を現場単位に整理</li>
                 </ul>
@@ -5364,6 +5375,82 @@ window.siteManager = {
             this.saveSites([{ siteId, siteName, createdAt: new Date().toISOString(), formData: d, photoList }]);
             this.setCurrentSiteId(siteId);
         } catch(e) { console.warn('現場データの移行に失敗:', e); }
+    },
+
+    // ---- ここからUI操作（段階2） ----
+
+    // 現場を切り替える／新規作成する前に、今の内容を保存するか確認してから続行する。
+    // OK=保存してから続行、キャンセル=保存せず続行（どちらでも移動自体は行う）。
+    // 現在の現場がまだ無い場合（初回等）は確認せずそのまま続行する。
+    confirmAndProceed(afterFn) {
+        if (this.getCurrentSiteId()) {
+            if (confirm('今の入力内容を保存してから移動しますか？\n（キャンセルすると保存せずに移動します）')) {
+                this.commitCurrentToSite();
+            }
+        }
+        afterFn();
+    },
+
+    switchToSite(siteId) {
+        if (siteId === this.getCurrentSiteId()) return;
+        this.confirmAndProceed(() => {
+            this.loadSiteIntoForm(siteId);
+            this.renderSiteList();
+            window.uiHelper && uiHelper.showToast('現場を切り替えました');
+        });
+    },
+
+    promptCreateSite() {
+        const name = prompt('新しい現場の名前を入力してください（例：〇〇橋 上流側）');
+        if (name === null) return; // キャンセル
+        if (!name.trim()) { alert('現場名を入力してください'); return; }
+        this.confirmAndProceed(() => {
+            const siteId = this.createSite(name);
+            // 新規現場は空の状態から始める（前の現場の入力を引きずらない）
+            document.querySelectorAll('.accordion-item input, .accordion-item select, .accordion-item textarea').forEach(el => {
+                if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return;
+                if (el.tagName === 'SELECT') el.selectedIndex = 0;
+                else el.value = '';
+            });
+            if (window.mapApp && mapApp.allDrawnItems) { mapApp.allDrawnItems.clearLayers(); mapApp.updateMapSummary(); }
+            if (window.sketchApp) { sketchApp.elements = []; if (sketchApp.redrawAll) sketchApp.redrawAll(); }
+            window.photoApp.photos = [];
+            window.photoApp.currentIndex = -1;
+            window.photoApp.render();
+            window.photoApp.updateHeaderSummary();
+            window.syncDeptName && window.syncDeptName('');
+            window.syncDisasterNoTab && window.syncDisasterNoTab('');
+            const d = document.getElementById('default-date');
+            if (d) d.value = new Date().toISOString().split('T')[0];
+            this.setCurrentSiteId(siteId);
+            this.renderSiteList();
+            window.uiHelper && uiHelper.showToast('新しい現場「' + name.trim() + '」を作成しました');
+        });
+    },
+
+    _escapeHtml(s) {
+        const d = document.createElement('div');
+        d.textContent = s == null ? '' : String(s);
+        return d.innerHTML;
+    },
+
+    renderSiteList() {
+        const container = document.getElementById('site-list-container');
+        if (!container) return;
+        const sites = this.getSites();
+        const currentId = this.getCurrentSiteId();
+        if (sites.length === 0) {
+            container.innerHTML = '<p style="font-size:0.85rem; color:#888;">現場がまだありません。「＋ 新規現場を作成」から始めてください。</p>';
+            return;
+        }
+        container.innerHTML = sites.slice().reverse().map(s => {
+            const active = s.siteId === currentId;
+            return `<div onclick="siteManager.switchToSite('${s.siteId}')"
+                style="padding:10px; border:1px solid ${active ? '#3498db' : '#ddd'}; border-radius:4px; margin-bottom:6px; cursor:pointer; background:${active ? '#eaf4fb' : '#fff'};">
+                <div style="font-weight:bold; font-size:0.9rem;">${active ? '● ' : '○ '}${this._escapeHtml(s.siteName)}</div>
+                <div style="font-size:0.75rem; color:#888;">${this._escapeHtml(s.siteId)}</div>
+            </div>`;
+        }).join('');
     }
 };
 
@@ -5929,6 +6016,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // 既存ユーザーの現場データ移行（現場リストがまだ無ければ旧オートセーブから1件作る）
     window.siteManager.migrateIfNeeded();
+    window.siteManager.renderSiteList();
     window.storageManager.load();
     document.querySelectorAll('.accordion-item').forEach(item => updateS(item));
     uiHelper.switchMapMode('map');
