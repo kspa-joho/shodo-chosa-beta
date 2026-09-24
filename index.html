@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.12)</title>
+    <title>被災状況調査アプリ (Phase 6.13)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -99,6 +99,8 @@ body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; d
 .input-group { margin-bottom: 12px; }
 .input-group label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 4px; }
 .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+/* 【Phase 6.13】管理項目の参照ボタンで引用した値の目立たせ表示（書き換えるまで維持） */
+.ref-highlight { background-color: #fff3cd !important; border-color: #f0ad4e !important; }
 .btn-main { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
 .btn-sub { width: 100%; padding: 10px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; }
 .map-controls { display: flex; gap: 5px; padding: 8px; background: #eee; }
@@ -125,9 +127,8 @@ body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; d
 #mode-btn-map:not(.active), #mode-btn-draw:not(.active), #mode-btn-sketch:not(.active) { background: rgba(255,255,255,0.1); color: white; border-color: transparent; }
 .color-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 3px rgba(0,0,0,0.3); padding: 0; cursor: pointer; }
 .color-btn.active { transform: scale(1.2); border-color: #333; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
-/* 【Phase 6.01】白紙メモのキャンバスも位置図と同じ4:3に固定（高さは幅から自動算出。JS側resizeAndClearでも同じ比率にしている） */
-.sketch-canvas-container { position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background: white; cursor: crosshair; touch-action: none; margin-bottom: 5px; width: 100%; max-width: min(100%, 93.333vh); margin-left: auto; margin-right: auto; aspect-ratio: 4 / 3; }
-canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
+.sketch-canvas-container { position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background: white; cursor: crosshair; touch-action: none; margin-bottom: 5px; }
+canvas.sketch-canvas { display: block; width: 100%; }
 </style>
 </head>
 <body>
@@ -176,6 +177,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
+            <button type="button" class="btn-sub" style="margin-bottom:10px; background:#8e44ad;"
+                onclick="siteManager.openReferenceModal()">📋 他の現場から引用</button>
             <div class="input-group"><label>会社ID</label><input type="text" name="company_id"></div>
             <div class="input-group"><label>調査班長名</label><input type="text" name="leader_name"></div>
             <div class="input-group"><label>整理番号</label><input type="text" name="ref_no"></div>
@@ -185,6 +188,31 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
                 <label>発注者名</label>
                 <input type="text" name="dept_name" placeholder="例：鹿児島県"
                     oninput="syncDeptName(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理項目の参照ボタン用モーダル（4択） -->
+    <div id="modal-reference-choice" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">災害番号・発注者名・被災日・整理番号を引用</div>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                <button type="button" class="btn-sub" onclick="siteManager.applyReferenceFromDefaults()">① 保存済みの初期値を引用</button>
+                <button type="button" class="btn-sub" onclick="siteManager.applyReferenceFromLastSite()">② 最後の現場を引用</button>
+                <button type="button" class="btn-sub" onclick="siteManager.openSitePickModal()">③ 他の現場を指定して引用</button>
+            </div>
+            <div class="custom-modal-actions">
+                <button type="button" class="btn-sub" onclick="siteManager.closeReferenceModal()">④ キャンセル</button>
+            </div>
+        </div>
+    </div>
+    <!-- ③で使う、現場を選ぶモーダル -->
+    <div id="modal-reference-site-pick" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">現場を選択</div>
+            <div id="reference-site-pick-list" style="max-height:300px; overflow-y:auto; margin-top:10px;"></div>
+            <div class="custom-modal-actions">
+                <button type="button" class="btn-sub" onclick="siteManager.closeSitePickModal()">戻る</button>
             </div>
         </div>
     </div>
@@ -562,12 +590,12 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.12</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.13</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.12</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.13</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -586,8 +614,8 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.12)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.12 (Step2-⑥ 段階2：現場リストUI・新規作成・切替)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.13)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.13 (Step2-⑥ 段階3：管理項目の参照ボタン)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -905,6 +933,17 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
             <li><strong>誤操作への配慮:</strong> 現地調査タブに常時表示される災害番号（Phase 5.93）と、現場一覧の●印強調表示の2つで、「今どの現場を開いているか」を確認しやすくしてある。</li>
         </ul>
 
+        <h4>5.24 複数現場管理 段階3：管理項目の参照ボタン（Phase 6.13）</h4>
+        <ul>
+            <li><strong>設計の実装:</strong> 7.1で確定した設計をそのまま実装した。管理項目アコーディオンに「📋 他の現場から引用」ボタンを追加し、押すとモーダルで①保存済みの初期値／②最後の現場／③他の現場を指定／④キャンセルの4択を出す。</li>
+            <li><strong>①保存済みの初期値:</strong> survey_app_defaultsから災害番号・発注者名・被災日を引用する。saveDefaults()の保存対象にこの3項目を追加した（整理番号は対象外のまま）。</li>
+            <li><strong>②最後の現場:</strong> siteManager.getSites()の配列の末尾（最後に作成された現場）のformDataから、災害番号・発注者名・被災日・整理番号を引用する。</li>
+            <li><strong>③他の現場を指定:</strong> 現場一覧をモーダルで表示し、選んだ現場のformDataから同じ4項目を引用する。</li>
+            <li><strong>ハイライト表示:</strong> 引用した項目には.ref-highlightクラス（薄いオレンジ背景）を付与する。値を実際に書き換えた（inputイベントが発火した）時点でクラスを外す。プログラムによる値の代入だけではinputイベントを発火させていないため、①②③の適用直後にハイライトが即座に消えることはない。</li>
+            <li><strong>調査日は対象外:</strong> 参照では引き継がない。常に今日の日付のまま。</li>
+            <li><strong>同期表示の扱い:</strong> dept_name・disaster_noはinputイベント経由（inline oninput）で同期表示（syncDeptName・syncDisasterNoTab）される設計だが、参照適用時はinputイベントを発火させない方針のため、_applyReferenceFields()内でこの2つの同期関数を明示的に呼んでいる。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -961,7 +1000,7 @@ canvas.sketch-canvas { display: block; width: 100%; height: 100%; }
                 <ul>
                     <li>済：段階1 データの持ち方・保存の仕組み（siteManager・photoStorageのsiteId対応）</li>
                     <li>済：段階2 現場リストのUI（一覧・新規作成・切替）（Phase 6.12）</li>
-                    <li>残：段階3 管理項目の参照ボタン（設計済み・7.1参照）</li>
+                    <li>済：段階3 管理項目の参照ボタン（Phase 6.13。設計は7.1参照）</li>
                     <li>残：段階4 JZIP入出力を現場単位に整理</li>
                 </ul>
             </li>
@@ -5451,6 +5490,90 @@ window.siteManager = {
                 <div style="font-size:0.75rem; color:#888;">${this._escapeHtml(s.siteId)}</div>
             </div>`;
         }).join('');
+    },
+
+    // ---- 段階3：管理項目の参照ボタン（設計は7.1参照） ----
+    // 引き継ぐ項目は災害番号・発注者名・被災日・整理番号の4項目。
+    // 整理番号は空欄にせず参照元の値をそのまま引き継ぐ（Phase 5.92確定）。
+    // 引き継いだ項目は、値を実際に書き換えるまで.ref-highlightクラスで目立つ色にする。
+
+    openReferenceModal() {
+        const m = document.getElementById('modal-reference-choice');
+        if (m) m.style.display = 'flex';
+    },
+    closeReferenceModal() {
+        const m = document.getElementById('modal-reference-choice');
+        if (m) m.style.display = 'none';
+    },
+    openSitePickModal() {
+        this.closeReferenceModal();
+        const list = document.getElementById('reference-site-pick-list');
+        const sites = this.getSites();
+        if (list) {
+            if (sites.length === 0) {
+                list.innerHTML = '<p style="font-size:0.85rem; color:#888;">参照できる現場がありません。</p>';
+            } else {
+                list.innerHTML = sites.slice().reverse().map(s => `
+                    <div onclick="siteManager.applyReferenceFromSite('${s.siteId}')"
+                        style="padding:10px; border:1px solid #ddd; border-radius:4px; margin-bottom:6px; cursor:pointer;">
+                        <div style="font-weight:bold; font-size:0.9rem;">${this._escapeHtml(s.siteName)}</div>
+                        <div style="font-size:0.75rem; color:#888;">${this._escapeHtml(s.siteId)}</div>
+                    </div>`).join('');
+            }
+        }
+        const m = document.getElementById('modal-reference-site-pick');
+        if (m) m.style.display = 'flex';
+    },
+    closeSitePickModal() {
+        const m = document.getElementById('modal-reference-site-pick');
+        if (m) m.style.display = 'none';
+    },
+
+    // ①保存済みの初期値を引用
+    applyReferenceFromDefaults() {
+        const raw = localStorage.getItem('survey_app_defaults');
+        if (!raw) { alert('初期値が保存されていません'); return; }
+        let d;
+        try { d = JSON.parse(raw); } catch(e) { return; }
+        this._applyReferenceFields({ disaster_no: d.disaster_no, dept_name: d.dept_name, damage_date: d.damage_date });
+    },
+    // ②最後の現場を引用
+    applyReferenceFromLastSite() {
+        const sites = this.getSites();
+        if (sites.length === 0) { alert('参照できる現場がありません'); return; }
+        this._applyReferenceFromSiteRecord(sites[sites.length - 1]);
+    },
+    // ③指定した現場を引用
+    applyReferenceFromSite(siteId) {
+        const site = this.getSite(siteId);
+        if (!site) return;
+        this._applyReferenceFromSiteRecord(site);
+        this.closeSitePickModal();
+    },
+    _applyReferenceFromSiteRecord(site) {
+        const d = site.formData || {};
+        this._applyReferenceFields({
+            disaster_no: d.disaster_no, dept_name: d.dept_name,
+            damage_date: d.damage_date, ref_no: d.ref_no
+        });
+    },
+    // 実際にフィールドへ値を入れて、ハイライトを付ける（inputイベントは発火させない。
+    // 発火させると「書き換えるまでハイライト」の判定がすぐ消えてしまうため）
+    _applyReferenceFields(fields) {
+        Object.keys(fields).forEach(name => {
+            const val = fields[name];
+            if (val === undefined || val === null || val === '') return;
+            const el = document.querySelector(`[name="${name}"]`);
+            if (!el) return;
+            el.value = val;
+            el.classList.add('ref-highlight');
+        });
+        // 発注者名・災害番号の同期表示は個別に呼ぶ（上記の理由でinputイベント経由にしない）
+        if (fields.dept_name !== undefined && window.syncDeptName) window.syncDeptName(fields.dept_name);
+        if (fields.disaster_no !== undefined && window.syncDisasterNoTab) window.syncDisasterNoTab(fields.disaster_no);
+        window.storageManager && window.storageManager.save();
+        this.closeReferenceModal();
+        window.uiHelper && uiHelper.showToast('現場情報を引用しました');
     }
 };
 
@@ -5790,7 +5913,9 @@ window.appControl = {
     saveDefaults() {
         const DEFAULTS_KEY = 'survey_app_defaults';
         const d = {};
-        ['company_id','leader_name','company_name','tel','fax','person_name','email'].forEach(k => {
+        // 【Phase 6.13】7.1の設計に基づき、参照ボタン①用にdisaster_no・dept_name・damage_dateも
+        // 保存対象に加える（整理番号ref_noは現場ごとに異なるため対象外。②③の現場参照でのみ引き継ぐ）。
+        ['company_id','leader_name','company_name','tel','fax','person_name','email','disaster_no','dept_name','damage_date'].forEach(k => {
             const el = document.querySelector(`[name="${k}"]`);
             if (el) d[k] = el.value;
         });
@@ -6005,7 +6130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     document.querySelectorAll('.accordion-item').forEach(item => { 
         item.querySelectorAll('input, select, textarea').forEach(i => {
-            i.addEventListener('input', () => { updateS(item); window.storageManager.save(); });
+            i.addEventListener('input', () => { i.classList.remove('ref-highlight'); updateS(item); window.storageManager.save(); });
         }); 
     });
     const d = document.getElementById('default-date'); if (d && !d.value) d.value = new Date().toISOString().split('T')[0];
