@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.14)</title>
+    <title>被災状況調査アプリ (Phase 6.16)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -155,7 +155,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <!-- 管理タブ：管理項目・調査を実施した者・端末設定 -->
             <section id="content-manage" class="tab-content"><div class="survey-app-ui">
 
-    <!-- 現場管理（Step2-⑥ 段階2：現場リストUI） -->
+    <!-- 現場管理（Phase 6.16：新規作成・JZIP読み込み・各現場のJZIP出力/削除） -->
     <div class="accordion-item" data-group="site-manage">
         <button class="accordion-header">
             <div class="header-label"><span class="main-title">現場管理</span><span class="summary-text" id="site-manage-summary">現場リスト</span></div>
@@ -163,9 +163,14 @@ canvas.sketch-canvas { display: block; width: 100%; }
         </button>
         <div class="accordion-content">
             <p style="font-size:0.78rem; color:#888; margin:0 0 8px 0;">
-                現場を切り替える・新規に作成すると、その時点の入力内容を保存するか確認します。
+                現場を切り替えると、未保存の変更があれば確認します。JZIP出力は、保存済みの内容だけが対象です
+                （今開いている現場に未保存の変更がある場合は、先に「保存」タブで保存してください）。
             </p>
-            <button type="button" class="btn-main" style="margin-bottom:10px;" onclick="siteManager.promptCreateSite()">＋ 新規現場を作成</button>
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+                <button type="button" class="btn-main" style="flex:1;" onclick="siteManager.promptCreateSite()">＋ 新規現場を作成</button>
+                <input type="file" id="import-jzip" accept=".zip" style="display:none" onchange="appControl.importZip(this)">
+                <button type="button" class="btn-sub" style="flex:1;" onclick="document.getElementById('import-jzip').click()">JZIP読み込み</button>
+            </div>
             <div id="site-list-container"></div>
         </div>
     </div>
@@ -605,12 +610,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.14</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.16</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.14</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.16</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -629,8 +634,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.14)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.14 (保存確認を2択から3択に修正：現場を移動しない選択肢を追加)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.16)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.16 (保存・JZIP入出力の再整理：現地調査タブ「保存」・管理タブ「現場管理」に役割分担)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -972,6 +977,48 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>実装:</strong> siteManager.confirmAndProceed()は、続行時に呼ぶ関数(afterFn)を_pendingProceedFnに保持したままモーダルを開くだけにし、実際の続行はモーダルのボタン（proceedWithSave/proceedWithoutSave）が押されたときに呼び出す。cancelProceed()は_pendingProceedFnを破棄してモーダルを閉じるだけで、何も実行しない。</li>
         </ul>
 
+        <h4>5.26 複数現場管理 段階4：JZIP入出力を現場単位に整理（Phase 6.15）</h4>
+        <ul>
+            <li><strong>エクスポート（保存する側）:</strong> 大枠は変更なし（画面＝今開いている現場の内容をそのまま書き出す）。JZIP保存は明示的な保存操作という位置づけのため、zip生成と同時にsiteManager.commitCurrentToSite()を呼び、現在の現場データにも確定保存するようにした。</li>
+            <li><strong>インポート（読み込む側）：設計変更:</strong> 従来は読み込んだ内容で画面を上書きしていたが、これを「新しい現場として現場リストに追加する」動きに変更した。今開いている画面（今の現場）の内容には一切触れない。
+                <ul>
+                    <li>新しいsiteIdを採番し、現場名は整理番号(ref_no)、無ければ災害番号(disaster_no)、どちらも無ければ「(JZIP読み込み)」とする。</li>
+                    <li>survey_sitesに新しい現場レコードとして追加する。</li>
+                    <li>写真本体は、この新しいsiteIdに紐づけてIndexedDBへ同期する（photoStorage.syncAllにsiteIdを明示的に渡す）。</li>
+                    <li>読み込み後は現場一覧を再描画するだけで、自動的にはその現場へ切り替えない。切り替えるかどうかは現場管理の一覧からユーザー自身が選ぶ（誤って今の作業内容を巻き込まないようにするため）。</li>
+                </ul>
+            </li>
+            <li>これで改修指示書Step2-⑥（複数現場管理の再設計）の段階1〜4がすべて完了した。</li>
+        </ul>
+
+        <h4>5.27 保存・JZIP入出力の再整理（Phase 6.16）</h4>
+        <ul>
+            <li><strong>背景:</strong> 段階4までで複数現場管理は動くようになったが、「今開いている現場は画面から出力・他の現場は保存済みデータから出力」という食い違いや、「今の入力を確定させるだけの手段が無い」という課題が壁打ちで見えてきた。ここで役割分担を再整理した。</li>
+            <li><strong>現地調査タブ「保存」（旧・入出力データ操作）:</strong>
+                <ul>
+                    <li>JZIPの入出力は置かない。上書き保存・別名保存の2つのボタンのみ。</li>
+                    <li>上書き保存（siteManager.overwriteSave）：現在の現場データへcommitCurrentToSite()。現場がまだ無ければ新規作成に回す。</li>
+                    <li>別名保存（siteManager.saveAsNew）：名前を聞いてから新しい現場として保存し、以後の編集はそちらの現場に対して続く（同名の現場があっても問題ない。現場の識別子はsiteIdであり、現場名は表示用のラベルにすぎない）。</li>
+                    <li>アコーディオン見出し横の表示が「保存済み」「未保存」「現場未選択」に切り替わる（災害番号の常時表示と同じ発想）。</li>
+                </ul>
+            </li>
+            <li><strong>管理タブ「現場管理」:</strong>
+                <ul>
+                    <li>＋新規現場を作成・JZIP読み込みを横並びで配置。</li>
+                    <li>現在編集中の現場を一番上に表示し、「（現在編集中）」の文言も添える。</li>
+                    <li>各現場の行に「JZIP出力」「削除」ボタンを配置。JZIP出力は保存済みのデータ（survey_sites・IndexedDB）だけを対象とし、今開いている現場に未保存の変更がある場合は出力を拒否し、先に保存タブで保存するよう案内する。</li>
+                    <li>削除は確認のうえ、現場データ（survey_sites）とIndexedDB（photoStorage.clearAllForSite）の両方を消す。今開いている現場自体を削除した場合は、画面を空の状態に戻す。</li>
+                </ul>
+            </li>
+            <li><strong>未保存判定（siteManager.hasUnsavedChanges）:</strong> イベントで逐一フラグを立てる方式ではなく、getFormData()・photoApp.photosの現在値を、保存済みの現場レコード（formData・photoList）とその都度JSON文字列で比較する方式にした。写真の追加・削除、地図の描画、白紙メモの編集など、個別に変更イベントを拾いきれない操作があっても取りこぼさない。</li>
+            <li><strong>既知の制限（Phase 6.16時点）:</strong>
+                <ul>
+                    <li>アコーディオン見出しの「保存済み/未保存」表示は、テキスト系フィールドの入力イベントで更新している。写真の追加・削除や地図・白紙メモの編集直後は表示の更新がやや遅れる場合があるが、実際の判定（hasUnsavedChanges）自体は比較方式のため常に正確で、JZIP出力の可否判定には影響しない。</li>
+                    <li>現場ごとのJZIP出力のファイル名構成（fn1〜5）は、端末設定の現在の選択をそのまま使う。現場ごとに異なるファイル名ルールは持たない。</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -1029,7 +1076,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>済：段階1 データの持ち方・保存の仕組み（siteManager・photoStorageのsiteId対応）</li>
                     <li>済：段階2 現場リストのUI（一覧・新規作成・切替）（Phase 6.12）</li>
                     <li>済：段階3 管理項目の参照ボタン（Phase 6.13。設計は7.1参照）。保存確認は3択に修正（Phase 6.14）</li>
-                    <li>残：段階4 JZIP入出力を現場単位に整理</li>
+                    <li>済：段階4 JZIP入出力を現場単位に整理（Phase 6.15）。⑥複数現場管理はこれで一区切り。</li>
                 </ul>
             </li>
             <li>iPhone実機での動作確認（部会お披露目時）</li>
@@ -5483,6 +5530,7 @@ window.siteManager = {
         this.confirmAndProceed(() => {
             this.loadSiteIntoForm(siteId);
             this.renderSiteList();
+            this.updateSaveStatusLabel();
             window.uiHelper && uiHelper.showToast('現場を切り替えました');
         });
     },
@@ -5510,6 +5558,11 @@ window.siteManager = {
             const d = document.getElementById('default-date');
             if (d) d.value = new Date().toISOString().split('T')[0];
             this.setCurrentSiteId(siteId);
+            // 空にしたDOMの状態を、作ったばかりの現場データへそのまま確定保存しておく
+            // （そうしないとgetFormData()が返す「全項目が空文字」の形とformData:{}が
+            //   一致せず、作成直後なのに「未保存」と表示されてしまうため）
+            this.commitCurrentToSite();
+            this.updateSaveStatusLabel();
             this.renderSiteList();
             window.uiHelper && uiHelper.showToast('新しい現場「' + name.trim() + '」を作成しました');
         });
@@ -5521,6 +5574,7 @@ window.siteManager = {
         return d.innerHTML;
     },
 
+    // 【Phase 6.16】現在の現場を一番上に表示し、各行にJZIP出力・削除ボタンを追加する
     renderSiteList() {
         const container = document.getElementById('site-list-container');
         if (!container) return;
@@ -5530,14 +5584,151 @@ window.siteManager = {
             container.innerHTML = '<p style="font-size:0.85rem; color:#888;">現場がまだありません。「＋ 新規現場を作成」から始めてください。</p>';
             return;
         }
-        container.innerHTML = sites.slice().reverse().map(s => {
+        const sorted = sites.slice().sort((a, b) => {
+            if (a.siteId === currentId) return -1;
+            if (b.siteId === currentId) return 1;
+            return (b.createdAt || '').localeCompare(a.createdAt || '');
+        });
+        container.innerHTML = sorted.map(s => {
             const active = s.siteId === currentId;
-            return `<div onclick="siteManager.switchToSite('${s.siteId}')"
-                style="padding:10px; border:1px solid ${active ? '#3498db' : '#ddd'}; border-radius:4px; margin-bottom:6px; cursor:pointer; background:${active ? '#eaf4fb' : '#fff'};">
-                <div style="font-weight:bold; font-size:0.9rem;">${active ? '● ' : '○ '}${this._escapeHtml(s.siteName)}</div>
-                <div style="font-size:0.75rem; color:#888;">${this._escapeHtml(s.siteId)}</div>
+            return `<div style="padding:10px; border:1px solid ${active ? '#3498db' : '#ddd'}; border-radius:4px; margin-bottom:6px; background:${active ? '#eaf4fb' : '#fff'};">
+                <div onclick="siteManager.switchToSite('${s.siteId}')" style="cursor:pointer;">
+                    <div style="font-weight:bold; font-size:0.9rem;">${active ? '● ' : '○ '}${this._escapeHtml(s.siteName)}${active ? '（現在編集中）' : ''}</div>
+                    <div style="font-size:0.75rem; color:#888;">${this._escapeHtml(s.siteId)}</div>
+                </div>
+                <div style="display:flex; gap:6px; margin-top:6px;">
+                    <button type="button" class="btn-sub" style="flex:1; padding:6px; font-size:0.78rem;"
+                        onclick="event.stopPropagation(); siteManager.exportSiteZip('${s.siteId}')">JZIP出力</button>
+                    <button type="button" class="btn-sub" style="flex:1; padding:6px; font-size:0.78rem; background:#c0392b;"
+                        onclick="event.stopPropagation(); siteManager.deleteSite('${s.siteId}')">削除</button>
+                </div>
             </div>`;
         }).join('');
+    },
+
+    // ---- 段階5（保存の整理）：未保存かどうかの判定 ----
+    // イベントで逐一フラグを立てる方式ではなく、「今の画面の内容」と「最後に保存された
+    // 現場データ」を都度比較する方式にした。写真の追加・地図描画・白紙メモ等、
+    // 個別に変更イベントを拾いきれない操作があっても、比較方式なら取りこぼしがない。
+    hasUnsavedChanges() {
+        const currentId = this.getCurrentSiteId();
+        if (!currentId) return false;
+        const site = this.getSite(currentId);
+        if (!site) return true;
+        const currentForm = JSON.stringify(window.appControl.getFormData());
+        const savedForm = JSON.stringify(site.formData || {});
+        if (currentForm !== savedForm) return true;
+        const currentPhotos = JSON.stringify(window.photoApp.photos.map(p => ({
+            memo: p.memo, tag: p.tag, azimuth: p.azimuth, lat: p.lat, lng: p.lng,
+            gpsAccuracy: p.gpsAccuracy, gpsFixed: p.gpsFixed
+        })));
+        const savedPhotos = JSON.stringify(site.photoList || []);
+        return currentPhotos !== savedPhotos;
+    },
+
+    updateSaveStatusLabel() {
+        const el = document.getElementById('save-status-summary');
+        if (!el) return;
+        if (!this.getCurrentSiteId()) {
+            el.textContent = '現場未選択';
+            el.classList.remove('filled'); el.classList.remove('empty');
+            return;
+        }
+        const dirty = this.hasUnsavedChanges();
+        el.textContent = dirty ? '未保存' : '保存済み';
+        el.classList.toggle('empty', dirty);
+        el.classList.toggle('filled', !dirty);
+    },
+
+    // ---- 保存（現地調査タブ「保存」アコーディオン） ----
+    overwriteSave() {
+        if (!this.getCurrentSiteId()) { this.promptCreateSite(); return; }
+        this.commitCurrentToSite();
+        this.updateSaveStatusLabel();
+        this.renderSiteList();
+        window.uiHelper && uiHelper.showToast('上書き保存しました');
+    },
+    saveAsNew() {
+        const name = prompt('保存する現場名を入力してください');
+        if (name === null) return;
+        if (!name.trim()) { alert('現場名を入力してください'); return; }
+        const siteId = this.createSite(name);
+        this.setCurrentSiteId(siteId);
+        this.commitCurrentToSite(); // 今の画面の内容を、新しく作った現場へそのまま保存する
+        this.updateSaveStatusLabel();
+        this.renderSiteList();
+        window.uiHelper && uiHelper.showToast('別名で保存しました：' + name.trim());
+    },
+
+    // ---- 現場ごとのJZIP出力（保存済みデータのみ対象。未保存の変更があれば拒否する） ----
+    _buildFn(d) {
+        const p = [];
+        ['fn1','fn2','fn3','fn4','fn5'].forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            const v = sel.value;
+            if (v !== 'none') p.push((d[v] || 'null').toString().replace(/-/g, ''));
+        });
+        return p.join('_') || 'survey';
+    },
+    async exportSiteZip(siteId) {
+        if (siteId === this.getCurrentSiteId() && this.hasUnsavedChanges()) {
+            alert('未保存の変更があります。先に「保存」タブ（現地調査）で保存してください。');
+            return;
+        }
+        const site = this.getSite(siteId);
+        if (!site) return;
+        const d = JSON.parse(JSON.stringify(site.formData || {}));
+        const zip = new JSZip();
+        const folder = zip.folder('photos');
+        const photoRecords = await window.photoStorage.getAllForSite(siteId);
+        photoRecords.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
+        d.photoList = (site.photoList || []).map((p, i) => {
+            const fn = `photo_${i}.jpg`;
+            const rec = photoRecords[i];
+            if (rec && rec.dataUrl) {
+                const jpegData = window.appControl._embedExif({ ...p, dataUrl: rec.dataUrl });
+                folder.file(fn, jpegData.split(',')[1], { base64: true });
+            }
+            return {
+                fileName: fn, memo: p.memo || "", tag: p.tag || "補足",
+                azimuth: p.azimuth ?? null, lat: p.lat ?? null, lng: p.lng ?? null,
+                gpsAccuracy: p.gpsAccuracy ?? null, gpsFixed: p.gpsFixed ?? false
+            };
+        });
+        zip.file('survey_data.json', JSON.stringify(d, null, 2));
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = this._buildFn(d) + '.zip';
+        a.click();
+    },
+
+    // ---- 現場の削除 ----
+    deleteSite(siteId) {
+        if (!confirm('この現場を削除します。元に戻せません。よろしいですか？')) return;
+        const sites = this.getSites().filter(s => s.siteId !== siteId);
+        this.saveSites(sites);
+        window.photoStorage && window.photoStorage.clearAllForSite(siteId);
+        if (this.getCurrentSiteId() === siteId) {
+            // 今開いている現場自体を削除した場合、画面を空にする
+            this.setCurrentSiteId(null);
+            document.querySelectorAll('.accordion-item input, .accordion-item select, .accordion-item textarea').forEach(el => {
+                if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return;
+                if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
+            });
+            if (window.mapApp && mapApp.allDrawnItems) { mapApp.allDrawnItems.clearLayers(); mapApp.updateMapSummary(); }
+            if (window.sketchApp) { sketchApp.elements = []; if (sketchApp.redrawAll) sketchApp.redrawAll(); }
+            window.photoApp.photos = [];
+            window.photoApp.currentIndex = -1;
+            window.photoApp.render();
+            window.photoApp.updateHeaderSummary();
+            window.syncDeptName && window.syncDeptName('');
+            window.syncDisasterNoTab && window.syncDisasterNoTab('');
+        }
+        this.renderSiteList();
+        this.updateSaveStatusLabel();
+        window.uiHelper && uiHelper.showToast('現場を削除しました');
     },
 
     // ---- 段階3：管理項目の参照ボタン（設計は7.1参照） ----
@@ -5850,6 +6041,8 @@ window.appControl = {
             a.download = this.getFn() + ".zip";
             a.click();
         });
+        // 【Phase 6.15】JZIP保存は明示的な保存操作のため、現在の現場データにも確定保存する
+        if (window.siteManager) window.siteManager.commitCurrentToSite();
     },
 
     // JPEG の dataUrl に GPS・方位 EXIF を書き込んで返す
@@ -5911,36 +6104,20 @@ window.appControl = {
         a.download = this.getFn() + ".csv";
         a.click();
     },
+    // 【Phase 6.15】JZIP読み込みは、今開いている画面を上書きするのではなく、
+    // 新しい現場として現場リストに追加する動きに変更した。今の画面（今開いている現場）の
+    // 内容には一切触れない。読み込んだ現場に切り替えるかどうかは、現場管理から選んでもらう。
     importZip(input) {
         const file = input.files[0]; if (!file) return;
         JSZip.loadAsync(file).then(async zip => {
             const json = JSON.parse(await zip.file("survey_data.json").async("string"));
-            Object.keys(json).forEach(k => {
-                const el = document.querySelector(`[name="${k}"]`);
-                if (el) { el.value = json[k]; el.dispatchEvent(new Event('input')); }
-            });
-            mapApp.init(); mapApp.allDrawnItems.clearLayers();
-            const restore = (geom, isM) => {
-                if (!geom) return;
-                L.geoJSON(geom, {
-                    pointToLayer: (feature, latlng) => (isM && !feature.properties.isText) ? L.circle(latlng, { radius: 10, color: '#ff0000', weight: 6, fillOpacity: 0 }) : L.marker(latlng)
-                }).eachLayer(l => {
-                    if(!l.options) l.options = {}; l.options.isMain = isM;
-                    if (l.feature.properties && l.feature.properties.isText) {
-                        mapApp.allDrawnItems.addLayer(mapApp.createTextLayer(l.getLatLng(), l.feature.properties.textVal));
-                    } else { 
-                        if (l.setStyle && !(l instanceof L.Circle)) { l.setStyle({ color: isM ? '#ff0000' : '#0000ff', weight: 6, opacity: 0.7 }); }
-                        if (isM && l instanceof L.Marker) { l.options.icon = new L.Icon.Default(); l.on('add', () => { if(l._icon) l._icon.classList.add('marker-red'); }); } 
-                        mapApp.allDrawnItems.addLayer(l); 
-                    }
-                });
-            };
-            restore(json.mainGeom, true); restore(json.subGeom, false); mapApp.updateMapSummary();
-            photoApp.photos = [];
+
+            const photoList = [];
+            const dataUrls = [];
             for (const p of json.photoList) {
                 const b64 = await zip.file(`photos/${p.fileName}`).async("base64");
-                photoApp.photos.push({
-                    dataUrl:     `data:image/jpeg;base64,${b64}`,
+                dataUrls.push(`data:image/jpeg;base64,${b64}`);
+                photoList.push({
                     memo:        p.memo        || '',
                     tag:         p.tag         || '補足',
                     azimuth:     p.azimuth     ?? null,
@@ -5950,11 +6127,25 @@ window.appControl = {
                     gpsFixed:    p.gpsFixed    ?? false
                 });
             }
-            photoApp.currentIndex = 0; photoApp.render(); photoApp.updateHeaderSummary();
-            // IndexedDBにも同期しておく（アプリが落ちても読み込んだ写真が復元できるように）
-            window.photoStorage && window.photoStorage.syncAll(photoApp.photos);
-            storageManager.save(); 
-            uiHelper.showToast("インポート完了");
+
+            const siteId = window.siteManager.generateSiteId();
+            const siteName = json.ref_no || json.disaster_no || '(JZIP読み込み)';
+            const sites = window.siteManager.getSites();
+            sites.push({
+                siteId, siteName, createdAt: new Date().toISOString(),
+                formData: json, photoList
+            });
+            window.siteManager.saveSites(sites);
+
+            // 写真本体はこの新しい現場のsiteIdに紐づけてIndexedDBへ保存する
+            // （syncAllはphotos配列のdataUrlだけを見るので、簡易オブジェクトの配列で渡す）
+            window.photoStorage && window.photoStorage.syncAll(
+                dataUrls.map(u => ({ dataUrl: u })), siteId
+            );
+
+            window.siteManager.renderSiteList();
+            input.value = "";
+            uiHelper.showToast(`現場「${siteName}」として読み込みました（現場管理から切り替えてください）`);
         });
     },
     // ---- 初期値をLocalStorageに保存 ----
@@ -6178,7 +6369,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     document.querySelectorAll('.accordion-item').forEach(item => { 
         item.querySelectorAll('input, select, textarea').forEach(i => {
-            i.addEventListener('input', () => { i.classList.remove('ref-highlight'); updateS(item); window.storageManager.save(); });
+            i.addEventListener('input', () => { i.classList.remove('ref-highlight'); updateS(item); window.storageManager.save(); window.siteManager && siteManager.updateSaveStatusLabel(); });
         }); 
     });
     const d = document.getElementById('default-date'); if (d && !d.value) d.value = new Date().toISOString().split('T')[0];
@@ -6191,6 +6382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.siteManager.migrateIfNeeded();
     window.siteManager.renderSiteList();
     window.storageManager.load();
+    window.siteManager.updateSaveStatusLabel();
     document.querySelectorAll('.accordion-item').forEach(item => updateS(item));
     uiHelper.switchMapMode('map');
     // GPSはアプリ起動時から取り始める
