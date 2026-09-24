@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.13)</title>
+    <title>被災状況調査アプリ (Phase 6.14)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -213,6 +213,21 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <div id="reference-site-pick-list" style="max-height:300px; overflow-y:auto; margin-top:10px;"></div>
             <div class="custom-modal-actions">
                 <button type="button" class="btn-sub" onclick="siteManager.closeSitePickModal()">戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 現場の切替・新規作成の前に出す、保存確認モーダル（3択：変更を保存／変更を保存せず破棄／現場を移動しない） -->
+    <div id="modal-save-confirm" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">今の入力内容をどうしますか？</div>
+            <p style="font-size:0.85rem; color:#555; margin-top:4px;">現場を切り替える・新規作成する前に選んでください。</p>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                <button type="button" class="btn-main" onclick="siteManager.proceedWithSave()">変更を保存</button>
+                <button type="button" class="btn-sub" style="background:#c0392b;" onclick="siteManager.proceedWithoutSave()">変更を保存せず破棄</button>
+            </div>
+            <div class="custom-modal-actions">
+                <button type="button" class="btn-sub" onclick="siteManager.cancelProceed()">現場を移動しない</button>
             </div>
         </div>
     </div>
@@ -590,12 +605,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.13</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.14</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.13</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.14</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -614,8 +629,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.13)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.13 (Step2-⑥ 段階3：管理項目の参照ボタン)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.14)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.14 (保存確認を2択から3択に修正：現場を移動しない選択肢を追加)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -944,6 +959,19 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>同期表示の扱い:</strong> dept_name・disaster_noはinputイベント経由（inline oninput）で同期表示（syncDeptName・syncDisasterNoTab）される設計だが、参照適用時はinputイベントを発火させない方針のため、_applyReferenceFields()内でこの2つの同期関数を明示的に呼んでいる。</li>
         </ul>
 
+        <h4>5.25 保存確認を2択から3択に修正（Phase 6.14）</h4>
+        <ul>
+            <li><strong>不具合の内容:</strong> Phase 6.12で実装した現場切替・新規作成前の確認は、ブラウザ標準のconfirm()（OK/キャンセルの2択）を使っていたため、「保存する」「保存しない」のどちらを選んでも移動自体は必ず行われてしまい、「やっぱり移動しない（このまま留まる）」を選べなかった。</li>
+            <li><strong>対応:</strong> 専用モーダル（#modal-save-confirm）に置き換え、3つのボタンを用意した：
+                <ul>
+                    <li>「変更を保存」：commitCurrentToSite()で保存してから移動する</li>
+                    <li>「変更を保存せず破棄」：保存せずに移動する</li>
+                    <li>「現場を移動しない」：モーダルを閉じるだけで、切替・新規作成自体を取りやめる</li>
+                </ul>
+            </li>
+            <li><strong>実装:</strong> siteManager.confirmAndProceed()は、続行時に呼ぶ関数(afterFn)を_pendingProceedFnに保持したままモーダルを開くだけにし、実際の続行はモーダルのボタン（proceedWithSave/proceedWithoutSave）が押されたときに呼び出す。cancelProceed()は_pendingProceedFnを破棄してモーダルを閉じるだけで、何も実行しない。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -1000,7 +1028,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                 <ul>
                     <li>済：段階1 データの持ち方・保存の仕組み（siteManager・photoStorageのsiteId対応）</li>
                     <li>済：段階2 現場リストのUI（一覧・新規作成・切替）（Phase 6.12）</li>
-                    <li>済：段階3 管理項目の参照ボタン（Phase 6.13。設計は7.1参照）</li>
+                    <li>済：段階3 管理項目の参照ボタン（Phase 6.13。設計は7.1参照）。保存確認は3択に修正（Phase 6.14）</li>
                     <li>残：段階4 JZIP入出力を現場単位に整理</li>
                 </ul>
             </li>
@@ -5418,16 +5446,36 @@ window.siteManager = {
 
     // ---- ここからUI操作（段階2） ----
 
-    // 現場を切り替える／新規作成する前に、今の内容を保存するか確認してから続行する。
-    // OK=保存してから続行、キャンセル=保存せず続行（どちらでも移動自体は行う）。
+    // 【Phase 6.14修正】現場を切り替える／新規作成する前に、専用モーダルで3択を出す。
+    // 「保存して移動」「保存せず移動」「やめる（このまま留まる）」。
+    // ブラウザ標準のconfirm()は2択（OK/キャンセル）しか出せず、「移動自体をやめる」という
+    // 選択肢が作れなかったため、専用モーダル（#modal-save-confirm）に変更した。
     // 現在の現場がまだ無い場合（初回等）は確認せずそのまま続行する。
+    _pendingProceedFn: null,
     confirmAndProceed(afterFn) {
-        if (this.getCurrentSiteId()) {
-            if (confirm('今の入力内容を保存してから移動しますか？\n（キャンセルすると保存せずに移動します）')) {
-                this.commitCurrentToSite();
-            }
-        }
-        afterFn();
+        if (!this.getCurrentSiteId()) { afterFn(); return; }
+        this._pendingProceedFn = afterFn;
+        const m = document.getElementById('modal-save-confirm');
+        if (m) m.style.display = 'flex'; else afterFn(); // モーダルが無い場合のフォールバック
+    },
+    proceedWithSave() {
+        this.commitCurrentToSite();
+        this._closeSaveConfirmModal();
+        const fn = this._pendingProceedFn; this._pendingProceedFn = null;
+        if (fn) fn();
+    },
+    proceedWithoutSave() {
+        this._closeSaveConfirmModal();
+        const fn = this._pendingProceedFn; this._pendingProceedFn = null;
+        if (fn) fn();
+    },
+    cancelProceed() {
+        this._closeSaveConfirmModal();
+        this._pendingProceedFn = null;
+    },
+    _closeSaveConfirmModal() {
+        const m = document.getElementById('modal-save-confirm');
+        if (m) m.style.display = 'none';
     },
 
     switchToSite(siteId) {
