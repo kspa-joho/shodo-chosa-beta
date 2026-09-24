@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.16)</title>
+    <title>被災状況調査アプリ (Phase 6.17)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -301,10 +301,24 @@ canvas.sketch-canvas { display: block; width: 100%; }
                 </label>
             </div>
 
-            <button type="button" class="btn-main" onclick="appControl.exportZip()">入力データ保存（JZIP形式）</button>
-            <input type="file" id="import-jzip" accept=".zip" style="display:none" onchange="appControl.importZip(this)">
-            <button type="button" class="btn-sub" onclick="document.getElementById('import-jzip').click()" style="margin-bottom:10px;">JZIP読み込み</button>
-            <button type="button" class="btn-sub" onclick="appControl.exportCSV()" style="margin-bottom:10px;">日報用CSVエクスポート（写真なし）</button>
+            <!-- 全現場一括JZIP出力（Phase 6.17） -->
+            <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666;">全現場一括JZIP出力</label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer; margin-top:6px;">
+                    <input type="checkbox" id="bulk-export-bundle" checked style="width:18px; height:18px;">
+                    まとめて1つのZIPにする
+                </label>
+                <p style="font-size:0.7rem; color:#999; margin:4px 0 8px 0;">
+                    オフにすると現場ごとに個別のZIPファイルとしてダウンロードします。ブラウザによっては複数ファイルの連続ダウンロードがブロックされる場合があります。
+                </p>
+                <div id="bulk-export-site-list" style="max-height:200px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; padding:6px; margin-bottom:8px; background:#fff;"></div>
+                <div style="display:flex; gap:6px; margin-bottom:8px;">
+                    <button type="button" class="btn-sub" style="flex:1; font-size:0.78rem;" onclick="siteManager.selectAllForBulkExport(true)">全て選択</button>
+                    <button type="button" class="btn-sub" style="flex:1; font-size:0.78rem;" onclick="siteManager.selectAllForBulkExport(false)">全て解除</button>
+                </div>
+                <button type="button" class="btn-main" onclick="siteManager.bulkExportSelected()">選択した現場をまとめてJZIP出力</button>
+                <div id="bulk-export-progress" style="font-size:0.8rem; color:#555; margin-top:6px; display:none;"></div>
+            </div>
             <hr style="margin: 15px 0;">
             <button type="button" class="btn-sub" style="background:#e67e22; margin-bottom:6px;"
                 onclick="appControl.saveDefaults()">初期値として保存</button>
@@ -589,17 +603,17 @@ canvas.sketch-canvas { display: block; width: 100%; }
         </div>
     </div>
 
-    <!-- 入出力（JZIP入出力・クリア） -->
+    <!-- 保存（Phase 6.16：現場データの上書き保存・別名保存。JZIPの入出力は現場管理タブへ移動） -->
     <div class="accordion-item" data-group="io-area">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">入出力データ操作</span><span class="summary-text">データ操作</span></div>
+            <div class="header-label"><span class="main-title">保存</span><span class="summary-text filled" id="save-status-summary">保存済み</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
-            <button type="button" class="btn-main" onclick="appControl.exportZip()">入力データ保存（JZIP形式）</button>
-            <input type="file" id="import-jzip" accept=".zip" style="display:none" onchange="appControl.importZip(this)">
-            <button type="button" class="btn-sub" onclick="document.getElementById('import-jzip').click()" style="margin-bottom:10px;">JZIP読み込み</button>
-            <button type="button" class="btn-sub" onclick="appControl.exportCSV()" style="margin-bottom:10px;">日報用CSVエクスポート（写真なし）</button>
+            <button type="button" class="btn-main" style="margin-bottom:8px;" onclick="siteManager.overwriteSave()">上書き保存</button>
+            <button type="button" class="btn-sub" style="margin-bottom:10px;" onclick="siteManager.saveAsNew()">別名保存</button>
+            <hr style="margin: 15px 0;">
+            <button type="button" class="btn-sub" onclick="appControl.exportCSV()">日報用CSVエクスポート（写真なし）</button>
         </div>
     </div>
 </div>
@@ -610,12 +624,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.16</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.17</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.16</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.17</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -634,8 +648,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.16)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.16 (保存・JZIP入出力の再整理：現地調査タブ「保存」・管理タブ「現場管理」に役割分担)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.17)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.17 (前回の反映漏れ修正・全現場一括JZIP出力を追加)</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -1017,6 +1031,21 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>現場ごとのJZIP出力のファイル名構成（fn1〜5）は、端末設定の現在の選択をそのまま使う。現場ごとに異なるファイル名ルールは持たない。</li>
                 </ul>
             </li>
+        </ul>
+
+        <h4>5.28 前回の反映漏れの修正・全現場一括JZIP出力（Phase 6.17）</h4>
+        <ul>
+            <li><strong>前回（Phase 6.16）の反映漏れ修正:</strong> introduction.htmlの入出力データ操作→「保存」への置き換えが、パッチスクリプトの不具合で実際には反映されていなかった。今回、直接str_replaceで確実に反映したうえで、あわせてmanage.html側にも同じ「入出力データ操作」という名前の別アコーディオン（ファイル名構成・写真設定等を持つ、現場管理とは別物）が残っており、そちらには古いJZIP保存/読み込みボタンと、現場管理タブに移したはずのJZIP読み込みボタンが重複していたことも判明したため、あわせて整理した（古いボタン・重複するCSV出力ボタンを削除）。</li>
+            <li><strong>全現場一括JZIP出力（manage.html・入出力データ操作）:</strong>
+                <ul>
+                    <li>「まとめて1つのZIPにする」チェック（デフォルトON）。ONの場合、外側の1つのZIPの中に現場ごとのフォルダ（survey_data.json＋photos/）を作る。1回のダウンロード操作で完結するため、ブラウザの複数ファイル連続ダウンロードのブロックを回避できる。</li>
+                    <li>OFFの場合は現場ごとに個別のZIPファイルを連続でダウンロードする。1件ごとに400ms待つことでブラウザのブロックをできるだけ避けるが、それでも初回はブラウザから複数ダウンロードの許可を求められる場合がある旨をチェック直下に注記した。</li>
+                    <li>現場一覧をチェックボックス形式で表示し、「全て選択」「全て解除」・出力対象を絞れる（改修指示書の「現場をリスト化しチェックボックス等で選択してまとめて保存」に対応）。</li>
+                    <li>進捗表示（#bulk-export-progress）：「n/m件目を処理中」のように表示し、古い端末での処理時間に対する不安を減らす。</li>
+                    <li>今開いている現場が選択対象に含まれ、かつ未保存の変更がある場合は、一括出力全体を実行前に拒否する（個別出力と同じ考え方）。</li>
+                </ul>
+            </li>
+            <li><strong>共通化:</strong> 1現場ぶんのZIP内容（survey_data.json・photos/）を組み立てる処理を_populateZipFolderForSite()として切り出し、個別出力（exportSiteZip）・一括出力（bundle時）の両方で共用する。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -5576,6 +5605,7 @@ window.siteManager = {
 
     // 【Phase 6.16】現在の現場を一番上に表示し、各行にJZIP出力・削除ボタンを追加する
     renderSiteList() {
+        this.renderBulkExportSiteList(); // 一括出力側の一覧も常に一緒に更新する
         const container = document.getElementById('site-list-container');
         if (!container) return;
         const sites = this.getSites();
@@ -5671,16 +5701,11 @@ window.siteManager = {
         });
         return p.join('_') || 'survey';
     },
-    async exportSiteZip(siteId) {
-        if (siteId === this.getCurrentSiteId() && this.hasUnsavedChanges()) {
-            alert('未保存の変更があります。先に「保存」タブ（現地調査）で保存してください。');
-            return;
-        }
-        const site = this.getSite(siteId);
-        if (!site) return;
+    // 1現場ぶんのsurvey_data.json・photosを、渡されたzip（またはフォルダ）に書き込む共通処理。
+    // 個別出力(exportSiteZip)と一括出力(bulkExportSelected)の「まとめる」モードの両方から使う。
+    async _populateZipFolderForSite(target, siteId, site) {
         const d = JSON.parse(JSON.stringify(site.formData || {}));
-        const zip = new JSZip();
-        const folder = zip.folder('photos');
+        const folder = target.folder('photos');
         const photoRecords = await window.photoStorage.getAllForSite(siteId);
         photoRecords.sort((a, b) => (a.index ?? 0) - (b.index ?? 0));
         d.photoList = (site.photoList || []).map((p, i) => {
@@ -5696,12 +5721,86 @@ window.siteManager = {
                 gpsAccuracy: p.gpsAccuracy ?? null, gpsFixed: p.gpsFixed ?? false
             };
         });
-        zip.file('survey_data.json', JSON.stringify(d, null, 2));
+        target.file('survey_data.json', JSON.stringify(d, null, 2));
+        return d;
+    },
+    async exportSiteZip(siteId) {
+        if (siteId === this.getCurrentSiteId() && this.hasUnsavedChanges()) {
+            alert('未保存の変更があります。先に「保存」タブ（現地調査）で保存してください。');
+            return;
+        }
+        const site = this.getSite(siteId);
+        if (!site) return;
+        const zip = new JSZip();
+        const d = await this._populateZipFolderForSite(zip, siteId, site);
         const blob = await zip.generateAsync({ type: 'blob' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = this._buildFn(d) + '.zip';
         a.click();
+    },
+
+    // ---- 一括出力（Phase 6.17）：現場を選んでまとめて出力する ----
+    renderBulkExportSiteList() {
+        const container = document.getElementById('bulk-export-site-list');
+        if (!container) return;
+        const sites = this.getSites();
+        if (sites.length === 0) {
+            container.innerHTML = '<p style="font-size:0.8rem; color:#888; margin:0;">現場がありません。</p>';
+            return;
+        }
+        container.innerHTML = sites.slice().reverse().map(s => `
+            <label style="display:flex; align-items:center; gap:6px; padding:4px 0; font-size:0.82rem; cursor:pointer;">
+                <input type="checkbox" class="bulk-export-check" value="${s.siteId}" checked>
+                ${this._escapeHtml(s.siteName)}（${this._escapeHtml(s.siteId)}）
+            </label>`).join('');
+    },
+    selectAllForBulkExport(checked) {
+        document.querySelectorAll('.bulk-export-check').forEach(cb => cb.checked = checked);
+    },
+    async bulkExportSelected() {
+        const checked = Array.from(document.querySelectorAll('.bulk-export-check:checked')).map(cb => cb.value);
+        if (checked.length === 0) { alert('現場を1件以上選んでください'); return; }
+        if (checked.includes(this.getCurrentSiteId()) && this.hasUnsavedChanges()) {
+            alert('未保存の変更があります。先に「保存」タブ（現地調査）で保存してください。');
+            return;
+        }
+        const progress = document.getElementById('bulk-export-progress');
+        const bundle = document.getElementById('bulk-export-bundle').checked;
+        if (progress) { progress.style.display = 'block'; progress.textContent = '準備中...'; }
+
+        if (bundle) {
+            // 「まとめて1つのZIPにする」：外側のZIPの中に、現場ごとのフォルダを作る
+            const outerZip = new JSZip();
+            for (let i = 0; i < checked.length; i++) {
+                const siteId = checked[i];
+                const site = this.getSite(siteId);
+                if (!site) continue;
+                if (progress) progress.textContent = `${i + 1}/${checked.length}件目を処理中：${site.siteName}`;
+                const folderName = (this._buildFn(site.formData || {}) || site.siteName || siteId) + '_' + siteId;
+                const folder = outerZip.folder(folderName);
+                await this._populateZipFolderForSite(folder, siteId, site);
+            }
+            if (progress) progress.textContent = '圧縮中...';
+            const blob = await outerZip.generateAsync({ type: 'blob' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `survey_sites_${new Date().toISOString().split('T')[0]}.zip`;
+            a.click();
+        } else {
+            // オフ：現場ごとに個別のZIPを連続でダウンロードする。
+            // ブラウザの連続ダウンロードブロックを避けるため、1件ごとに少し間隔を空ける。
+            for (let i = 0; i < checked.length; i++) {
+                const siteId = checked[i];
+                if (progress) progress.textContent = `${i + 1}/${checked.length}件目を出力中...`;
+                await this.exportSiteZip(siteId);
+                await new Promise(r => setTimeout(r, 400));
+            }
+        }
+        if (progress) {
+            progress.textContent = '完了しました';
+            setTimeout(() => { progress.style.display = 'none'; }, 3000);
+        }
     },
 
     // ---- 現場の削除 ----
