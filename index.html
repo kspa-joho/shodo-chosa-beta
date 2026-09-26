@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.20)</title>
+    <title>被災状況調査アプリ (Phase 6.21)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -273,6 +273,30 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
+
+            <!-- 【Phase 6.21】出力ファイル名構成を、旧・入出力データ設定から設定の先頭へ移動 -->
+            <!-- 出力ファイル名構成 -->
+            <div class="filename-builder" style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666;">出力ファイル名構成</label>
+                <div style="display:flex; gap:2px; margin-top:5px;">
+                    <select class="fn-part" id="fn1">
+                        <option value="survey_date" selected>調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none">なし</option>
+                    </select>
+                    <select class="fn-part" id="fn2">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no" selected>災害番号</option><option value="none">なし</option>
+                    </select>
+                    <select class="fn-part" id="fn3">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
+                    </select>
+                    <select class="fn-part" id="fn4">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
+                    </select>
+                    <select class="fn-part" id="fn5">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
+                    </select>
+                </div>
+            </div>
+
             <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
                 <label style="font-size:0.7rem; color:#666;">写真の出力横幅（長辺）</label>
                 <div style="display:flex; align-items:center; gap:8px; margin-top:5px; margin-bottom:8px;">
@@ -300,40 +324,21 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     オフにすると、現場管理でJZIP出力を実行したとき、チェックした現場ごとに個別のZIPファイルとして連続ダウンロードします。ブラウザによっては複数ファイルの連続ダウンロードがブロックされる場合があります。
                 </p>
             </div>
+
+            <!-- 【Phase 6.21】地図キャッシュを開放するボタンを、旧・入出力データ設定から設定の末尾へ移動 -->
+            <hr style="margin: 15px 0;">
+            <button type="button" class="btn-sub" style="background:#7f8c8d;"
+                onclick="mapCacheManager.clearAllCache()">地図キャッシュを開放する</button>
         </div>
     </div>
 
-    <!-- 入出力データ設定 -->
+    <!-- 初期値の設定（旧・入出力データ設定。Phase 6.21で改名） -->
     <div class="accordion-item" data-group="io-area">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">入出力データ設定</span><span class="summary-text">データ操作</span></div>
+            <div class="header-label"><span class="main-title">初期値の設定</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
-
-            <!-- 出力ファイル名構成 -->
-            <div class="filename-builder" style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
-                <label style="font-size:0.7rem; color:#666;">出力ファイル名構成</label>
-                <div style="display:flex; gap:2px; margin-top:5px;">
-                    <select class="fn-part" id="fn1">
-                        <option value="survey_date" selected>調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none">なし</option>
-                    </select>
-                    <select class="fn-part" id="fn2">
-                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no" selected>災害番号</option><option value="none">なし</option>
-                    </select>
-                    <select class="fn-part" id="fn3">
-                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
-                    </select>
-                    <select class="fn-part" id="fn4">
-                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
-                    </select>
-                    <select class="fn-part" id="fn5">
-                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
-                    </select>
-                </div>
-            </div>
-
-            <hr style="margin: 15px 0;">
             <button type="button" class="btn-sub" style="background:#e67e22; margin-bottom:6px;"
                 onclick="appControl.saveDefaults()">初期値として保存</button>
             <div style="display:flex; gap:6px; margin-bottom:6px;">
@@ -344,9 +349,13 @@ canvas.sketch-canvas { display: block; width: 100%; }
             </div>
             <button type="button" class="btn-sub" style="background:#7f8c8d; margin-bottom:10px;"
                 onclick="appControl.applyDefaults()">初期値の読み込み</button>
-            <hr style="margin: 15px 0;">
-            <button type="button" class="btn-sub" style="background:#7f8c8d;"
-                onclick="mapCacheManager.clearAllCache()">地図キャッシュを開放する</button>
+
+            <!-- 【Phase 6.21】今、端末に保存されている初期値（survey_app_defaults）の一覧。
+                 中身はappControl.renderDefaultsView()が描く。読み取り専用。 -->
+            <div style="background:#f7f7f7; padding:10px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666; display:block; margin-bottom:6px;">今の初期値（保存済み）</label>
+                <div id="defaults-view"></div>
+            </div>
         </div>
     </div>
 
@@ -638,12 +647,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.20</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.21</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.20</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.21</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -662,8 +671,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.20)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.20（保存確認モーダルを未保存の変更がある場合のみ表示／管理タブの表記整理・JZIP出力対象チェックのデフォルト全解除／出力ファイル名構成・写真の出力横幅の初期値がリセットで化ける不具合の修正）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.21)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.21（管理タブの項目整理：出力ファイル名構成と地図キャッシュ開放を「設定」へ移動、「入出力データ設定」を「初期値の設定」に改名し、保存済みの初期値の一覧表示を追加）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -695,7 +704,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
             <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
             <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
-            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.20更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（写真の出力横幅=初期1200px／強制4:3／まとめてZIP化。見出し横の補足表記は無し）・入出力データ設定（旧・入出力データ操作。ファイル名構成=初期は調査日・災害番号・なし・なし・なし／初期値の保存/クリア/読込・地図キャッシュ開放）</td></tr>
+            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.21更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（上から順に、出力ファイル名構成=初期は調査日・災害番号・なし・なし・なし／写真の出力横幅=初期1200px・強制4:3／まとめてZIP化／地図キャッシュを開放する。見出し横の補足表記は無し）・初期値の設定（旧・入出力データ設定。初期値として保存／クリア2種／初期値の読み込み／今の初期値（保存済み）の一覧表示。見出し横の補足表記は無し）</td></tr>
             <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
             <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
@@ -704,7 +713,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.20更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・siteManager（confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.21更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・siteManager（confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
@@ -716,7 +725,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <h3>4. タブ構成</h3>
         <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
             <tr style="background:#eee;"><th>タブ</th><th>section ID</th><th>内容</th><th>ソースファイル</th></tr>
-            <tr><td>管理</td><td>content-manage</td><td>現場管理・管理項目・調査を実施した者・設定・入出力データ設定</td><td>manage.html</td></tr>
+            <tr><td>管理</td><td>content-manage</td><td>現場管理・管理項目・調査を実施した者・設定・初期値の設定</td><td>manage.html</td></tr>
             <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・保存</td><td>introduction.html</td></tr>
             <tr><td>開発</td><td>content-dev</td><td>アプリ更新・開発ログ・アプリ化の手順</td><td>dev.html（spec.html・install_guide.htmlを内包）</td></tr>
         </table>
@@ -749,14 +758,14 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li>モード：メイン(位置)・サブ(落書き)・白紙メモの3モード。モード切替ボタンはCSS activeクラスで色制御（インラインstyle禁止）。</li>
             <li><strong>maxZoom:25（オーバーズーム対応）:</strong> maxNativeZoom:18（地理院）/19（ESRI）でタイルを拡大表示。</li>
             <li><strong>地図初期化タイミング（確定・変更禁止）:</strong> storageManager.load()では初期化せず、アコーディオンを開いたときにinvalidateSize()→ペンディングデータ復元の順で実行。DOMサイズ0での初期化を防ぐ。</li>
-            <li><strong>地図キャッシュ:</strong> 表示したタイルを自動でCache Storageに蓄積（Stale-While-Revalidate方式）。管理タブ「入出力データ設定」に「地図キャッシュを開放する」ボタンあり（LocalStorageには影響しない）。</li>
+            <li><strong>地図キャッシュ:</strong> 表示したタイルを自動でCache Storageに蓄積（Stale-While-Revalidate方式）。管理タブ「設定」アコーディオンの末尾（Phase 6.21で移動）に「地図キャッシュを開放する」ボタンあり（LocalStorageには影響しない）。</li>
         </ul>
 
         <h4>5.4 初期値・クリア機能</h4>
         <ul>
             <li><strong>保存内容:</strong> 会社情報（company_id/leader_name/company_name/tel/fax/person_name/email）・fn1〜fn5・photo_resize_width・photo_force_43</li>
             <li><strong>保存先:</strong> LocalStorage（キー: survey_app_defaults）。起動時にloadDefaults()で自動読み込み。</li>
-            <li><strong>保存場所（UI）:</strong> 管理タブ「入出力データ設定」アコーディオン内の「初期値として保存」ボタンで保存する。現時点では保存済みの値を読める専用の表示欄は無く、「初期値の読み込み」ボタンを押すと画面の該当欄に反映される形で内容を確認できる。</li>
+            <li><strong>保存場所（UI）:</strong> 管理タブ「初期値の設定」アコーディオン（旧・入出力データ設定。Phase 6.21で改名）内の「初期値として保存」ボタンで保存する。保存済みの値は、同アコーディオンの「初期値の読み込み」ボタンの下にある「今の初期値（保存済み）」欄で常に確認できる（5.32参照）。ただしファイル名構成（fn1〜5）・写真の出力横幅・強制4:3の入力欄自体は「設定」アコーディオンにあり、「初期値として保存」はそれらの現在の選択値も含めて保存する。</li>
             <li><strong>クリア（初期値を残す）:</strong> フォーム・写真・地図・白紙メモ・オートセーブ・IndexedDBを全消去→初期値を適用。確認ダイアログあり。</li>
             <li><strong>クリア（全未入力）:</strong> 同上だが初期値を適用しない。確認ダイアログあり。</li>
             <li><strong>初期値の読み込み:</strong> 入力内容はそのまま・初期値フィールドだけ上書き。</li>
@@ -1080,7 +1089,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                 </ul>
             </li>
             <li><strong>入出力データ操作→入出力データ設定に改名:</strong> 上記の移動により、残るのはファイル名構成（fn1〜5）・初期値として保存／クリア（2種）／初期値の読み込み・地図キャッシュを開放する、の4系統。これらは現場単位ではなく端末・アプリ全体の設定寄りの項目のため「入出力データ設定」という名称に改めた。アコーディオン自体は廃止しておらず、中身を移動したうえで名称のみ変更している。</li>
-            <li><strong>保存済みの初期値の閲覧について（現時点の制限）:</strong> 「初期値として保存」ボタンで保存した内容（survey_app_defaults）を一覧表示する専用のUIは、Phase 6.18時点ではまだ無い。保存済みの値を確認したい場合は「初期値の読み込み」を押すと該当欄に反映される形になる。専用の閲覧UIが必要かどうかは今後の検討課題として残す（7章参照）。</li>
+            <li><strong>保存済みの初期値の閲覧について:</strong> Phase 6.18時点では一覧表示するUIが無かったが、Phase 6.21で「初期値の設定」アコーディオン内に一覧表示欄を追加して解決した（5.32参照）。</li>
         </ul>
 
         <h4>5.30 現場管理リストの表示崩れ修正・チェックリストとの統合（Phase 6.19）</h4>
@@ -1116,6 +1125,27 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>CSV出力の対象（現状の仕様・確認事項）:</strong> 「CSV出力」（appControl.exportCSV）は、現場一覧のチェックとは無関係に、現在の画面の内容（今開いている現場）を1行のCSVで出力する（5.29の記載どおり）。チェックした現場を対象にするかどうかは未確定の検討事項として7章に記載。</li>
         </ul>
 
+        <h4>5.32 管理タブの項目整理・保存済みの初期値の一覧表示（Phase 6.21）</h4>
+        <ul>
+            <li><strong>背景:</strong> 「初期値がどうなっているか分からない」という指摘。保存済みの初期値（survey_app_defaults）の中身を確かめる手段が「初期値の読み込み」で画面へ反映させるしか無かったこと、また「入出力データ設定」に設定系の項目（ファイル名構成・地図キャッシュ開放）が混在していたことが原因のため、項目の置き場所を整理したうえで一覧表示を追加した。</li>
+            <li><strong>項目の移動・改名（manage.html）:</strong>
+                <ul>
+                    <li>出力ファイル名構成（fn1〜5）：「入出力データ設定」→「設定」アコーディオンの先頭へ移動。</li>
+                    <li>地図キャッシュを開放するボタン：「入出力データ設定」→「設定」アコーディオンの末尾へ移動（区切り線の下）。</li>
+                    <li>「入出力データ設定」→「初期値の設定」に改名。見出し横の「データ操作」の表記は削除。data-group="io-area"は変更していない（リセット除外・サマリ判定がこのIDを参照しているため）。</li>
+                    <li>結果として「設定」の並びは、出力ファイル名構成／写真の出力横幅・強制4:3／まとめてZIP化／地図キャッシュを開放する、の順。「初期値の設定」の並びは、初期値として保存／クリア（初期値を残す・全未入力）／初期値の読み込み／今の初期値（保存済み）、の順。</li>
+                </ul>
+            </li>
+            <li><strong>今の初期値（保存済み）の一覧表示:</strong>
+                <ul>
+                    <li>場所：「初期値の設定」アコーディオン内、「初期値の読み込み」ボタンの直下（#defaults-view）。読み取り専用。</li>
+                    <li>表示内容：端末（LocalStorage：survey_app_defaults）に保存されている値そのもの。画面の今の入力値ではない。会社ID／調査班長名／会社名／電話番号／FAX番号／職氏名／E-mail／災害番号／発注者名／被災日／出力ファイル名構成（「調査日 ＋ 災害番号」のように「なし」を除いて連結）／写真の出力横幅／強制的に4:3（する・しない）。値が空・未保存の項目は「（未設定）」、初期値がまだ一度も保存されていない場合は「初期値はまだ保存されていません。」と表示する。</li>
+                    <li>実装：appControl.renderDefaultsView()。起動時（loadDefaults()の直後）と、saveDefaults()の保存成功時に更新する。selectの表示名（「調査日」「1200px（標準）」等）は、該当selectの選択肢の表示テキストをDOMから引いて使うため、選択肢の名称を変えても表示は追随する。値の表示はHTMLエスケープしている。</li>
+                    <li>注意：「初期値として保存」で保存される項目のうち、災害番号・発注者名・被災日は「他の現場から引用」の①（保存済みの初期値を引用）で使われるが、loadDefaults()（起動時・初期値の読み込み・クリア後）が画面へ反映するのは、会社ID・調査班長名・会社名・電話番号・FAX番号・職氏名・E-mail・ファイル名構成・写真設定のみ（Phase 6.13以降の従来仕様どおり）。</li>
+                </ul>
+            </li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -1142,7 +1172,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>部品ファイルの差し替え漏れに注意:</strong> src配下のファイルは互いにバージョンがずれると症状の切り分けが難しくなる。改修のたびに影響する全ファイルを一式で提示・反映する。</li>
             <li><strong>地図の画像化は「タイルを再取得しない」方式で確定（Phase 6.05）:</strong> leaflet-image・html2canvasはいずれも地理院タイルサーバーとの相性問題（オーバーズーム時の404・CORS絡みの再取得失敗）で真っ黒画像を引き起こした。既に画面へ読み込み済みのDOM要素（&lt;img&gt;タイル）をそのまま転写する自前実装に統一し、新規のタイル取得を一切発生させない方針とする。今後、地図の画像化まわりを触る際もこの方針を踏襲する。</li>
             <li><strong>調査を実施した者は端末固定（Phase 6.18）:</strong> 現場の新規作成・削除に伴う暗黙のリセット対象からこの項目群を除外する。明示的な「クリア」操作では従来通り消去対象に含む。</li>
-            <li><strong>設定・入出力データ設定も端末固定（Phase 6.20）:</strong> 「設定」（写真の出力横幅・強制4:3・まとめてZIP化）と「入出力データ設定」（出力ファイル名構成）は端末・アプリ全体の設定であり、現場の新規作成・削除に伴う暗黙のリセット対象から除外する。selectのリセットは先頭の選択肢ではなくHTMLの初期選択（selected属性）へ戻す。今後selectを追加する場合は、初期値にしたい選択肢へ必ずselected属性を付ける。</li>
+            <li><strong>設定・初期値の設定も端末固定（Phase 6.20、名称はPhase 6.21で更新）:</strong> 「設定」（出力ファイル名構成・写真の出力横幅・強制4:3・まとめてZIP化・地図キャッシュ開放。Phase 6.21でファイル名構成を「初期値の設定」から移動）と「初期値の設定」（旧・入出力データ設定。data-group="io-area"）は端末・アプリ全体の設定であり、現場の新規作成・削除に伴う暗黙のリセット対象から除外する。selectのリセットは先頭の選択肢ではなくHTMLの初期選択（selected属性）へ戻す。今後selectを追加する場合は、初期値にしたい選択肢へ必ずselected属性を付ける。</li>
             <li><strong>保存確認モーダルは未保存の変更がある場合のみ（Phase 6.20）:</strong> 現場の切替・新規作成の前に確認を出すのは、hasUnsavedChanges()がtrueのときだけ。変更が無いのに確認を出さない。</li>
             <li><strong>JZIP出力対象チェックはデフォルト全解除（Phase 6.20）:</strong> 出力対象を明示的に選ばせる。再描画でチェックが消えないよう、状態を引き継ぐ。</li>
             <li><strong>JZIP出力経路はチェックボックス方式に一本化（Phase 6.18）:</strong> 現場カードごとの個別JZIP出力ボタンは廃止。現場管理アコーディオン上部の「JZIP出力」ボタン＋対象選択チェックリストが唯一の出力経路。</li>
@@ -1165,7 +1195,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>【要判断】CSV出力の対象:</strong> 現状のCSV出力は現在の画面の内容のみで、現場一覧のチェックとは連動していない。チェックした現場を対象にする場合の論点：①複数現場を1つのCSV（1現場1行）にまとめるか、現場ごとに別ファイルにするか。②起点座標・終点座標（appControl.exportCSV内のmapApp.getMainCoords()）は現在の地図から取っているため、保存済みの他の現場については、保存データ（mainGeom）から座標を再計算する処理が必要（1_script_map.jsの現物確認が必要）。③未保存の変更がある現場を含める場合の扱い（JZIP出力と同じく拒否するか）。</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
             <li>AppB側：帳票の位置図セル（現状12.86×6.64cm）を4:3の比率に合わせて再調整（AppBスレッドで対応）</li>
-            <li><strong>【継続・検討中】保存済みの初期値の閲覧UI:</strong> survey_app_defaultsの内容を一覧表示する専用UIを追加するかどうか未確定（5.29参照）。追加する場合、管理タブのどこに置くか・表示形式（読み取り専用の一覧か、初期値として保存ボタンの直下に簡易表示するか等）を次回の壁打ちで決める。</li>
+            <li><strong>【Phase 6.21完了】保存済みの初期値の閲覧UI:</strong> 「初期値の設定」アコーディオン内、「初期値の読み込み」ボタンの下に、保存済みの初期値の一覧表示欄を追加（5.32参照）。管理タブの項目整理（ファイル名構成・地図キャッシュ開放を「設定」へ移動、「入出力データ設定」を「初期値の設定」に改名）もあわせて実施。実機での見え方の確認が必要。</li>
         </ul>
     </div>
 </div>
@@ -5406,6 +5436,13 @@ document.addEventListener('click', (e) => {
 //     ある場合は、起動時に自動で「現場1」として1件だけ作成する。
 // =============================================================================
 //
+// 【Phase 6.21】管理タブの項目移動・初期値の表示（本ファイルでの変更点）
+//   ・appControl.renderDefaultsView()を新設。端末に保存済みの初期値（survey_app_defaults）を
+//     管理タブ「初期値の設定」の#defaults-viewに一覧表示する（読み取り専用）。
+//     起動時（loadDefaults直後）と、saveDefaults()成功時に更新する。
+//   ・出力ファイル名構成（fn1〜5）は「設定」アコーディオンの先頭へ、地図キャッシュ開放ボタンは
+//     「設定」の末尾へ移動した（manage.html側の変更。本ファイルはid指定のため影響なし）。
+//
 // 【Phase 6.20】保存確認モーダルの出し分け修正・初期値まわりの修正（本ファイルでの変更点）
 //   ・confirmAndProceed()：未保存の変更が実際にある場合（hasUnsavedChanges()）だけ
 //     保存確認モーダルを出す。変更が無ければ確認なしでそのまま処理を進める。
@@ -6379,7 +6416,63 @@ window.appControl = {
         try {
             localStorage.setItem(DEFAULTS_KEY, JSON.stringify(d));
             window.uiHelper && uiHelper.showToast("初期値を保存しました");
+            this.renderDefaultsView();
         } catch(e) { alert("保存に失敗しました: " + e.message); }
+    },
+
+    // 【Phase 6.21】端末に保存されている初期値（survey_app_defaults）を、管理タブ
+    // 「初期値の設定」の#defaults-viewに一覧表示する（読み取り専用）。
+    // 従来は保存済みの初期値の中身を確かめる手段が「初期値の読み込み」で画面へ反映させるしか
+    // 無かったため、保存内容がその場で分かるようにした。
+    // 表示するのは「保存済みの値」であり、画面の今の入力値ではない。
+    renderDefaultsView() {
+        const box = document.getElementById('defaults-view');
+        if (!box) return;
+        const esc = (s) => window.siteManager._escapeHtml(s);
+        let d = null;
+        try { d = JSON.parse(localStorage.getItem('survey_app_defaults') || 'null'); } catch(e) { d = null; }
+        if (!d) {
+            box.innerHTML = '<p style="font-size:0.8rem; color:#888; margin:0;">初期値はまだ保存されていません。</p>';
+            return;
+        }
+        const val = (k) => (d[k] === undefined || d[k] === null || d[k] === '')
+            ? '<span style="color:#aaa;">（未設定）</span>' : esc(d[k]);
+        // selectの選択肢の表示名（value→表示名）をDOMから引く
+        const optText = (selId, v) => {
+            const sel = document.getElementById(selId);
+            const o = sel ? Array.from(sel.options).find(x => x.value === v) : null;
+            return o ? o.text : v;
+        };
+        const fnParts = ['fn1','fn2','fn3','fn4','fn5']
+            .filter(id => d[id] !== undefined && d[id] !== 'none')
+            .map(id => optText(id, d[id]));
+        const fnText = fnParts.length ? fnParts.map(esc).join(' ＋ ') : '<span style="color:#aaa;">（未設定）</span>';
+        const resizeText = d.photo_resize_width === undefined
+            ? '<span style="color:#aaa;">（未設定）</span>'
+            : esc(optText('photo-resize-width', String(d.photo_resize_width)));
+        const f43Text = d.photo_force_43 === undefined
+            ? '<span style="color:#aaa;">（未設定）</span>'
+            : (d.photo_force_43 ? 'する' : 'しない');
+        const rows = [
+            ['会社ID', val('company_id')],
+            ['調査班長名', val('leader_name')],
+            ['会社名', val('company_name')],
+            ['電話番号', val('tel')],
+            ['FAX番号', val('fax')],
+            ['職氏名', val('person_name')],
+            ['E-mail', val('email')],
+            ['災害番号', val('disaster_no')],
+            ['発注者名', val('dept_name')],
+            ['被災日', val('damage_date')],
+            ['出力ファイル名構成', fnText],
+            ['写真の出力横幅', resizeText],
+            ['強制的に4:3', f43Text]
+        ];
+        box.innerHTML = rows.map(r =>
+            `<div style="display:grid; grid-template-columns:8.5em 1fr; gap:8px; padding:4px 0; border-bottom:1px solid #e5e5e5; font-size:0.8rem;">
+                <div style="color:#666;">${r[0]}</div>
+                <div style="min-width:0; overflow-wrap:anywhere; color:#222;">${r[1]}</div>
+            </div>`).join('');
     },
 
     // ---- 全クリア ----
@@ -6599,6 +6692,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.gpsManager && window.gpsManager.start();
     // 初期値をLocalStorageから読み込む（会社情報・ファイル名構成・写真設定）
     window.appControl.loadDefaults();
+    // 【Phase 6.21】保存済みの初期値を管理タブに一覧表示する
+    window.appControl.renderDefaultsView();
 
     // 【iOS対応】カメラ・ファイル選択のchangeリスナーをaddEventListenerで登録する。
     // iOSのSafariではinputのinline onchangeが capture="environment" と組み合わせると
