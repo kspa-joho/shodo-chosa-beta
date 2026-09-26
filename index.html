@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.21)</title>
+    <title>被災状況調査アプリ (Phase 6.22)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -647,12 +647,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.21</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.22</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.21</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.22</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -671,8 +671,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.21)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.21（管理タブの項目整理：出力ファイル名構成と地図キャッシュ開放を「設定」へ移動、「入出力データ設定」を「初期値の設定」に改名し、保存済みの初期値の一覧表示を追加）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.22)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.22（CSV出力を現場管理のチェックに連動：チェックした現場を1現場1行の1ファイルで出力。未チェックなら従来どおり現在の画面）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -704,7 +704,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
             <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
             <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
-            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.21更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（上から順に、出力ファイル名構成=初期は調査日・災害番号・なし・なし・なし／写真の出力横幅=初期1200px・強制4:3／まとめてZIP化／地図キャッシュを開放する。見出し横の補足表記は無し）・初期値の設定（旧・入出力データ設定。初期値として保存／クリア2種／初期値の読み込み／今の初期値（保存済み）の一覧表示。見出し横の補足表記は無し）</td></tr>
+            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.22更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力（チェックした現場が対象）の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（上から順に、出力ファイル名構成=初期は調査日・災害番号・なし・なし・なし／写真の出力横幅=初期1200px・強制4:3／まとめてZIP化／地図キャッシュを開放する。見出し横の補足表記は無し）・初期値の設定（旧・入出力データ設定。初期値として保存／クリア2種／初期値の読み込み／今の初期値（保存済み）の一覧表示。見出し横の補足表記は無し）</td></tr>
             <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
             <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
@@ -713,7 +713,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.21更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・siteManager（confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.22更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
@@ -1067,7 +1067,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>背景:</strong> Phase 6.17までで機能面は揃ったが、管理タブ内のボタン配置・アコーディオン構成が使いにくいという指摘（壁打ち）を受けて整理した。個別のJZIP出力ボタンとチェックボックス方式の一括出力が併存していた点、「入出力データ操作」に写真設定・現場一括出力の設定・ファイル名構成・初期値管理が全部混在していた点が主な課題。</li>
             <li><strong>現場管理アコーディオンの再構成:</strong>
                 <ul>
-                    <li>「新規現場を作成」「JZIP読込」「JZIP出力」「CSV出力」の4ボタンを1列に配置。「JZIP出力」は下のチェックリストで選んだ現場を対象に一括出力する（siteManager.bulkExportSelected()）。「CSV出力」は現在の画面の内容をCSVで出力する（appControl.exportCSV()、従来通り現場単位の一括出力ではない）。</li>
+                    <li>「新規現場を作成」「JZIP読込」「JZIP出力」「CSV出力」の4ボタンを1列に配置。「JZIP出力」は下のチェックリストで選んだ現場を対象に一括出力する（siteManager.bulkExportSelected()）。【Phase 6.18時点】「CSV出力」は現在の画面の内容をCSVで出力する（appControl.exportCSV()、現場単位の一括出力ではない）。※Phase 6.22でチェックした現場を対象にする仕様に変更（5.33参照）。</li>
                     <li>個別の現場カードにあった「JZIP出力」ボタンは廃止。JZIP出力の経路をチェックボックス方式の一括出力（上部ボタン＋対象選択チェックリスト）に一本化した。</li>
                     <li>現場カードのレイアウトを、現場名・siteId（左）と「削除」ボタン（右）の横並びに変更。縦に伸びていたカードの高さを抑えた。</li>
                     <li>並び順は従来通り：現在編集中の現場を先頭固定、それ以外はcreatedAt降順（新しいものが上、古いものが下）。今回のレイアウト変更でもこの並び順ロジック自体は変更していない。</li>
@@ -1122,7 +1122,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>manage.htmlのfn1の「調査日」にもselected属性を明示した（fn2=災害番号、fn3〜5=なし、出力横幅=1200pxは従来からselected指定済み）。</li>
                 </ul>
             </li>
-            <li><strong>CSV出力の対象（現状の仕様・確認事項）:</strong> 「CSV出力」（appControl.exportCSV）は、現場一覧のチェックとは無関係に、現在の画面の内容（今開いている現場）を1行のCSVで出力する（5.29の記載どおり）。チェックした現場を対象にするかどうかは未確定の検討事項として7章に記載。</li>
+            <li><strong>CSV出力の対象（Phase 6.20時点の確認結果）:</strong> 「CSV出力」（appControl.exportCSV）は、現場一覧のチェックとは無関係に、現在の画面の内容（今開いている現場）を1行のCSVで出力する作りだった。この件はPhase 6.22で、チェックした現場を対象にする仕様に変更した（5.33参照）。</li>
         </ul>
 
         <h4>5.32 管理タブの項目整理・保存済みの初期値の一覧表示（Phase 6.21）</h4>
@@ -1144,6 +1144,24 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>注意：「初期値として保存」で保存される項目のうち、災害番号・発注者名・被災日は「他の現場から引用」の①（保存済みの初期値を引用）で使われるが、loadDefaults()（起動時・初期値の読み込み・クリア後）が画面へ反映するのは、会社ID・調査班長名・会社名・電話番号・FAX番号・職氏名・E-mail・ファイル名構成・写真設定のみ（Phase 6.13以降の従来仕様どおり）。</li>
                 </ul>
             </li>
+        </ul>
+
+        <h4>5.33 CSV出力を現場管理のチェックに連動（Phase 6.22）</h4>
+        <ul>
+            <li><strong>背景:</strong> Phase 6.20で「CSV出力でも、JZIP出力と同じくチェックした現場が対象になるか」を確認したところ、当時のCSV出力は現在の画面の内容（今開いている現場）しか出力せず、チェックとは連動していなかった。壁打ちで方針を確定し、実装した。</li>
+            <li><strong>仕様（壁打ちで確定）:</strong>
+                <ul>
+                    <li>チェックが1件も無い場合：従来どおり、現在の画面の内容（今開いている現場）を1行で出力する。ファイル名は従来どおり出力ファイル名構成（fn1〜5）による。</li>
+                    <li>チェックが1件以上ある場合：チェックした現場の保存済みデータ（survey_sitesのformData・photoList）から、1つのCSVに1現場1行で出力する。行の並びは現場一覧の表示順（現在編集中の現場が先頭、以降はcreatedAt降順）。</li>
+                    <li>ファイル名：チェックが1件だけなら従来と同じくファイル名構成（fn1〜5）を、その現場のデータに適用した名前。2件以上なら<code>survey_sites_YYYY-MM-DD.csv</code>。</li>
+                    <li>未保存の変更の扱い：今開いている現場がチェックされていて、未保存の変更がある（hasUnsavedChanges()）場合は、JZIP出力と同じく出力を拒否し「先に保存してください」と表示する（保存済みデータと画面の内容が食い違ったCSVを出さないため）。チェックされていない現場の未保存の変更は判定に関係しない。</li>
+                    <li>チェックした現場のうち、データが見つからないものは行を作らずに飛ばす。1行も作れなかった場合は「出力できる現場がありませんでした」と表示する。</li>
+                </ul>
+            </li>
+            <li><strong>列構成:</strong> 従来のCSVと同一（27列。調査日〜対策の概要・会社名・電話番号・FAX番号・職氏名・E-mail・起点座標・終点座標・写真枚数）。appControl.CSV_HEADERSに切り出し、1現場ぶんの行組み立てを_csvRow()に切り出した。文字コードはUTF-8（BOM付き・Excel対策）、値は全て二重引用符で囲む。</li>
+            <li><strong>起点・終点座標（appControl._coordsFromMainGeom）:</strong> 従来は画面上のレイヤーからmapApp.getMainCoords()で作っていたが、保存済みの他の現場では画面に地図が展開されていないため、保存データ（formData.mainGeom：GeoJSONのFeatureCollection）から同じ書式で作る。書式は「緯度 経度」を小数6桁・半角スペース区切り。点（マーカー／円）は起点のみ（終点は空）、線は先頭の点が起点・末尾の点が終点。メインの図形が複数ある場合は最後のものを使う（getMainCoordsと同じ）。mainGeomが無い・空の現場は起点・終点とも空欄。GeoJSONは[経度,緯度]の順のため、緯度・経度に入れ替えて出力している。</li>
+            <li><strong>写真枚数:</strong> チェックした現場ではsite.photoListの件数（写真本体の読込状況には依存しない）。</li>
+            <li><strong>既知の制限:</strong> JZIP読込直後の現場は、読み込んだJSONのformDataをそのまま持つため、地図の図形・各項目は読み込んだ内容がそのまま出力される。JZIP側のmainGeomにFeatureCollection以外の形が入っている場合は、座標が空欄になる。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -1175,6 +1193,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>設定・初期値の設定も端末固定（Phase 6.20、名称はPhase 6.21で更新）:</strong> 「設定」（出力ファイル名構成・写真の出力横幅・強制4:3・まとめてZIP化・地図キャッシュ開放。Phase 6.21でファイル名構成を「初期値の設定」から移動）と「初期値の設定」（旧・入出力データ設定。data-group="io-area"）は端末・アプリ全体の設定であり、現場の新規作成・削除に伴う暗黙のリセット対象から除外する。selectのリセットは先頭の選択肢ではなくHTMLの初期選択（selected属性）へ戻す。今後selectを追加する場合は、初期値にしたい選択肢へ必ずselected属性を付ける。</li>
             <li><strong>保存確認モーダルは未保存の変更がある場合のみ（Phase 6.20）:</strong> 現場の切替・新規作成の前に確認を出すのは、hasUnsavedChanges()がtrueのときだけ。変更が無いのに確認を出さない。</li>
             <li><strong>JZIP出力対象チェックはデフォルト全解除（Phase 6.20）:</strong> 出力対象を明示的に選ばせる。再描画でチェックが消えないよう、状態を引き継ぐ。</li>
+            <li><strong>CSV出力もチェックした現場が対象（Phase 6.22）:</strong> JZIP出力と同じチェックリストを共用する。チェックが無ければ現在の画面を出力、あれば保存済みデータから1現場1行。今開いている現場に未保存の変更がある場合は出力を拒否する（JZIP出力と同じ考え方）。</li>
             <li><strong>JZIP出力経路はチェックボックス方式に一本化（Phase 6.18）:</strong> 現場カードごとの個別JZIP出力ボタンは廃止。現場管理アコーディオン上部の「JZIP出力」ボタン＋対象選択チェックリストが唯一の出力経路。</li>
             <li><strong>現場一覧はチェックボックス選択・切替・編集・削除を1つのリストに統合（Phase 6.19）:</strong> 別々の一覧に分けない。行のレイアウトはCSS Grid（固定幅カラム＋1fr）で組み、現場名は1行省略表示（ellipsis）にする。flexベースの幅計算に依存したレイアウトは、実機で現場名が縦に1文字ずつ折り返される表示崩れを起こしたため、今後もこの種のリストはGrid＋ellipsisで組む方針とする。</li>
         </ul>
@@ -1192,7 +1211,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>【Phase 6.19完了】現場一覧の表示崩れ修正・編集機能追加:</strong> JZIP出力チェックリストと現場カード一覧をCSS Gridベースの1つのリストに統合し、実機で発生していた現場名の縦1文字折り返し表示崩れ（flexのwidth計算破綻が原因）を解消。あわせて現場名を後から変更できる「編集」ボタン（renameSite）を追加。詳細は5.30参照。</li>
             <li><strong>【Phase 6.20完了】</strong> 保存確認モーダルを未保存の変更がある場合のみ表示／管理タブの表記整理（「現場リスト」「出力設定」「JZIP出力の対象現場…」の削除）／JZIP出力対象チェックのデフォルト全解除／出力ファイル名構成・写真の出力横幅の初期値がリセットで化ける不具合の修正。詳細は5.31参照。</li>
             <li>iPhone実機での動作確認（部会お披露目時）：Phase 6.19の修正（現場名の縦折り返しが解消されたか）に加え、Phase 6.20の以下の点も実機確認が必要。①何も編集していない状態で「＋新規現場」「現場の切替」を押しても確認モーダルが出ないこと。②編集後は出ること。③JZIP読込直後の現場（formDataにphotoList等が含まれる）や、地図の図形を描いた現場で、未編集なのに「未保存」と判定されてしまわないこと（hasUnsavedChanges()の比較が、保存時と読込時でキーや座標の形が一致している前提のため）。</li>
-            <li><strong>【要判断】CSV出力の対象:</strong> 現状のCSV出力は現在の画面の内容のみで、現場一覧のチェックとは連動していない。チェックした現場を対象にする場合の論点：①複数現場を1つのCSV（1現場1行）にまとめるか、現場ごとに別ファイルにするか。②起点座標・終点座標（appControl.exportCSV内のmapApp.getMainCoords()）は現在の地図から取っているため、保存済みの他の現場については、保存データ（mainGeom）から座標を再計算する処理が必要（1_script_map.jsの現物確認が必要）。③未保存の変更がある現場を含める場合の扱い（JZIP出力と同じく拒否するか）。</li>
+            <li><strong>【Phase 6.22完了】CSV出力の対象:</strong> チェックした現場を対象に、1つのCSVへ1現場1行で出力するよう変更。詳細は5.33参照。実機での確認（複数現場を選んでの出力、未保存の現場を選んだときの拒否、Excelでの文字化け・座標の見え方）が必要。</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
             <li>AppB側：帳票の位置図セル（現状12.86×6.64cm）を4:3の比率に合わせて再調整（AppBスレッドで対応）</li>
             <li><strong>【Phase 6.21完了】保存済みの初期値の閲覧UI:</strong> 「初期値の設定」アコーディオン内、「初期値の読み込み」ボタンの下に、保存済みの初期値の一覧表示欄を追加（5.32参照）。管理タブの項目整理（ファイル名構成・地図キャッシュ開放を「設定」へ移動、「入出力データ設定」を「初期値の設定」に改名）もあわせて実施。実機での見え方の確認が必要。</li>
@@ -5436,6 +5455,13 @@ document.addEventListener('click', (e) => {
 //     ある場合は、起動時に自動で「現場1」として1件だけ作成する。
 // =============================================================================
 //
+// 【Phase 6.22】CSV出力を現場管理のチェックに連動（本ファイルでの変更点）
+//   ・appControl.exportCSV()：チェックが無ければ従来どおり現在の画面を1行で出力。
+//     チェックが1件以上あれば、チェックした現場の保存済みデータから1現場1行の1ファイルを出力する。
+//     今開いている現場がチェックされていて未保存の変更がある場合は、JZIP出力と同じく拒否する。
+//   ・_csvRow／_coordsFromMainGeom／_downloadCSV／CSV_HEADERSを新設。起点・終点座標は、
+//     保存データ（formData.mainGeom）から、mapApp.getMainCoords()と同じ書式で作る。
+//
 // 【Phase 6.21】管理タブの項目移動・初期値の表示（本ファイルでの変更点）
 //   ・appControl.renderDefaultsView()を新設。端末に保存済みの初期値（survey_app_defaults）を
 //     管理タブ「初期値の設定」の#defaults-viewに一覧表示する（読み取り専用）。
@@ -6341,15 +6367,81 @@ window.appControl = {
             return p.dataUrl;
         }
     },
-    exportCSV() {
-        const d = this.getFormData(); const c = window.mapApp.getMainCoords();
-        const headers = ["調査日","会社ID","調査班長名","整理番号","災害番号","所属名","被災場所","路線・河川名等","被災日","延長 [m]","高さ [m]","岸別","距離標・区間","コメント","被災拡大の可能性","拡大状況","特記事項有無","特記事項状況","対策の概要","会社名","電話番号","FAX番号","職氏名","E-mail","起点座標","終点座標","写真枚数"];
-        const row = [d.survey_date, d.company_id, d.leader_name, d.ref_no, d.disaster_no, d.dept_name, d.loc_name, d.route_name, d.damage_date, d.length, d.height, d.side_type, d.distance_label, d.comment, d.expansion_exists, d.expansion_status, d.special_exists, d.special_status, d.plan_summary, d.company_name, d.tel, d.fax, d.person_name, d.email, c.start, c.end, window.photoApp.photos.length]
-                    .map(v => `"${(v || "").toString().replace(/"/g, '""')}"`);
+    // 【Phase 6.22】CSV出力を、現場管理のチェック（JZIP出力対象と共通）に連動させた。
+    //   ・チェックが1件も無い場合：従来どおり、現在の画面の内容（今開いている現場）を1行で出力する。
+    //   ・チェックが1件以上ある場合：チェックした現場の「保存済みデータ」から、1現場1行のCSV（1ファイル）を出力する。
+    //     今開いている現場がチェックされていて未保存の変更がある場合は、JZIP出力と同じく出力を拒否する
+    //     （保存済みデータと画面の内容が食い違ったCSVを出さないため）。
+    //   列の並び・書式は従来のCSVと同一（CSV_HEADERS／_csvRow）。
+    CSV_HEADERS: ["調査日","会社ID","調査班長名","整理番号","災害番号","所属名","被災場所","路線・河川名等","被災日","延長 [m]","高さ [m]","岸別","距離標・区間","コメント","被災拡大の可能性","拡大状況","特記事項有無","特記事項状況","対策の概要","会社名","電話番号","FAX番号","職氏名","E-mail","起点座標","終点座標","写真枚数"],
+    // 1現場ぶんのCSV行（引用符つき・カンマ区切りの文字列）を作る。c={start,end}
+    _csvRow(d, c, photoCount) {
+        return [d.survey_date, d.company_id, d.leader_name, d.ref_no, d.disaster_no, d.dept_name, d.loc_name, d.route_name, d.damage_date, d.length, d.height, d.side_type, d.distance_label, d.comment, d.expansion_exists, d.expansion_status, d.special_exists, d.special_status, d.plan_summary, d.company_name, d.tel, d.fax, d.person_name, d.email, c.start, c.end, photoCount]
+            .map(v => `"${(v || "").toString().replace(/"/g, '""')}"`).join(",");
+    },
+    // 保存済みの現場データ（formData.mainGeom：GeoJSONのFeatureCollection）から、起点・終点座標を作る。
+    // 書式・選び方は mapApp.getMainCoords()（画面上のレイヤーから作る従来処理）と同じ：
+    //   ・「緯度 経度」を小数6桁・半角スペース区切り
+    //   ・点（マーカー／円）は起点のみ、終点は空
+    //   ・線は先頭の点が起点・末尾の点が終点
+    //   ・メインの図形が複数ある場合は最後のもの（getMainCoordsがeachLayerで最後に見つけたものを使うのと同じ）
+    _coordsFromMainGeom(geom) {
+        const empty = { start: "", end: "" };
+        const feats = (geom && geom.features) || [];
+        const feat = feats[feats.length - 1];
+        if (!feat || !feat.geometry || !feat.geometry.coordinates) return empty;
+        const g = feat.geometry, co = g.coordinates;
+        const f = (pt) => `${Number(pt[1]).toFixed(6)} ${Number(pt[0]).toFixed(6)}`; // GeoJSONは[経度,緯度]
+        if (g.type === 'Point') return co.length >= 2 ? { start: f(co), end: "" } : empty;
+        let line = null;
+        if (g.type === 'LineString') line = co;
+        else if (g.type === 'MultiLineString') line = co[0];
+        else if (g.type === 'Polygon') {
+            line = (co[0] || []).slice();
+            // GeoJSONの環は始点を末尾に繰り返して閉じているため、LeafletのgetLatLngs()と同じ形に戻す
+            if (line.length > 1 && line[0][0] === line[line.length - 1][0] && line[0][1] === line[line.length - 1][1]) line.pop();
+        }
+        if (!line || line.length === 0) return empty;
+        return { start: f(line[0]), end: f(line[line.length - 1]) };
+    },
+    _downloadCSV(rows, filename) {
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob(["﻿" + headers.join(",") + "\n" + row.join(",")], {type:"text/csv"}));
-        a.download = this.getFn() + ".csv";
+        a.href = URL.createObjectURL(new Blob(["﻿" + this.CSV_HEADERS.join(",") + "\n" + rows.join("\n")], {type:"text/csv"}));
+        a.download = filename;
         a.click();
+    },
+    exportCSV() {
+        const checked = Array.from(document.querySelectorAll('.bulk-export-check:checked')).map(cb => cb.value);
+
+        // チェックが無い場合：従来どおり現在の画面の内容を出力する
+        if (checked.length === 0) {
+            const d = this.getFormData(); const c = window.mapApp.getMainCoords();
+            this._downloadCSV([this._csvRow(d, c, window.photoApp.photos.length)], this.getFn() + ".csv");
+            return;
+        }
+
+        // チェックがある場合：チェックした現場の保存済みデータから1現場1行で出力する
+        const sm = window.siteManager;
+        if (checked.includes(sm.getCurrentSiteId()) && sm.hasUnsavedChanges()) {
+            alert('未保存の変更があります。先に「保存」タブ（現地調査）で保存してください。');
+            return;
+        }
+        const rows = [];
+        let firstData = null;
+        checked.forEach(siteId => {
+            const site = sm.getSite(siteId);
+            if (!site) return;
+            const d = site.formData || {};
+            if (!firstData) firstData = d;
+            rows.push(this._csvRow(d, this._coordsFromMainGeom(d.mainGeom), (site.photoList || []).length));
+        });
+        if (rows.length === 0) { alert('出力できる現場がありませんでした'); return; }
+        // 1現場だけなら従来と同じファイル名構成、複数現場なら日付入りの共通名にする
+        const filename = rows.length === 1
+            ? sm._buildFn(firstData) + ".csv"
+            : `survey_sites_${new Date().toISOString().split('T')[0]}.csv`;
+        this._downloadCSV(rows, filename);
+        window.uiHelper && uiHelper.showToast(`${rows.length}件の現場をCSV出力しました`);
     },
     // 【Phase 6.15】JZIP読み込みは、今開いている画面を上書きするのではなく、
     // 新しい現場として現場リストに追加する動きに変更した。今の画面（今開いている現場）の
