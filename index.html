@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.18)</title>
+    <title>被災状況調査アプリ (Phase 6.19)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -170,19 +170,20 @@ canvas.sketch-canvas { display: block; width: 100%; }
                 <button type="button" class="btn-sub" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="appControl.exportCSV()">CSV出力</button>
             </div>
 
-            <!-- JZIP出力（上のボタン）の対象を選ぶチェックリスト -->
+            <!-- 【Phase 6.19】JZIP出力の対象選択（チェックボックス）と、現場の切替・編集・削除を
+                 1つのリストに統合した。行はCSS Grid（固定カラム幅）で組んでおり、
+                 現場名がどれだけ長くても1行に収まらない分は省略表示(ellipsis)にする。
+                 以前のflexベースの実装は、現場名のボックス幅が計算に失敗して0近くまで潰れ、
+                 日本語が1文字ずつ縦に折り返される表示崩れを起こしていたため、Gridに変更した。 -->
             <div style="background:#f7f7f7; padding:10px; margin-bottom:12px; border-radius:4px;">
-                <label style="font-size:0.7rem; color:#666;">JZIP出力の対象現場（チェックした現場が対象）</label>
-                <div id="bulk-export-site-list" style="max-height:200px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; padding:6px; margin:6px 0 8px 0; background:#fff;"></div>
-                <div style="display:flex; gap:6px;">
-                    <button type="button" class="btn-sub" style="flex:1; font-size:0.78rem;" onclick="siteManager.selectAllForBulkExport(true)">全て選択</button>
-                    <button type="button" class="btn-sub" style="flex:1; font-size:0.78rem;" onclick="siteManager.selectAllForBulkExport(false)">全て解除</button>
-                </div>
+                <label style="font-size:0.7rem; color:#666; display:block; margin-bottom:6px;">JZIP出力の対象現場（チェックした現場が対象）</label>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer; padding:4px 0;">
+                    <input type="checkbox" id="bulk-export-select-all" checked onchange="siteManager.selectAllForBulkExport(this.checked)">
+                    全選択／全解除
+                </label>
+                <div id="site-list-container" style="max-height:320px; overflow-y:auto;"></div>
                 <div id="bulk-export-progress" style="font-size:0.8rem; color:#555; margin-top:6px; display:none;"></div>
             </div>
-
-            <!-- 現場の切替・削除用リスト -->
-            <div id="site-list-container"></div>
         </div>
     </div>
 
@@ -633,12 +634,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.18</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.19</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.18</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.19</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -657,8 +658,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.18)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.18（管理タブのレイアウト整理：現場管理の配置・現場カードの横並び化、調査を実施した者の端末固定化、設定アコーディオンの新設、入出力データ設定への改名）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.19)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.19（現場管理リストの表示崩れ修正：JZIP出力チェックリストと現場カードをGridレイアウトの1つのリストに統合し、現場名の編集ボタンを追加）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -690,7 +691,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
             <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
             <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
-            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.18更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力の1列ボタン＋一括JZIP出力チェックリスト＋現場カード一覧）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（写真の出力横幅／強制4:3／まとめてZIP化）・入出力データ設定（旧・入出力データ操作。ファイル名構成・初期値の保存/クリア/読込・地図キャッシュ開放）</td></tr>
+            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.19更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（写真の出力横幅／強制4:3／まとめてZIP化）・入出力データ設定（旧・入出力データ操作。ファイル名構成・初期値の保存/クリア/読込・地図キャッシュ開放）</td></tr>
             <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
             <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
@@ -699,7 +700,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.18更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・siteManager（現場カード横並びレイアウト・調査を実施した者を除外したリセット処理）・更新確認・mapCacheManager・saveDefaults/loadDefaults・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.19更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・siteManager（現場一覧をGridレイアウトに統合・renameSite新設・調査を実施した者を除外したリセット処理）・更新確認・mapCacheManager・saveDefaults/loadDefaults・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
@@ -1078,6 +1079,17 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>保存済みの初期値の閲覧について（現時点の制限）:</strong> 「初期値として保存」ボタンで保存した内容（survey_app_defaults）を一覧表示する専用のUIは、Phase 6.18時点ではまだ無い。保存済みの値を確認したい場合は「初期値の読み込み」を押すと該当欄に反映される形になる。専用の閲覧UIが必要かどうかは今後の検討課題として残す（7章参照）。</li>
         </ul>
 
+        <h4>5.30 現場管理リストの表示崩れ修正・チェックリストとの統合（Phase 6.19）</h4>
+        <ul>
+            <li><strong>不具合の内容:</strong> Phase 6.18で現場カードを横並び（flex）レイアウトに変更した際、実機で現場名のボックスが極端に幅0近くまで潰れ、日本語の現場名が1文字ずつ縦に折り返されて表示される崩れが発生した。削除ボタンも文字の途中に重なって表示され、実用に耐えない状態だった。</li>
+            <li><strong>原因:</strong> 現場名を表示する要素に<code>flex:1; min-width:0</code>を指定していたが、実機のレンダリング環境によっては隣接する削除ボタン（<code>flex:0 0 auto</code>）側の幅計算が優先され、現場名側のflex基準幅が実質0に潰れるケースがあった。日本語（CJK）テキストはデフォルトで文字と文字の間どこでも改行できるため、ボックス幅がほぼ0になると1文字ごとに改行され、結果として縦書きのような表示になっていた。</li>
+            <li><strong>対応方針:</strong> flexの幅計算に依存しない、より安定したCSS Grid（<code>grid-template-columns: 24px 1fr 52px 52px</code>という固定幅＋1frの組み合わせ）にレイアウトを変更した。あわせて現場名・siteIdの行には<code>white-space:nowrap; overflow:hidden; text-overflow:ellipsis</code>を指定し、たとえ幅が想定より狭くなっても、縦に折り返されるのではなく1行の省略表示（…）に収まるようにした。</li>
+            <li><strong>UIの統合（壁打ちで確定）:</strong> 従来別々だった「JZIP出力の対象を選ぶチェックリスト（#bulk-export-site-list）」と「現場の切替・削除用リスト（#site-list-container）」を1つのリストに統合した。1行のカラム構成は左から　チェックボックス（JZIP出力対象選択）／現場名・siteId（タップで切替）／編集ボタン／削除ボタン、の4列。</li>
+            <li><strong>全選択／全解除:</strong> リスト上部の「全て選択」「全て解除」の2ボタンを、1つのチェックボックス（#bulk-export-select-all）に置き換えた。個別チェックの状態が変わった場合にこのチェックボックス自体の状態を追随させる仕組みは持たない（あくまで一括操作のトリガーとして機能する簡易な実装）。</li>
+            <li><strong>現場名の編集機能を新設（siteManager.renameSite）:</strong> 各行に「編集」ボタンを追加し、押すとprompt()で現在の現場名を初期値表示しつつ新しい名前を入力できる。siteId・createdAt等のデータ構造は一切変更せず、表示用のsiteNameだけを更新する。従来は現場名を作成後に付け替える手段が無かったための追加機能。</li>
+            <li><strong>renderBulkExportSiteList()の廃止:</strong> 上記の統合により、専用の一覧描画関数は不要になったため削除した。renderSiteList()が唯一の一覧描画関数となる。selectAllForBulkExport()は引き続き<code>.bulk-export-check</code>クラスのチェックボックス（今はrenderSiteList()が描く行に含まれる）を一括で切り替える。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -1105,6 +1117,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>地図の画像化は「タイルを再取得しない」方式で確定（Phase 6.05）:</strong> leaflet-image・html2canvasはいずれも地理院タイルサーバーとの相性問題（オーバーズーム時の404・CORS絡みの再取得失敗）で真っ黒画像を引き起こした。既に画面へ読み込み済みのDOM要素（&lt;img&gt;タイル）をそのまま転写する自前実装に統一し、新規のタイル取得を一切発生させない方針とする。今後、地図の画像化まわりを触る際もこの方針を踏襲する。</li>
             <li><strong>調査を実施した者は端末固定（Phase 6.18）:</strong> 現場の新規作成・削除に伴う暗黙のリセット対象からこの項目群を除外する。明示的な「クリア」操作では従来通り消去対象に含む。</li>
             <li><strong>JZIP出力経路はチェックボックス方式に一本化（Phase 6.18）:</strong> 現場カードごとの個別JZIP出力ボタンは廃止。現場管理アコーディオン上部の「JZIP出力」ボタン＋対象選択チェックリストが唯一の出力経路。</li>
+            <li><strong>現場一覧はチェックボックス選択・切替・編集・削除を1つのリストに統合（Phase 6.19）:</strong> 別々の一覧に分けない。行のレイアウトはCSS Grid（固定幅カラム＋1fr）で組み、現場名は1行省略表示（ellipsis）にする。flexベースの幅計算に依存したレイアウトは、実機で現場名が縦に1文字ずつ折り返される表示崩れを起こしたため、今後もこの種のリストはGrid＋ellipsisで組む方針とする。</li>
         </ul>
     </div>
 
@@ -1116,11 +1129,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li>【Step2-②】位置図と帳票枠のサイズ不一致：解決（Phase 6.05）。位置図の画面表示自体を4:3に固定。詳細は5.10参照。</li>
             <li>【Step2-③】白紙メモのベクタ化：完了（Phase 6.05〜6.07）。詳細は5.12〜5.18参照（段階3の拡大記入のみ見送り。理由は5.17参照）。</li>
             <li>【Step2-⑤】GPS・方位取得のUI調整：解決（Phase 6.08・6.09）。詳細は5.19・5.20参照。</li>
-            <li>【Step2-⑥】複数現場管理の再設計：段階1〜4完了（Phase 6.11〜6.15）。その後の運用整理（Phase 6.16〜6.18）も含め、⑥は一区切り。詳細は5.22〜5.29参照。</li>
-            <li>iPhone実機での動作確認（部会お披露目時）</li>
+            <li>【Step2-⑥】複数現場管理の再設計：段階1〜4完了（Phase 6.11〜6.15）。その後の運用整理（Phase 6.16〜6.18）、および実機で発生した現場一覧の表示崩れ修正・チェックリスト統合（Phase 6.19）も含め、⑥は一区切り。詳細は5.22〜5.30参照。</li>
+            <li><strong>【Phase 6.19完了】現場一覧の表示崩れ修正・編集機能追加:</strong> JZIP出力チェックリストと現場カード一覧をCSS Gridベースの1つのリストに統合し、実機で発生していた現場名の縦1文字折り返し表示崩れ（flexのwidth計算破綻が原因）を解消。あわせて現場名を後から変更できる「編集」ボタン（renameSite）を追加。詳細は5.30参照。</li>
+            <li>iPhone実機での動作確認（部会お披露目時）：Phase 6.19の修正について、実機での表示崩れが解消されたかどうかの再確認が必要（ユーザーへの本ファイルセット送付後、次回確認予定）。</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
             <li>AppB側：帳票の位置図セル（現状12.86×6.64cm）を4:3の比率に合わせて再調整（AppBスレッドで対応）</li>
-            <li><strong>【新規・検討中】保存済みの初期値の閲覧UI:</strong> survey_app_defaultsの内容を一覧表示する専用UIを追加するかどうか未確定（5.29参照）。追加する場合、管理タブのどこに置くか・表示形式（読み取り専用の一覧か、初期値として保存ボタンの直下に簡易表示するか等）を次回の壁打ちで決める。</li>
+            <li><strong>【継続・検討中】保存済みの初期値の閲覧UI:</strong> survey_app_defaultsの内容を一覧表示する専用UIを追加するかどうか未確定（5.29参照）。追加する場合、管理タブのどこに置くか・表示形式（読み取り専用の一覧か、初期値として保存ボタンの直下に簡易表示するか等）を次回の壁打ちで決める。</li>
         </ul>
     </div>
 </div>
@@ -5614,10 +5628,14 @@ window.siteManager = {
         return d.innerHTML;
     },
 
-    // 【Phase 6.18】現在の現場を一番上に表示し、各カードは「現場名（左）＋削除ボタン（右）」の
-    // 横並びレイアウトにする。個別のJZIP出力ボタンは廃止（上部の一括JZIP出力に統一）。
+    // 【Phase 6.19】JZIP出力の対象選択チェックボックスと、現場の切替・編集・削除を
+    // 1つのリストに統合した（従来は#site-list-containerと#bulk-export-site-listの2つに
+    // 分かれていたが、見た目も機能も重複していたため一本化した）。
+    // 行はCSS Grid（固定カラム幅 + 1fr）で組む。以前のflexベースの実装は、現場名の
+    // ボックス幅の計算に失敗して0近くまで潰れ、日本語が1文字ずつ縦に折り返される
+    // 表示崩れを起こしていたため、より安定するGridレイアウトに変更した。
+    // 現在編集中の現場を先頭固定。それ以外は createdAt 降順（新しいものが上、古いものが下）。
     renderSiteList() {
-        this.renderBulkExportSiteList(); // 一括出力側の一覧も常に一緒に更新する
         const container = document.getElementById('site-list-container');
         if (!container) return;
         const sites = this.getSites();
@@ -5626,7 +5644,6 @@ window.siteManager = {
             container.innerHTML = '<p style="font-size:0.85rem; color:#888;">現場がまだありません。「＋新規現場」から始めてください。</p>';
             return;
         }
-        // 現在編集中の現場を先頭固定。それ以外は createdAt 降順（新しいものが上、古いものが下）
         const sorted = sites.slice().sort((a, b) => {
             if (a.siteId === currentId) return -1;
             if (b.siteId === currentId) return 1;
@@ -5634,15 +5651,37 @@ window.siteManager = {
         });
         container.innerHTML = sorted.map(s => {
             const active = s.siteId === currentId;
-            return `<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px; border:1px solid ${active ? '#3498db' : '#ddd'}; border-radius:4px; margin-bottom:6px; background:${active ? '#eaf4fb' : '#fff'};">
-                <div onclick="siteManager.switchToSite('${s.siteId}')" style="cursor:pointer; flex:1; min-width:0;">
-                    <div style="font-weight:bold; font-size:0.9rem;">${active ? '● ' : '○ '}${this._escapeHtml(s.siteName)}${active ? '（現在編集中）' : ''}</div>
-                    <div style="font-size:0.75rem; color:#888;">${this._escapeHtml(s.siteId)}</div>
+            return `<div style="display:grid; grid-template-columns:24px 1fr 52px 52px; align-items:center; gap:8px; padding:10px; border:1px solid ${active ? '#3498db' : '#ddd'}; border-radius:4px; margin-bottom:6px; background:${active ? '#eaf4fb' : '#fff'};">
+                <input type="checkbox" class="bulk-export-check" value="${s.siteId}" checked onclick="event.stopPropagation()">
+                <div onclick="siteManager.switchToSite('${s.siteId}')" style="cursor:pointer; min-width:0; overflow:hidden;">
+                    <div style="font-weight:bold; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${active ? '● ' : '○ '}${this._escapeHtml(s.siteName)}${active ? '（現在編集中）' : ''}</div>
+                    <div style="font-size:0.75rem; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${this._escapeHtml(s.siteId)}</div>
                 </div>
-                <button type="button" class="btn-sub" style="flex:0 0 auto; padding:6px 12px; font-size:0.78rem; background:#c0392b;"
+                <button type="button" class="btn-sub" style="padding:6px 4px; font-size:0.75rem;"
+                    onclick="event.stopPropagation(); siteManager.renameSite('${s.siteId}')">編集</button>
+                <button type="button" class="btn-sub" style="padding:6px 4px; font-size:0.75rem; background:#c0392b;"
                     onclick="event.stopPropagation(); siteManager.deleteSite('${s.siteId}')">削除</button>
             </div>`;
         }).join('');
+        const selectAllCb = document.getElementById('bulk-export-select-all');
+        if (selectAllCb) selectAllCb.checked = true;
+    },
+
+    // 【Phase 6.19】現場名の付け替え。データの持ち方（siteId・createdAt等）は一切変えず、
+    // 表示用ラベルであるsiteNameだけを更新する。
+    renameSite(siteId) {
+        const site = this.getSite(siteId);
+        if (!site) return;
+        const name = prompt('現場名を入力してください', site.siteName);
+        if (name === null) return;
+        if (!name.trim()) { alert('現場名を入力してください'); return; }
+        const sites = this.getSites();
+        const idx = sites.findIndex(s => s.siteId === siteId);
+        if (idx === -1) return;
+        sites[idx].siteName = name.trim();
+        this.saveSites(sites);
+        this.renderSiteList();
+        window.uiHelper && uiHelper.showToast('現場名を変更しました');
     },
 
     // ---- 段階5（保存の整理）：未保存かどうかの判定 ----
@@ -5751,22 +5790,12 @@ window.siteManager = {
 
     // ---- 一括出力（Phase 6.17〜）：現場を選んでまとめて出力する ----
     // 【Phase 6.18】現場管理の上部ボタン「JZIP出力」から直接呼ばれる、唯一のJZIP出力経路。
-    renderBulkExportSiteList() {
-        const container = document.getElementById('bulk-export-site-list');
-        if (!container) return;
-        const sites = this.getSites();
-        if (sites.length === 0) {
-            container.innerHTML = '<p style="font-size:0.8rem; color:#888; margin:0;">現場がありません。</p>';
-            return;
-        }
-        container.innerHTML = sites.slice().reverse().map(s => `
-            <label style="display:flex; align-items:center; gap:6px; padding:4px 0; font-size:0.82rem; cursor:pointer;">
-                <input type="checkbox" class="bulk-export-check" value="${s.siteId}" checked>
-                ${this._escapeHtml(s.siteName)}（${this._escapeHtml(s.siteId)}）
-            </label>`).join('');
-    },
+    // 【Phase 6.19】対象選択チェックボックスはrenderSiteList()が描く現場一覧の各行に統合した
+    // ため、専用の一覧描画関数（renderBulkExportSiteList）は廃止した。
     selectAllForBulkExport(checked) {
         document.querySelectorAll('.bulk-export-check').forEach(cb => cb.checked = checked);
+        const selectAllCb = document.getElementById('bulk-export-select-all');
+        if (selectAllCb) selectAllCb.checked = checked;
     },
     async bulkExportSelected() {
         const checked = Array.from(document.querySelectorAll('.bulk-export-check:checked')).map(cb => cb.value);
