@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.17)</title>
+    <title>被災状況調査アプリ (Phase 6.18)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -155,22 +155,33 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <!-- 管理タブ：管理項目・調査を実施した者・端末設定 -->
             <section id="content-manage" class="tab-content"><div class="survey-app-ui">
 
-    <!-- 現場管理（Phase 6.16：新規作成・JZIP読み込み・各現場のJZIP出力/削除） -->
+    <!-- 現場管理 -->
     <div class="accordion-item" data-group="site-manage">
         <button class="accordion-header">
             <div class="header-label"><span class="main-title">現場管理</span><span class="summary-text" id="site-manage-summary">現場リスト</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
-            <p style="font-size:0.78rem; color:#888; margin:0 0 8px 0;">
-                現場を切り替えると、未保存の変更があれば確認します。JZIP出力は、保存済みの内容だけが対象です
-                （今開いている現場に未保存の変更がある場合は、先に「保存」タブで保存してください）。
-            </p>
             <div style="display:flex; gap:6px; margin-bottom:10px;">
-                <button type="button" class="btn-main" style="flex:1;" onclick="siteManager.promptCreateSite()">＋ 新規現場を作成</button>
+                <button type="button" class="btn-main" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="siteManager.promptCreateSite()">＋新規現場</button>
                 <input type="file" id="import-jzip" accept=".zip" style="display:none" onchange="appControl.importZip(this)">
-                <button type="button" class="btn-sub" style="flex:1;" onclick="document.getElementById('import-jzip').click()">JZIP読み込み</button>
+                <button type="button" class="btn-sub" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="document.getElementById('import-jzip').click()">JZIP読込</button>
+                <button type="button" class="btn-sub" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="siteManager.bulkExportSelected()">JZIP出力</button>
+                <button type="button" class="btn-sub" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="appControl.exportCSV()">CSV出力</button>
             </div>
+
+            <!-- JZIP出力（上のボタン）の対象を選ぶチェックリスト -->
+            <div style="background:#f7f7f7; padding:10px; margin-bottom:12px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666;">JZIP出力の対象現場（チェックした現場が対象）</label>
+                <div id="bulk-export-site-list" style="max-height:200px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; padding:6px; margin:6px 0 8px 0; background:#fff;"></div>
+                <div style="display:flex; gap:6px;">
+                    <button type="button" class="btn-sub" style="flex:1; font-size:0.78rem;" onclick="siteManager.selectAllForBulkExport(true)">全て選択</button>
+                    <button type="button" class="btn-sub" style="flex:1; font-size:0.78rem;" onclick="siteManager.selectAllForBulkExport(false)">全て解除</button>
+                </div>
+                <div id="bulk-export-progress" style="font-size:0.8rem; color:#555; margin-top:6px; display:none;"></div>
+            </div>
+
+            <!-- 現場の切替・削除用リスト -->
             <div id="site-list-container"></div>
         </div>
     </div>
@@ -197,17 +208,15 @@ canvas.sketch-canvas { display: block; width: 100%; }
         </div>
     </div>
 
-    <!-- 管理項目の参照ボタン用モーダル（4択） -->
+    <!-- 管理項目の参照ボタン用モーダル（4択・左揃え） -->
     <div id="modal-reference-choice" class="custom-modal-overlay">
         <div class="custom-modal-box">
             <div class="custom-modal-title">災害番号・発注者名・被災日・整理番号を引用</div>
             <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
-                <button type="button" class="btn-sub" onclick="siteManager.applyReferenceFromDefaults()">① 保存済みの初期値を引用</button>
-                <button type="button" class="btn-sub" onclick="siteManager.applyReferenceFromLastSite()">② 最後の現場を引用</button>
-                <button type="button" class="btn-sub" onclick="siteManager.openSitePickModal()">③ 他の現場を指定して引用</button>
-            </div>
-            <div class="custom-modal-actions">
-                <button type="button" class="btn-sub" onclick="siteManager.closeReferenceModal()">④ キャンセル</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromDefaults()">① 保存済みの初期値を引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromLastSite()">② 最後の現場を引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.openSitePickModal()">③ 他の現場を指定して引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.closeReferenceModal()">④ キャンセル</button>
             </div>
         </div>
     </div>
@@ -237,7 +246,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
         </div>
     </div>
 
-    <!-- 調査を実施した者 -->
+    <!-- 調査を実施した者（端末固定：現場作成・削除で消えない） -->
     <div class="accordion-item" data-group="surveyor-info">
         <button class="accordion-header">
             <div class="header-label"><span class="main-title">調査を実施した者</span><span class="summary-text empty">未入力</span></div>
@@ -252,10 +261,47 @@ canvas.sketch-canvas { display: block; width: 100%; }
         </div>
     </div>
 
-    <!-- 入出力データ操作 -->
+    <!-- 設定 -->
+    <div class="accordion-item" data-group="output-settings">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">設定</span><span class="summary-text">出力設定</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666;">写真の出力横幅（長辺）</label>
+                <div style="display:flex; align-items:center; gap:8px; margin-top:5px; margin-bottom:8px;">
+                    <select id="photo-resize-width" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px; font-size:0.9rem;">
+                        <option value="800">800px（小・軽量）</option>
+                        <option value="1200" selected>1200px（標準）</option>
+                        <option value="1600">1600px（大）</option>
+                        <option value="2000">2000px（最大）</option>
+                        <option value="0">リサイズなし（元サイズ）</option>
+                    </select>
+                    <span style="font-size:0.75rem; color:#888;">で保存</span>
+                </div>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer;">
+                    <input type="checkbox" id="photo-force-43" style="width:18px; height:18px;">
+                    強制的に4:3にする（右側をカット）
+                </label>
+            </div>
+
+            <div style="background:#eee; padding:10px; border-radius:4px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer;">
+                    <input type="checkbox" id="bulk-export-bundle" checked style="width:18px; height:18px;">
+                    複数JZIP出力時、まとめて1つのZIPにする
+                </label>
+                <p style="font-size:0.7rem; color:#999; margin:6px 0 0 0;">
+                    オフにすると、現場管理でJZIP出力を実行したとき、チェックした現場ごとに個別のZIPファイルとして連続ダウンロードします。ブラウザによっては複数ファイルの連続ダウンロードがブロックされる場合があります。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 入出力データ設定 -->
     <div class="accordion-item" data-group="io-area">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">入出力データ操作</span><span class="summary-text">データ操作</span></div>
+            <div class="header-label"><span class="main-title">入出力データ設定</span><span class="summary-text">データ操作</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
@@ -282,43 +328,6 @@ canvas.sketch-canvas { display: block; width: 100%; }
                 </div>
             </div>
 
-            <!-- 写真設定 -->
-            <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
-                <label style="font-size:0.7rem; color:#666;">写真の出力横幅（長辺）</label>
-                <div style="display:flex; align-items:center; gap:8px; margin-top:5px; margin-bottom:8px;">
-                    <select id="photo-resize-width" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px; font-size:0.9rem;">
-                        <option value="800">800px（小・軽量）</option>
-                        <option value="1200" selected>1200px（標準）</option>
-                        <option value="1600">1600px（大）</option>
-                        <option value="2000">2000px（最大）</option>
-                        <option value="0">リサイズなし（元サイズ）</option>
-                    </select>
-                    <span style="font-size:0.75rem; color:#888;">で保存</span>
-                </div>
-                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer;">
-                    <input type="checkbox" id="photo-force-43" style="width:18px; height:18px;">
-                    強制的に4:3にする（右側をカット）
-                </label>
-            </div>
-
-            <!-- 全現場一括JZIP出力（Phase 6.17） -->
-            <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
-                <label style="font-size:0.7rem; color:#666;">全現場一括JZIP出力</label>
-                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer; margin-top:6px;">
-                    <input type="checkbox" id="bulk-export-bundle" checked style="width:18px; height:18px;">
-                    まとめて1つのZIPにする
-                </label>
-                <p style="font-size:0.7rem; color:#999; margin:4px 0 8px 0;">
-                    オフにすると現場ごとに個別のZIPファイルとしてダウンロードします。ブラウザによっては複数ファイルの連続ダウンロードがブロックされる場合があります。
-                </p>
-                <div id="bulk-export-site-list" style="max-height:200px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; padding:6px; margin-bottom:8px; background:#fff;"></div>
-                <div style="display:flex; gap:6px; margin-bottom:8px;">
-                    <button type="button" class="btn-sub" style="flex:1; font-size:0.78rem;" onclick="siteManager.selectAllForBulkExport(true)">全て選択</button>
-                    <button type="button" class="btn-sub" style="flex:1; font-size:0.78rem;" onclick="siteManager.selectAllForBulkExport(false)">全て解除</button>
-                </div>
-                <button type="button" class="btn-main" onclick="siteManager.bulkExportSelected()">選択した現場をまとめてJZIP出力</button>
-                <div id="bulk-export-progress" style="font-size:0.8rem; color:#555; margin-top:6px; display:none;"></div>
-            </div>
             <hr style="margin: 15px 0;">
             <button type="button" class="btn-sub" style="background:#e67e22; margin-bottom:6px;"
                 onclick="appControl.saveDefaults()">初期値として保存</button>
@@ -624,12 +633,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.17</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.18</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.17</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.18</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -648,8 +657,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.17)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.17 (前回の反映漏れ修正・全現場一括JZIP出力を追加)</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.18)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.18（管理タブのレイアウト整理：現場管理の配置・現場カードの横並び化、調査を実施した者の端末固定化、設定アコーディオンの新設、入出力データ設定への改名）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -681,8 +690,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
             <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
             <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
-            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>現場管理（仮）・管理項目（発注者名含む）・調査を実施した者・入出力データ操作</td></tr>
-            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td></tr>
+            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.18更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力の1列ボタン＋一括JZIP出力チェックリスト＋現場カード一覧）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（写真の出力横幅／強制4:3／まとめてZIP化）・入出力データ設定（旧・入出力データ操作。ファイル名構成・初期値の保存/クリア/読込・地図キャッシュ開放）</td></tr>
+            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
             <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
@@ -690,7 +699,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・プリセット・更新確認・mapCacheManager・saveDefaults/loadDefaults・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.18更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・siteManager（現場カード横並びレイアウト・調査を実施した者を除外したリセット処理）・更新確認・mapCacheManager・saveDefaults/loadDefaults・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
@@ -702,11 +711,10 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <h3>4. タブ構成</h3>
         <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
             <tr style="background:#eee;"><th>タブ</th><th>section ID</th><th>内容</th><th>ソースファイル</th></tr>
-            <tr><td>管理</td><td>content-manage</td><td>現場管理（仮）・管理項目・調査を実施した者・入出力データ操作</td><td>manage.html</td></tr>
-            <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・JZIP入出力</td><td>introduction.html</td></tr>
+            <tr><td>管理</td><td>content-manage</td><td>現場管理・管理項目・調査を実施した者・設定・入出力データ設定</td><td>manage.html</td></tr>
+            <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・保存</td><td>introduction.html</td></tr>
             <tr><td>開発</td><td>content-dev</td><td>アプリ更新・開発ログ・アプリ化の手順</td><td>dev.html（spec.html・install_guide.htmlを内包）</td></tr>
         </table>
-        <p style="margin-top:10px; font-size:0.9rem;">※ ⑥複数現場管理は未実装。「現場管理」アコーディオンは準備中表示。実装時に管理タブ内のこの部分を現場リスト方式に置き換える（タブ構成自体は変わらない）。</p>
     </div>
 
     <div class="spec-section">
@@ -720,14 +728,14 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>写真エリアのUI配置順（確定）:</strong> ナビゲーション → プレビュー → タグ・削除 → 📷撮影・📁ファイル選択ボタン → 写真の備考 → センサーエリア（撮影方向・位置情報）</li>
             <li><strong>カメラinput分離（確定・変更禁止）:</strong> photo-camera-input（handleCameraFile・GPS自動記録）/ photo-file-input（handleFileSelect・EXIF読み込み）。changeリスナーはDOMContentLoaded内でaddEventListenerで登録（iOS対応）。</li>
             <li><strong>IndexedDB永続化（photoStorage）:</strong> 撮影・選択・削除・ソート・並び替え時にsyncAll()。アプリ起動時にrestore()でdataUrlを復元。アプリが落ちても写真が消えない。</li>
-            <li><strong>4:3強制クロップ:</strong> 縦を基準に左寄せで右側をカット。targetWは4:3後の横幅が基準。管理タブのチェックボックスで制御。</li>
+            <li><strong>4:3強制クロップ:</strong> 縦を基準に左寄せで右側をカット。targetWは4:3後の横幅が基準。管理タブ「設定」のチェックボックスで制御。</li>
             <li><strong>撮影ボタンのGPS表示:</strong> 「誤差○m」を直接表示。未取得時は点滅。GPS起動はDOMContentLoadedで実施。</li>
             <li><strong>位置情報4状態:</strong> ○m（精度あり）/ 修正済み（地図タップ後・青・座標表示）/ 不明（EXIFから）/ 未取得</li>
             <li><strong>GPS修正フロー:</strong> 修正ボタン→写真タブ閉じ→位置図タブ開く（現在ズーム+2）→地図タップ→写真タブに戻る。gpsFixed=true。</li>
             <li><strong>方位センサー優先順位:</strong> webkitCompassHeading（iOS・真北基準）→ deviceorientationabsolute（Android等・真北基準）→ deviceorientation（フォールバック）</li>
             <li><strong>撮影方向は記録/削除ボタン方式のまま（GPSのみ修正ボタンに一本化）。</strong></li>
             <li><strong>JZIPエクスポート時のEXIF書き込み:</strong> piexifjsで既存EXIFにマージしてGPS座標・方位・精度を書き込む。エラー時フォールバック。</li>
-            <li><strong>リサイズ横幅指定:</strong> 管理タブで800/1200/1600/2000px・なしを選択。デフォルト1200px。</li>
+            <li><strong>リサイズ横幅指定:</strong> 管理タブ「設定」で800/1200/1600/2000px・なしを選択。デフォルト1200px。</li>
         </ul>
 
         <h4>5.3 地図機能</h4>
@@ -736,13 +744,14 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li>モード：メイン(位置)・サブ(落書き)・白紙メモの3モード。モード切替ボタンはCSS activeクラスで色制御（インラインstyle禁止）。</li>
             <li><strong>maxZoom:25（オーバーズーム対応）:</strong> maxNativeZoom:18（地理院）/19（ESRI）でタイルを拡大表示。</li>
             <li><strong>地図初期化タイミング（確定・変更禁止）:</strong> storageManager.load()では初期化せず、アコーディオンを開いたときにinvalidateSize()→ペンディングデータ復元の順で実行。DOMサイズ0での初期化を防ぐ。</li>
-            <li><strong>地図キャッシュ:</strong> 表示したタイルを自動でCache Storageに蓄積（Stale-While-Revalidate方式）。管理タブに「地図キャッシュを開放する」ボタンあり（LocalStorageには影響しない）。</li>
+            <li><strong>地図キャッシュ:</strong> 表示したタイルを自動でCache Storageに蓄積（Stale-While-Revalidate方式）。管理タブ「入出力データ設定」に「地図キャッシュを開放する」ボタンあり（LocalStorageには影響しない）。</li>
         </ul>
 
         <h4>5.4 初期値・クリア機能</h4>
         <ul>
             <li><strong>保存内容:</strong> 会社情報（company_id/leader_name/company_name/tel/fax/person_name/email）・fn1〜fn5・photo_resize_width・photo_force_43</li>
             <li><strong>保存先:</strong> LocalStorage（キー: survey_app_defaults）。起動時にloadDefaults()で自動読み込み。</li>
+            <li><strong>保存場所（UI）:</strong> 管理タブ「入出力データ設定」アコーディオン内の「初期値として保存」ボタンで保存する。現時点では保存済みの値を読める専用の表示欄は無く、「初期値の読み込み」ボタンを押すと画面の該当欄に反映される形で内容を確認できる。</li>
             <li><strong>クリア（初期値を残す）:</strong> フォーム・写真・地図・白紙メモ・オートセーブ・IndexedDBを全消去→初期値を適用。確認ダイアログあり。</li>
             <li><strong>クリア（全未入力）:</strong> 同上だが初期値を適用しない。確認ダイアログあり。</li>
             <li><strong>初期値の読み込み:</strong> 入力内容はそのまま・初期値フィールドだけ上書き。</li>
@@ -954,7 +963,6 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>二重の安全策:</strong> 現地調査タブに常時表示される災害番号（Phase 5.93）により、誤って別の現場に切り替えても気づけるようにしてある。</li>
             <li><strong>写真本体（photoStorage・2_script_photo.js）:</strong> IndexedDBのレコードにsiteIdを持たせ、キーを「siteId::インデックス番号」の複合キーに変更した。syncAll(photos, siteId)・restoreForSite(siteId)・clearAllForSite(siteId)を新設。siteId省略時はsiteManager.getCurrentSiteId()（無ければ'default'）を自動で使うため、既存の呼び出し（syncAll(this.photos)等）はそのまま動く。</li>
             <li><strong>既存ユーザーの移行:</strong> survey_sitesがまだ無く、旧survey_app_autosaveだけある場合、起動時にsiteManager.migrateIfNeeded()が自動で「現場1」を1件作成する。IndexedDBの旧レコード（siteIdタグ無し・idが整数）も、getAllForSite()側で「現在の現場のもの」として後方互換的に扱う。</li>
-            <li><strong>今回は含めない（段階2以降）:</strong> 現場リストのUI（一覧表示・新規作成ボタン・切替操作・保存確認ダイアログ）、参照ボタン（7.1）、JZIP入出力の現場単位への整理。現時点ではsiteManagerの関数群は用意されているが、画面から呼び出す導線はまだない。</li>
         </ul>
 
         <h4>5.23 複数現場管理 段階2：現場リストUI（Phase 6.12）</h4>
@@ -976,6 +984,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>ハイライト表示:</strong> 引用した項目には.ref-highlightクラス（薄いオレンジ背景）を付与する。値を実際に書き換えた（inputイベントが発火した）時点でクラスを外す。プログラムによる値の代入だけではinputイベントを発火させていないため、①②③の適用直後にハイライトが即座に消えることはない。</li>
             <li><strong>調査日は対象外:</strong> 参照では引き継がない。常に今日の日付のまま。</li>
             <li><strong>同期表示の扱い:</strong> dept_name・disaster_noはinputイベント経由（inline oninput）で同期表示（syncDeptName・syncDisasterNoTab）される設計だが、参照適用時はinputイベントを発火させない方針のため、_applyReferenceFields()内でこの2つの同期関数を明示的に呼んでいる。</li>
+            <li><strong>【Phase 6.18】4択モーダルのレイアウト:</strong> ①②③④の各ボタンをtext-align:leftで左揃えに変更した（従来はボタン標準の中央揃えで読みにくいという指摘のため）。④キャンセルも他の3つと同じ列に統合し、見た目上も1つの選択肢群として扱う。</li>
         </ul>
 
         <h4>5.25 保存確認を2択から3択に修正（Phase 6.14）</h4>
@@ -1016,14 +1025,6 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>アコーディオン見出し横の表示が「保存済み」「未保存」「現場未選択」に切り替わる（災害番号の常時表示と同じ発想）。</li>
                 </ul>
             </li>
-            <li><strong>管理タブ「現場管理」:</strong>
-                <ul>
-                    <li>＋新規現場を作成・JZIP読み込みを横並びで配置。</li>
-                    <li>現在編集中の現場を一番上に表示し、「（現在編集中）」の文言も添える。</li>
-                    <li>各現場の行に「JZIP出力」「削除」ボタンを配置。JZIP出力は保存済みのデータ（survey_sites・IndexedDB）だけを対象とし、今開いている現場に未保存の変更がある場合は出力を拒否し、先に保存タブで保存するよう案内する。</li>
-                    <li>削除は確認のうえ、現場データ（survey_sites）とIndexedDB（photoStorage.clearAllForSite）の両方を消す。今開いている現場自体を削除した場合は、画面を空の状態に戻す。</li>
-                </ul>
-            </li>
             <li><strong>未保存判定（siteManager.hasUnsavedChanges）:</strong> イベントで逐一フラグを立てる方式ではなく、getFormData()・photoApp.photosの現在値を、保存済みの現場レコード（formData・photoList）とその都度JSON文字列で比較する方式にした。写真の追加・削除、地図の描画、白紙メモの編集など、個別に変更イベントを拾いきれない操作があっても取りこぼさない。</li>
             <li><strong>既知の制限（Phase 6.16時点）:</strong>
                 <ul>
@@ -1033,19 +1034,48 @@ canvas.sketch-canvas { display: block; width: 100%; }
             </li>
         </ul>
 
-        <h4>5.28 前回の反映漏れの修正・全現場一括JZIP出力（Phase 6.17）</h4>
+        <h4>5.28 全現場一括JZIP出力の追加（Phase 6.17）</h4>
         <ul>
-            <li><strong>前回（Phase 6.16）の反映漏れ修正:</strong> introduction.htmlの入出力データ操作→「保存」への置き換えが、パッチスクリプトの不具合で実際には反映されていなかった。今回、直接str_replaceで確実に反映したうえで、あわせてmanage.html側にも同じ「入出力データ操作」という名前の別アコーディオン（ファイル名構成・写真設定等を持つ、現場管理とは別物）が残っており、そちらには古いJZIP保存/読み込みボタンと、現場管理タブに移したはずのJZIP読み込みボタンが重複していたことも判明したため、あわせて整理した（古いボタン・重複するCSV出力ボタンを削除）。</li>
-            <li><strong>全現場一括JZIP出力（manage.html・入出力データ操作）:</strong>
+            <li><strong>全現場一括JZIP出力:</strong>
                 <ul>
                     <li>「まとめて1つのZIPにする」チェック（デフォルトON）。ONの場合、外側の1つのZIPの中に現場ごとのフォルダ（survey_data.json＋photos/）を作る。1回のダウンロード操作で完結するため、ブラウザの複数ファイル連続ダウンロードのブロックを回避できる。</li>
-                    <li>OFFの場合は現場ごとに個別のZIPファイルを連続でダウンロードする。1件ごとに400ms待つことでブラウザのブロックをできるだけ避けるが、それでも初回はブラウザから複数ダウンロードの許可を求められる場合がある旨をチェック直下に注記した。</li>
-                    <li>現場一覧をチェックボックス形式で表示し、「全て選択」「全て解除」・出力対象を絞れる（改修指示書の「現場をリスト化しチェックボックス等で選択してまとめて保存」に対応）。</li>
+                    <li>OFFの場合は現場ごとに個別のZIPファイルを連続でダウンロードする。1件ごとに400ms待つことでブラウザのブロックをできるだけ避けるが、それでも初回はブラウザから複数ダウンロードの許可を求められる場合がある。</li>
+                    <li>現場一覧をチェックボックス形式で表示し、「全て選択」「全て解除」で出力対象を絞れる（改修指示書の「現場をリスト化しチェックボックス等で選択してまとめて保存」に対応）。</li>
                     <li>進捗表示（#bulk-export-progress）：「n/m件目を処理中」のように表示し、古い端末での処理時間に対する不安を減らす。</li>
                     <li>今開いている現場が選択対象に含まれ、かつ未保存の変更がある場合は、一括出力全体を実行前に拒否する（個別出力と同じ考え方）。</li>
                 </ul>
             </li>
             <li><strong>共通化:</strong> 1現場ぶんのZIP内容（survey_data.json・photos/）を組み立てる処理を_populateZipFolderForSite()として切り出し、個別出力（exportSiteZip）・一括出力（bundle時）の両方で共用する。</li>
+        </ul>
+
+        <h4>5.29 管理タブのレイアウト整理（Phase 6.18）</h4>
+        <ul>
+            <li><strong>背景:</strong> Phase 6.17までで機能面は揃ったが、管理タブ内のボタン配置・アコーディオン構成が使いにくいという指摘（壁打ち）を受けて整理した。個別のJZIP出力ボタンとチェックボックス方式の一括出力が併存していた点、「入出力データ操作」に写真設定・現場一括出力の設定・ファイル名構成・初期値管理が全部混在していた点が主な課題。</li>
+            <li><strong>現場管理アコーディオンの再構成:</strong>
+                <ul>
+                    <li>「新規現場を作成」「JZIP読込」「JZIP出力」「CSV出力」の4ボタンを1列に配置。「JZIP出力」は下のチェックリストで選んだ現場を対象に一括出力する（siteManager.bulkExportSelected()）。「CSV出力」は現在の画面の内容をCSVで出力する（appControl.exportCSV()、従来通り現場単位の一括出力ではない）。</li>
+                    <li>個別の現場カードにあった「JZIP出力」ボタンは廃止。JZIP出力の経路をチェックボックス方式の一括出力（上部ボタン＋対象選択チェックリスト）に一本化した。</li>
+                    <li>現場カードのレイアウトを、現場名・siteId（左）と「削除」ボタン（右）の横並びに変更。縦に伸びていたカードの高さを抑えた。</li>
+                    <li>並び順は従来通り：現在編集中の現場を先頭固定、それ以外はcreatedAt降順（新しいものが上、古いものが下）。今回のレイアウト変更でもこの並び順ロジック自体は変更していない。</li>
+                    <li>JZIP出力の対象を選ぶチェックリスト（旧・入出力データ操作内の「全現場一括JZIP出力」）を現場管理アコーディオンの中に移動した。</li>
+                </ul>
+            </li>
+            <li><strong>管理項目アコーディオン:</strong> 「他の現場から引用」の4択モーダル（①②③④）を左揃えのボタン列に変更（詳細は5.24参照）。</li>
+            <li><strong>調査を実施した者の端末固定化:</strong>
+                <ul>
+                    <li>方針変更：この項目群（会社名・電話番号・FAX番号・職氏名・E-mail）は、現場ごとに変わるものではなく、使用する端末（＝担当者）ごとに基本的に固定という位置づけに変更した。</li>
+                    <li>実装：siteManager.promptCreateSite()・siteManager.deleteSite()内のフォームリセット処理で、<code>.accordion-item[data-group="surveyor-info"]</code>配下の入力欄を除外するようにセレクタを変更した。新規現場作成時・現場削除（現在編集中の現場を削除した場合の画面クリア）時のどちらでも、この項目群の値は保持される。</li>
+                    <li>「クリア（初期値を残す／全未入力）」（appControl.clearAll）は対象外：こちらは明示的な全消去操作のため、従来通りこの項目群も含めて消去される。端末固定化の対象は、あくまで現場の新規作成・削除に伴う暗黙のリセットのみ。</li>
+                </ul>
+            </li>
+            <li><strong>設定アコーディオンの新設:</strong>
+                <ul>
+                    <li>旧・入出力データ操作にあった「写真の出力横幅」「強制的に4:3にする」「複数JZIP出力時、まとめて1つのZIPにする」の3項目を、新設した「設定」アコーディオン（data-group="output-settings"）に移動した。</li>
+                    <li>「まとめて1つのZIPにする」チェックボックス自体はここに置くが、対象の現場を選ぶチェックリストは設定アコーディオンには置かない（現場管理アコーディオン側に一本化。設定側に現場リストを重複させると保守が煩雑になるため）。</li>
+                </ul>
+            </li>
+            <li><strong>入出力データ操作→入出力データ設定に改名:</strong> 上記の移動により、残るのはファイル名構成（fn1〜5）・初期値として保存／クリア（2種）／初期値の読み込み・地図キャッシュを開放する、の4系統。これらは現場単位ではなく端末・アプリ全体の設定寄りの項目のため「入出力データ設定」という名称に改めた。アコーディオン自体は廃止しておらず、中身を移動したうえで名称のみ変更している。</li>
+            <li><strong>保存済みの初期値の閲覧について（現時点の制限）:</strong> 「初期値として保存」ボタンで保存した内容（survey_app_defaults）を一覧表示する専用のUIは、Phase 6.18時点ではまだ無い。保存済みの値を確認したい場合は「初期値の読み込み」を押すと該当欄に反映される形になる。専用の閲覧UIが必要かどうかは今後の検討課題として残す（7章参照）。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -1073,63 +1103,24 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>アプリ更新UIは開発タブに1箇所のみ（Phase 6.05）:</strong> dev.htmlの「アプリ更新」アコーディオンが唯一の実装。spec.html側に重複した更新UIは置かない（id重複・二重表示を防ぐため）。</li>
             <li><strong>部品ファイルの差し替え漏れに注意:</strong> src配下のファイルは互いにバージョンがずれると症状の切り分けが難しくなる。改修のたびに影響する全ファイルを一式で提示・反映する。</li>
             <li><strong>地図の画像化は「タイルを再取得しない」方式で確定（Phase 6.05）:</strong> leaflet-image・html2canvasはいずれも地理院タイルサーバーとの相性問題（オーバーズーム時の404・CORS絡みの再取得失敗）で真っ黒画像を引き起こした。既に画面へ読み込み済みのDOM要素（&lt;img&gt;タイル）をそのまま転写する自前実装に統一し、新規のタイル取得を一切発生させない方針とする。今後、地図の画像化まわりを触る際もこの方針を踏襲する。</li>
+            <li><strong>調査を実施した者は端末固定（Phase 6.18）:</strong> 現場の新規作成・削除に伴う暗黙のリセット対象からこの項目群を除外する。明示的な「クリア」操作では従来通り消去対象に含む。</li>
+            <li><strong>JZIP出力経路はチェックボックス方式に一本化（Phase 6.18）:</strong> 現場カードごとの個別JZIP出力ボタンは廃止。現場管理アコーディオン上部の「JZIP出力」ボタン＋対象選択チェックリストが唯一の出力経路。</li>
         </ul>
     </div>
 
     <div class="spec-section">
         <h3>7. 次に行うタスクの積み残し（改修指示書準拠）</h3>
         <ul>
-            <li>【Step1-③】入力項目の初期値・階層設計
-                <ul>
-                    <li>済：3タブ構成への移行（Phase 5.80）、発注者名の管理タブ移動と諸元へのreadonly表示（Phase 5.81）</li>
-                    <li>済：災害番号の常時表示（現地調査タブのボタンに2段組みで表示。Phase 5.93）</li>
-                    <li>残：管理項目の参照ボタン（下記設計。⑥複数現場管理と同時に実装する）</li>
-                </ul>
-            </li>
+            <li>【Step1-③】入力項目の初期値・階層設計：完了（Phase 6.13にて管理項目の参照ボタンを実装済み。Phase 6.18で参照モーダルのレイアウトも左揃えに調整済み）。</li>
             <li>【Step2-①】真っ黒画像バグ：解決（Phase 6.05）。地図を写真に保存の実装を自前のタイル転写方式に変更。詳細は5.8参照。</li>
             <li>【Step2-②】位置図と帳票枠のサイズ不一致：解決（Phase 6.05）。位置図の画面表示自体を4:3に固定。詳細は5.10参照。</li>
-            <li>【Step2-③】白紙メモのベクタ化：段階1完了（Phase 6.05）。詳細は5.12参照。
-                <ul>
-                    <li>済：要素ベース(elements配列)への書き換え。undo・全消去・キャンバスの4:3固定。</li>
-                    <li>済：段階2 文字要素の選択・移動・回転・複数行入力（Phase 6.05）</li>
-                    <li>済：段階2続き 消しゴム廃止・編集モードで文字/直線/ペンを選択・移動（Phase 6.05）</li>
-                    <li>済：直線を連続線（折れ線）に変更。全頂点を編集可能に（Phase 6.05）</li>
-                    <li>済：線の頂点1点だけを削除する機能、作図中の点の可視化（Phase 6.05）</li>
-                    <li>見送り：段階3 拡大(ズーム)して細部記入。理由は5.17参照。</li>
-                    <li>済：段階4 ブラウザバック対策（Phase 6.07）</li>
-                </ul>
-            </li>
+            <li>【Step2-③】白紙メモのベクタ化：完了（Phase 6.05〜6.07）。詳細は5.12〜5.18参照（段階3の拡大記入のみ見送り。理由は5.17参照）。</li>
             <li>【Step2-⑤】GPS・方位取得のUI調整：解決（Phase 6.08・6.09）。詳細は5.19・5.20参照。</li>
-            <li>【Step2-⑥】複数現場管理の再設計：段階1完了（Phase 6.11）。詳細は5.22参照。
-                <ul>
-                    <li>済：段階1 データの持ち方・保存の仕組み（siteManager・photoStorageのsiteId対応）</li>
-                    <li>済：段階2 現場リストのUI（一覧・新規作成・切替）（Phase 6.12）</li>
-                    <li>済：段階3 管理項目の参照ボタン（Phase 6.13。設計は7.1参照）。保存確認は3択に修正（Phase 6.14）</li>
-                    <li>済：段階4 JZIP入出力を現場単位に整理（Phase 6.15）。⑥複数現場管理はこれで一区切り。</li>
-                </ul>
-            </li>
+            <li>【Step2-⑥】複数現場管理の再設計：段階1〜4完了（Phase 6.11〜6.15）。その後の運用整理（Phase 6.16〜6.18）も含め、⑥は一区切り。詳細は5.22〜5.29参照。</li>
             <li>iPhone実機での動作確認（部会お披露目時）</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
             <li>AppB側：帳票の位置図セル（現状12.86×6.64cm）を4:3の比率に合わせて再調整（AppBスレッドで対応）</li>
-        </ul>
-
-        <h4>7.1 管理項目の参照ボタン（設計確定・⑥と同時実装）</h4>
-        <p>同一災害で複数現場を回る際、共通する管理項目を他の現場から引き継ぐための機能。⑥で現場データの持ち方が変わるため、⑥の実装時に合わせて作る（先行実装すると二度手間になるため）。</p>
-        <ul>
-            <li><strong>配置:</strong> 管理タブ「管理項目」アコーディオン内に参照ボタンを置く。</li>
-            <li><strong>選択肢（4択）:</strong>
-                <ul>
-                    <li>①指定した初期値を引用（「初期値として保存」で保存した値）</li>
-                    <li>②最後の現場を参照</li>
-                    <li>③それ以外の現場を指定して参照（⑥の現場リストから選択）</li>
-                    <li>④キャンセル</li>
-                </ul>
-            </li>
-            <li><strong>引き継ぐ項目:</strong> 災害番号・発注者名・被災日・整理番号の4項目。</li>
-            <li><strong>整理番号の扱い（Phase 5.92確定）:</strong> 空欄にはせず、参照元の値をそのまま引き継ぐ。ただし現場ごとに異なるはずの項目なので、書き換え忘れに気づけるよう文字色を変えて表示する。</li>
-            <li><strong>前回値であることを示す文字色表示:</strong> 参照で引き継いだ災害番号・発注者名・被災日・整理番号の4項目は、引き継ぎ直後は目立つ色（オレンジ等）で表示する。ユーザーがその項目の値を実際に書き換えた時点で通常の文字色（黒）に戻す。フォーカスが入っただけ・クリックしただけでは色は変わらない（値の変更で判定する。inputイベントでのみ色を戻し、focus/blurイベントでは戻さない）。色が前回値のままでもその値は正式な入力値として採用される（未入力・無効という意味ではない）。</li>
-            <li><strong>調査日：</strong> 参照元の日付ではなく今日の日付のままとする（色表示の対象外）。</li>
-            <li><strong>①の前提:</strong> 「初期値として保存」の保存対象（survey_app_defaults）に災害番号・発注者名・被災日を追加する（整理番号は初期値保存の対象外。②③の現場参照でのみ引き継ぐ）。</li>
+            <li><strong>【新規・検討中】保存済みの初期値の閲覧UI:</strong> survey_app_defaultsの内容を一覧表示する専用UIを追加するかどうか未確定（5.29参照）。追加する場合、管理タブのどこに置くか・表示形式（読み取り専用の一覧か、初期値として保存ボタンの直下に簡易表示するか等）を次回の壁打ちで決める。</li>
         </ul>
     </div>
 </div>
@@ -5369,6 +5360,18 @@ document.addEventListener('click', (e) => {
 //   ・既存ユーザー向けの移行：survey_sitesがまだ無く、survey_app_autosaveだけ
 //     ある場合は、起動時に自動で「現場1」として1件だけ作成する。
 // =============================================================================
+//
+// 【Phase 6.18】管理タブのレイアウト整理（本ファイルでの変更点）
+//   ・「調査を実施した者」は端末固定の情報として扱う方針に変更。
+//     現場の新規作成(promptCreateSite)・削除(deleteSite)でも
+//     この項目群だけはリセット対象から除外する
+//     （.accordion-item[data-group="surveyor-info"] を除外して入力欄をクリアする）。
+//   ・現場カードのレイアウトを、現場名（左）＋削除ボタン（右）の横並びに変更。
+//     個別の「JZIP出力」ボタンはカードから廃止し、上部のチェックボックス方式の
+//     一括JZIP出力（bulkExportSelected）に統一した。
+//   ・並び順は従来通り「現在編集中の現場を先頭固定、それ以外はcreatedAt降順
+//     （新しいものが上、古いものが下）」のまま変更なし。
+// =============================================================================
 window.siteManager = {
     LIST_KEY: 'survey_sites',
     CURRENT_KEY: 'survey_app_current_site',
@@ -5564,14 +5567,22 @@ window.siteManager = {
         });
     },
 
+    // 【Phase 6.18】「調査を実施した者」は端末固定の情報のため、
+    // 新規現場作成時のフォームリセットから除外する
+    // （.accordion-item[data-group="surveyor-info"] 内の入力欄はクリアしない）。
     promptCreateSite() {
         const name = prompt('新しい現場の名前を入力してください（例：〇〇橋 上流側）');
         if (name === null) return; // キャンセル
         if (!name.trim()) { alert('現場名を入力してください'); return; }
         this.confirmAndProceed(() => {
             const siteId = this.createSite(name);
-            // 新規現場は空の状態から始める（前の現場の入力を引きずらない）
-            document.querySelectorAll('.accordion-item input, .accordion-item select, .accordion-item textarea').forEach(el => {
+            // 新規現場は空の状態から始める（前の現場の入力を引きずらない）。
+            // ただし「調査を実施した者」は端末固定情報として維持する。
+            document.querySelectorAll(
+                '.accordion-item:not([data-group="surveyor-info"]) input, ' +
+                '.accordion-item:not([data-group="surveyor-info"]) select, ' +
+                '.accordion-item:not([data-group="surveyor-info"]) textarea'
+            ).forEach(el => {
                 if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return;
                 if (el.tagName === 'SELECT') el.selectedIndex = 0;
                 else el.value = '';
@@ -5603,7 +5614,8 @@ window.siteManager = {
         return d.innerHTML;
     },
 
-    // 【Phase 6.16】現在の現場を一番上に表示し、各行にJZIP出力・削除ボタンを追加する
+    // 【Phase 6.18】現在の現場を一番上に表示し、各カードは「現場名（左）＋削除ボタン（右）」の
+    // 横並びレイアウトにする。個別のJZIP出力ボタンは廃止（上部の一括JZIP出力に統一）。
     renderSiteList() {
         this.renderBulkExportSiteList(); // 一括出力側の一覧も常に一緒に更新する
         const container = document.getElementById('site-list-container');
@@ -5611,9 +5623,10 @@ window.siteManager = {
         const sites = this.getSites();
         const currentId = this.getCurrentSiteId();
         if (sites.length === 0) {
-            container.innerHTML = '<p style="font-size:0.85rem; color:#888;">現場がまだありません。「＋ 新規現場を作成」から始めてください。</p>';
+            container.innerHTML = '<p style="font-size:0.85rem; color:#888;">現場がまだありません。「＋新規現場」から始めてください。</p>';
             return;
         }
+        // 現在編集中の現場を先頭固定。それ以外は createdAt 降順（新しいものが上、古いものが下）
         const sorted = sites.slice().sort((a, b) => {
             if (a.siteId === currentId) return -1;
             if (b.siteId === currentId) return 1;
@@ -5621,17 +5634,13 @@ window.siteManager = {
         });
         container.innerHTML = sorted.map(s => {
             const active = s.siteId === currentId;
-            return `<div style="padding:10px; border:1px solid ${active ? '#3498db' : '#ddd'}; border-radius:4px; margin-bottom:6px; background:${active ? '#eaf4fb' : '#fff'};">
-                <div onclick="siteManager.switchToSite('${s.siteId}')" style="cursor:pointer;">
+            return `<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px; border:1px solid ${active ? '#3498db' : '#ddd'}; border-radius:4px; margin-bottom:6px; background:${active ? '#eaf4fb' : '#fff'};">
+                <div onclick="siteManager.switchToSite('${s.siteId}')" style="cursor:pointer; flex:1; min-width:0;">
                     <div style="font-weight:bold; font-size:0.9rem;">${active ? '● ' : '○ '}${this._escapeHtml(s.siteName)}${active ? '（現在編集中）' : ''}</div>
                     <div style="font-size:0.75rem; color:#888;">${this._escapeHtml(s.siteId)}</div>
                 </div>
-                <div style="display:flex; gap:6px; margin-top:6px;">
-                    <button type="button" class="btn-sub" style="flex:1; padding:6px; font-size:0.78rem;"
-                        onclick="event.stopPropagation(); siteManager.exportSiteZip('${s.siteId}')">JZIP出力</button>
-                    <button type="button" class="btn-sub" style="flex:1; padding:6px; font-size:0.78rem; background:#c0392b;"
-                        onclick="event.stopPropagation(); siteManager.deleteSite('${s.siteId}')">削除</button>
-                </div>
+                <button type="button" class="btn-sub" style="flex:0 0 auto; padding:6px 12px; font-size:0.78rem; background:#c0392b;"
+                    onclick="event.stopPropagation(); siteManager.deleteSite('${s.siteId}')">削除</button>
             </div>`;
         }).join('');
     },
@@ -5740,7 +5749,8 @@ window.siteManager = {
         a.click();
     },
 
-    // ---- 一括出力（Phase 6.17）：現場を選んでまとめて出力する ----
+    // ---- 一括出力（Phase 6.17〜）：現場を選んでまとめて出力する ----
+    // 【Phase 6.18】現場管理の上部ボタン「JZIP出力」から直接呼ばれる、唯一のJZIP出力経路。
     renderBulkExportSiteList() {
         const container = document.getElementById('bulk-export-site-list');
         if (!container) return;
@@ -5804,6 +5814,7 @@ window.siteManager = {
     },
 
     // ---- 現場の削除 ----
+    // 【Phase 6.18】画面を空にする際も「調査を実施した者」はリセット対象から除外する。
     deleteSite(siteId) {
         if (!confirm('この現場を削除します。元に戻せません。よろしいですか？')) return;
         const sites = this.getSites().filter(s => s.siteId !== siteId);
@@ -5812,7 +5823,11 @@ window.siteManager = {
         if (this.getCurrentSiteId() === siteId) {
             // 今開いている現場自体を削除した場合、画面を空にする
             this.setCurrentSiteId(null);
-            document.querySelectorAll('.accordion-item input, .accordion-item select, .accordion-item textarea').forEach(el => {
+            document.querySelectorAll(
+                '.accordion-item:not([data-group="surveyor-info"]) input, ' +
+                '.accordion-item:not([data-group="surveyor-info"]) select, ' +
+                '.accordion-item:not([data-group="surveyor-info"]) textarea'
+            ).forEach(el => {
                 if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return;
                 if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
             });
@@ -6199,7 +6214,7 @@ window.appControl = {
         const row = [d.survey_date, d.company_id, d.leader_name, d.ref_no, d.disaster_no, d.dept_name, d.loc_name, d.route_name, d.damage_date, d.length, d.height, d.side_type, d.distance_label, d.comment, d.expansion_exists, d.expansion_status, d.special_exists, d.special_status, d.plan_summary, d.company_name, d.tel, d.fax, d.person_name, d.email, c.start, c.end, window.photoApp.photos.length]
                     .map(v => `"${(v || "").toString().replace(/"/g, '""')}"`);
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(new Blob(["\uFEFF" + headers.join(",") + "\n" + row.join(",")], {type:"text/csv"}));
+        a.href = URL.createObjectURL(new Blob(["﻿" + headers.join(",") + "\n" + row.join(",")], {type:"text/csv"}));
         a.download = this.getFn() + ".csv";
         a.click();
     },
@@ -6313,7 +6328,7 @@ window.appControl = {
 
         document.querySelectorAll('.accordion-item').forEach(item => {
             const s = item.querySelector('.summary-text');
-            if (s && !['map-area','photo-area','io-area','device-settings','site-manage','app-update','dev-log','install-guide'].includes(item.dataset.group)) {
+            if (s && !['map-area','photo-area','io-area','device-settings','site-manage','app-update','dev-log','install-guide','output-settings'].includes(item.dataset.group)) {
                 s.textContent = '未入力';
                 s.classList.remove('filled');
                 s.classList.add('empty');
@@ -6446,30 +6461,30 @@ document.addEventListener('DOMContentLoaded', () => {
         const open = content.style.display === 'block';
         document.querySelectorAll('.accordion-content').forEach(x => x.style.display = 'none');
         document.querySelectorAll('.accordion-header .icon').forEach(i => i.textContent = '+');
-        if (!open) { 
-            content.style.display = 'block'; 
-            h.querySelector('.icon').textContent = '-'; 
-            if (h.parentElement.dataset.group === 'map-area') { 
+        if (!open) {
+            content.style.display = 'block';
+            h.querySelector('.icon').textContent = '-';
+            if (h.parentElement.dataset.group === 'map-area') {
                 window.mapApp.init();
                 // 【修正】以前の .map-mode-selector ラッパーは廃止済み。
                 // 現行の3ボタン（#mode-btn-map/draw/sketch）から直接activeなものを判定する。
                 const activeBtn = document.querySelector('#mode-btn-map.active, #mode-btn-draw.active, #mode-btn-sketch.active');
                 const mode = activeBtn ? activeBtn.id.replace('mode-btn-', '') : 'map';
                 uiHelper.switchMapMode(mode);
-            } 
+            }
         }
     }));
     const updateS = (item) => {
-        const s = item.querySelector('.summary-text'); 
-        if (!s || ['map-area', 'photo-area', 'io-area', 'device-settings', 'site-manage', 'app-update', 'dev-log', 'install-guide'].includes(item.dataset.group)) return;
+        const s = item.querySelector('.summary-text');
+        if (!s || ['map-area', 'photo-area', 'io-area', 'device-settings', 'site-manage', 'app-update', 'dev-log', 'install-guide', 'output-settings'].includes(item.dataset.group)) return;
         const vals = Array.from(item.querySelectorAll('input, select, textarea')).map(i => i.value).filter(v => v && v !== 'none' && v !== '');
-        if (vals.length > 0) { s.textContent = vals.join(' / ').substring(0, 20); s.classList.replace('empty', 'filled'); } 
+        if (vals.length > 0) { s.textContent = vals.join(' / ').substring(0, 20); s.classList.replace('empty', 'filled'); }
         else { s.textContent = '未入力'; s.classList.replace('filled', 'empty'); }
     };
-    document.querySelectorAll('.accordion-item').forEach(item => { 
+    document.querySelectorAll('.accordion-item').forEach(item => {
         item.querySelectorAll('input, select, textarea').forEach(i => {
             i.addEventListener('input', () => { i.classList.remove('ref-highlight'); updateS(item); window.storageManager.save(); window.siteManager && siteManager.updateSaveStatusLabel(); });
-        }); 
+        });
     });
     const d = document.getElementById('default-date'); if (d && !d.value) d.value = new Date().toISOString().split('T')[0];
     const mapDiv = document.getElementById('map');
