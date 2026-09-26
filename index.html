@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.19)</title>
+    <title>被災状況調査アプリ (Phase 6.20)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -158,7 +158,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- 現場管理 -->
     <div class="accordion-item" data-group="site-manage">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">現場管理</span><span class="summary-text" id="site-manage-summary">現場リスト</span></div>
+            <div class="header-label"><span class="main-title">現場管理</span><span class="summary-text" id="site-manage-summary" style="display:none;"></span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
@@ -170,15 +170,19 @@ canvas.sketch-canvas { display: block; width: 100%; }
                 <button type="button" class="btn-sub" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="appControl.exportCSV()">CSV出力</button>
             </div>
 
+            <!-- 【Phase 6.20】アコーディオン見出し横の「現場リスト」「出力設定」表記、リスト上部の
+                 「JZIP出力の対象現場（チェックした現場が対象）」の注記を削除。JZIP出力対象のチェックは
+                 デフォルト全解除（全選択チェックボックスも初期はOFF）。
+                 出力ファイル名構成の初期値は fn1=調査日 / fn2=災害番号 / fn3〜5=なし、写真の出力横幅は
+                 1200px（標準）を、それぞれselected属性で明示している（リセット処理はこのselectedへ戻す）。 -->
             <!-- 【Phase 6.19】JZIP出力の対象選択（チェックボックス）と、現場の切替・編集・削除を
                  1つのリストに統合した。行はCSS Grid（固定カラム幅）で組んでおり、
                  現場名がどれだけ長くても1行に収まらない分は省略表示(ellipsis)にする。
                  以前のflexベースの実装は、現場名のボックス幅が計算に失敗して0近くまで潰れ、
                  日本語が1文字ずつ縦に折り返される表示崩れを起こしていたため、Gridに変更した。 -->
             <div style="background:#f7f7f7; padding:10px; margin-bottom:12px; border-radius:4px;">
-                <label style="font-size:0.7rem; color:#666; display:block; margin-bottom:6px;">JZIP出力の対象現場（チェックした現場が対象）</label>
                 <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer; padding:4px 0;">
-                    <input type="checkbox" id="bulk-export-select-all" checked onchange="siteManager.selectAllForBulkExport(this.checked)">
+                    <input type="checkbox" id="bulk-export-select-all" onchange="siteManager.selectAllForBulkExport(this.checked)">
                     全選択／全解除
                 </label>
                 <div id="site-list-container" style="max-height:320px; overflow-y:auto;"></div>
@@ -265,7 +269,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- 設定 -->
     <div class="accordion-item" data-group="output-settings">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">設定</span><span class="summary-text">出力設定</span></div>
+            <div class="header-label"><span class="main-title">設定</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
@@ -312,7 +316,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                 <label style="font-size:0.7rem; color:#666;">出力ファイル名構成</label>
                 <div style="display:flex; gap:2px; margin-top:5px;">
                     <select class="fn-part" id="fn1">
-                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none">なし</option>
+                        <option value="survey_date" selected>調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none">なし</option>
                     </select>
                     <select class="fn-part" id="fn2">
                         <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no" selected>災害番号</option><option value="none">なし</option>
@@ -634,12 +638,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.19</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.20</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.19</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.20</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -658,8 +662,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.19)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.19（現場管理リストの表示崩れ修正：JZIP出力チェックリストと現場カードをGridレイアウトの1つのリストに統合し、現場名の編集ボタンを追加）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.20)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.20（保存確認モーダルを未保存の変更がある場合のみ表示／管理タブの表記整理・JZIP出力対象チェックのデフォルト全解除／出力ファイル名構成・写真の出力横幅の初期値がリセットで化ける不具合の修正）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -691,7 +695,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
             <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
             <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
-            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.19更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（写真の出力横幅／強制4:3／まとめてZIP化）・入出力データ設定（旧・入出力データ操作。ファイル名構成・初期値の保存/クリア/読込・地図キャッシュ開放）</td></tr>
+            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.20更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（写真の出力横幅=初期1200px／強制4:3／まとめてZIP化。見出し横の補足表記は無し）・入出力データ設定（旧・入出力データ操作。ファイル名構成=初期は調査日・災害番号・なし・なし・なし／初期値の保存/クリア/読込・地図キャッシュ開放）</td></tr>
             <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
             <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
@@ -700,7 +704,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.19更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・siteManager（現場一覧をGridレイアウトに統合・renameSite新設・調査を実施した者を除外したリセット処理）・更新確認・mapCacheManager・saveDefaults/loadDefaults・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.20更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・siteManager（confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
@@ -972,7 +976,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>一覧表示:</strong> siteManager.renderSiteList()が、現場を新しい順に並べて表示する。現在開いている現場は●印・青枠・薄い青背景で強調表示、それ以外は○印。タップで切り替わる。</li>
             <li><strong>新規作成（siteManager.promptCreateSite）:</strong> 現場名の入力を求め（空なら作成しない）、confirmAndProceed()を経てから、新しいsiteIdで現場を作成する。作成後は画面の全入力・地図・写真・白紙メモを空の状態にリセットする（前の現場の内容を引きずらないように）。</li>
             <li><strong>切り替え（siteManager.switchToSite）:</strong> confirmAndProceed()を経てから、loadSiteIntoForm()で選んだ現場のデータを画面に反映する。</li>
-            <li><strong>保存確認（siteManager.confirmAndProceed）:</strong> 現在の現場が既にある場合、「今の入力内容を保存してから移動しますか？」を確認する（壁打ちで決めた案B）。OK＝commitCurrentToSite()で保存してから続行、キャンセル＝保存せず続行。どちらを選んでも切替・作成自体は行われる（引き止める確認ではなく、保存するかどうかだけの確認）。現在の現場がまだ無い（初回等）場合は確認せずそのまま続行する。</li>
+            <li><strong>保存確認（siteManager.confirmAndProceed）:</strong> 【Phase 6.14で3択モーダルに変更、Phase 6.20で出し分けを修正】現在の現場が既にあり、かつ未保存の変更がある場合に限り、保存確認モーダル（5.25参照）を出す。現在の現場がまだ無い（初回等）場合、または未保存の変更が無い場合は、確認せずそのまま続行する（5.31参照）。当初のPhase 6.12ではブラウザ標準confirm()の2択（OK＝保存して続行／キャンセル＝保存せず続行）だったが、5.25で3択モーダルに置き換え済み。</li>
             <li><strong>誤操作への配慮:</strong> 現地調査タブに常時表示される災害番号（Phase 5.93）と、現場一覧の●印強調表示の2つで、「今どの現場を開いているか」を確認しやすくしてある。</li>
         </ul>
 
@@ -998,7 +1002,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>「現場を移動しない」：モーダルを閉じるだけで、切替・新規作成自体を取りやめる</li>
                 </ul>
             </li>
-            <li><strong>実装:</strong> siteManager.confirmAndProceed()は、続行時に呼ぶ関数(afterFn)を_pendingProceedFnに保持したままモーダルを開くだけにし、実際の続行はモーダルのボタン（proceedWithSave/proceedWithoutSave）が押されたときに呼び出す。cancelProceed()は_pendingProceedFnを破棄してモーダルを閉じるだけで、何も実行しない。</li>
+            <li><strong>実装:</strong> siteManager.confirmAndProceed()は、続行時に呼ぶ関数(afterFn)を_pendingProceedFnに保持したままモーダルを開くだけにし、実際の続行はモーダルのボタン（proceedWithSave/proceedWithoutSave）が押されたときに呼び出す。cancelProceed()は_pendingProceedFnを破棄してモーダルを閉じるだけで、何も実行しない。モーダルを出す条件はPhase 6.20で「未保存の変更がある場合のみ」に絞った（5.31参照）。</li>
         </ul>
 
         <h4>5.26 複数現場管理 段階4：JZIP入出力を現場単位に整理（Phase 6.15）</h4>
@@ -1085,9 +1089,31 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>原因:</strong> 現場名を表示する要素に<code>flex:1; min-width:0</code>を指定していたが、実機のレンダリング環境によっては隣接する削除ボタン（<code>flex:0 0 auto</code>）側の幅計算が優先され、現場名側のflex基準幅が実質0に潰れるケースがあった。日本語（CJK）テキストはデフォルトで文字と文字の間どこでも改行できるため、ボックス幅がほぼ0になると1文字ごとに改行され、結果として縦書きのような表示になっていた。</li>
             <li><strong>対応方針:</strong> flexの幅計算に依存しない、より安定したCSS Grid（<code>grid-template-columns: 24px 1fr 52px 52px</code>という固定幅＋1frの組み合わせ）にレイアウトを変更した。あわせて現場名・siteIdの行には<code>white-space:nowrap; overflow:hidden; text-overflow:ellipsis</code>を指定し、たとえ幅が想定より狭くなっても、縦に折り返されるのではなく1行の省略表示（…）に収まるようにした。</li>
             <li><strong>UIの統合（壁打ちで確定）:</strong> 従来別々だった「JZIP出力の対象を選ぶチェックリスト（#bulk-export-site-list）」と「現場の切替・削除用リスト（#site-list-container）」を1つのリストに統合した。1行のカラム構成は左から　チェックボックス（JZIP出力対象選択）／現場名・siteId（タップで切替）／編集ボタン／削除ボタン、の4列。</li>
-            <li><strong>全選択／全解除:</strong> リスト上部の「全て選択」「全て解除」の2ボタンを、1つのチェックボックス（#bulk-export-select-all）に置き換えた。個別チェックの状態が変わった場合にこのチェックボックス自体の状態を追随させる仕組みは持たない（あくまで一括操作のトリガーとして機能する簡易な実装）。</li>
+            <li><strong>全選択／全解除:</strong> リスト上部の「全て選択」「全て解除」の2ボタンを、1つのチェックボックス（#bulk-export-select-all）に置き換えた。個別チェックの状態が変わった場合にこのチェックボックス自体の状態を追随させる仕組みは持たない（あくまで一括操作のトリガーとして機能する簡易な実装）。【Phase 6.20】初期状態は全解除に変更。一覧の再描画時は、全件にチェックが付いている場合のみ全選択チェックもONにする（5.31参照）。</li>
             <li><strong>現場名の編集機能を新設（siteManager.renameSite）:</strong> 各行に「編集」ボタンを追加し、押すとprompt()で現在の現場名を初期値表示しつつ新しい名前を入力できる。siteId・createdAt等のデータ構造は一切変更せず、表示用のsiteNameだけを更新する。従来は現場名を作成後に付け替える手段が無かったための追加機能。</li>
             <li><strong>renderBulkExportSiteList()の廃止:</strong> 上記の統合により、専用の一覧描画関数は不要になったため削除した。renderSiteList()が唯一の一覧描画関数となる。selectAllForBulkExport()は引き続き<code>.bulk-export-check</code>クラスのチェックボックス（今はrenderSiteList()が描く行に含まれる）を一括で切り替える。</li>
+        </ul>
+
+        <h4>5.31 保存確認モーダルの出し分け修正・管理タブの表記整理・初期値まわりの修正（Phase 6.20）</h4>
+        <ul>
+            <li><strong>保存確認モーダルの不具合:</strong> siteManager.confirmAndProceed()が「現場が選択中である」というだけで無条件に保存確認モーダルを出しており、何も編集していない状態で「＋新規現場」や現場の切替を押しても「今の入力内容をどうしますか？」が出ていた。
+                <ul>
+                    <li><strong>仕様（確定）:</strong> 未保存の変更が実際にある場合（siteManager.hasUnsavedChanges()がtrue）だけ、3択モーダル（変更を保存／変更を保存せず破棄／現場を移動しない）を出す。変更が無ければ確認なしでそのまま処理を進める。現場が未選択の場合も従来通り確認なしで続行する。</li>
+                    <li><strong>対象の呼び出し箇所:</strong> confirmAndProceed()を使っているのはswitchToSite()とpromptCreateSite()の2箇所で、どちらも上記の判定に統一された。deleteSite()は元々confirmAndProceed()を使っておらず、削除確認のconfirm()（「元に戻せません」）だけを出す作りのため変更していない（削除は保存の有無と無関係に破棄する操作のため）。</li>
+                    <li><strong>判定方式:</strong> 5.27の比較方式（getFormData()・photoApp.photosを保存済みレコードとJSON文字列で比較）をそのまま用いる。</li>
+                </ul>
+            </li>
+            <li><strong>管理タブの表記整理（manage.html）:</strong> 「現場管理」見出し横の「現場リスト」、「設定」見出し横の「出力設定」、現場リスト上部の「JZIP出力の対象現場（チェックした現場が対象）」の各表記を削除した。見出し横の#site-manage-summaryは他ファイルから参照されている可能性を考慮して要素自体は残し、非表示（display:none・中身なし）にしてある。</li>
+            <li><strong>JZIP出力対象チェックのデフォルト:</strong> 現場リストの各行のチェックは初期状態で全解除（従来は全てON）。全選択チェックボックス（#bulk-export-select-all）も初期OFF。renderSiteList()は再描画のたびに、描画前のチェック状態を控えて引き継ぐ（切替・編集・保存等でチェックが消えないようにするため）。全選択チェックボックスは、全ての現場にチェックが付いているときだけONにする。</li>
+            <li><strong>初期値がリセットで化ける不具合の修正:</strong> 出力ファイル名構成（fn1〜5）と写真の出力横幅（#photo-resize-width）のHTML上の初期値（fn1=調査日／fn2=災害番号／fn3〜5=なし、出力横幅=1200px）は正しく指定されていたが、新規現場の作成・現場削除・クリア操作のリセット処理が全てのselectをselectedIndex=0（先頭の選択肢）へ戻していたため、操作のたびにfn1〜5が全て「調査日」、出力横幅が800pxに化けていた。
+                <ul>
+                    <li>siteManager._resetControlToDefault(el)を新設：selectはHTMLの初期選択（option.defaultSelected）へ戻し、指定が無いselectだけ先頭へ戻す。テキスト系は空にする。checkbox/radio/fileは対象外（従来通り）。</li>
+                    <li>siteManager._resetSiteInputs()を新設：新規現場作成（promptCreateSite）・現場削除（deleteSite）の共通リセット。「調査を実施した者」に加え、「設定」（data-group="output-settings"）・「入出力データ設定」（data-group="io-area"）も除外する。これらは現場ごとの入力ではなく端末・アプリ全体の設定のため、現場の新規作成・削除で暗黙にリセットしない。</li>
+                    <li>appControl.clearAll()（明示的な全消去）は対象範囲を従来通り全アコーディオンとしたまま、selectのリセット先だけHTMLの初期選択に変更した。</li>
+                    <li>manage.htmlのfn1の「調査日」にもselected属性を明示した（fn2=災害番号、fn3〜5=なし、出力横幅=1200pxは従来からselected指定済み）。</li>
+                </ul>
+            </li>
+            <li><strong>CSV出力の対象（現状の仕様・確認事項）:</strong> 「CSV出力」（appControl.exportCSV）は、現場一覧のチェックとは無関係に、現在の画面の内容（今開いている現場）を1行のCSVで出力する（5.29の記載どおり）。チェックした現場を対象にするかどうかは未確定の検討事項として7章に記載。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -1116,6 +1142,9 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>部品ファイルの差し替え漏れに注意:</strong> src配下のファイルは互いにバージョンがずれると症状の切り分けが難しくなる。改修のたびに影響する全ファイルを一式で提示・反映する。</li>
             <li><strong>地図の画像化は「タイルを再取得しない」方式で確定（Phase 6.05）:</strong> leaflet-image・html2canvasはいずれも地理院タイルサーバーとの相性問題（オーバーズーム時の404・CORS絡みの再取得失敗）で真っ黒画像を引き起こした。既に画面へ読み込み済みのDOM要素（&lt;img&gt;タイル）をそのまま転写する自前実装に統一し、新規のタイル取得を一切発生させない方針とする。今後、地図の画像化まわりを触る際もこの方針を踏襲する。</li>
             <li><strong>調査を実施した者は端末固定（Phase 6.18）:</strong> 現場の新規作成・削除に伴う暗黙のリセット対象からこの項目群を除外する。明示的な「クリア」操作では従来通り消去対象に含む。</li>
+            <li><strong>設定・入出力データ設定も端末固定（Phase 6.20）:</strong> 「設定」（写真の出力横幅・強制4:3・まとめてZIP化）と「入出力データ設定」（出力ファイル名構成）は端末・アプリ全体の設定であり、現場の新規作成・削除に伴う暗黙のリセット対象から除外する。selectのリセットは先頭の選択肢ではなくHTMLの初期選択（selected属性）へ戻す。今後selectを追加する場合は、初期値にしたい選択肢へ必ずselected属性を付ける。</li>
+            <li><strong>保存確認モーダルは未保存の変更がある場合のみ（Phase 6.20）:</strong> 現場の切替・新規作成の前に確認を出すのは、hasUnsavedChanges()がtrueのときだけ。変更が無いのに確認を出さない。</li>
+            <li><strong>JZIP出力対象チェックはデフォルト全解除（Phase 6.20）:</strong> 出力対象を明示的に選ばせる。再描画でチェックが消えないよう、状態を引き継ぐ。</li>
             <li><strong>JZIP出力経路はチェックボックス方式に一本化（Phase 6.18）:</strong> 現場カードごとの個別JZIP出力ボタンは廃止。現場管理アコーディオン上部の「JZIP出力」ボタン＋対象選択チェックリストが唯一の出力経路。</li>
             <li><strong>現場一覧はチェックボックス選択・切替・編集・削除を1つのリストに統合（Phase 6.19）:</strong> 別々の一覧に分けない。行のレイアウトはCSS Grid（固定幅カラム＋1fr）で組み、現場名は1行省略表示（ellipsis）にする。flexベースの幅計算に依存したレイアウトは、実機で現場名が縦に1文字ずつ折り返される表示崩れを起こしたため、今後もこの種のリストはGrid＋ellipsisで組む方針とする。</li>
         </ul>
@@ -1131,7 +1160,9 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li>【Step2-⑤】GPS・方位取得のUI調整：解決（Phase 6.08・6.09）。詳細は5.19・5.20参照。</li>
             <li>【Step2-⑥】複数現場管理の再設計：段階1〜4完了（Phase 6.11〜6.15）。その後の運用整理（Phase 6.16〜6.18）、および実機で発生した現場一覧の表示崩れ修正・チェックリスト統合（Phase 6.19）も含め、⑥は一区切り。詳細は5.22〜5.30参照。</li>
             <li><strong>【Phase 6.19完了】現場一覧の表示崩れ修正・編集機能追加:</strong> JZIP出力チェックリストと現場カード一覧をCSS Gridベースの1つのリストに統合し、実機で発生していた現場名の縦1文字折り返し表示崩れ（flexのwidth計算破綻が原因）を解消。あわせて現場名を後から変更できる「編集」ボタン（renameSite）を追加。詳細は5.30参照。</li>
-            <li>iPhone実機での動作確認（部会お披露目時）：Phase 6.19の修正について、実機での表示崩れが解消されたかどうかの再確認が必要（ユーザーへの本ファイルセット送付後、次回確認予定）。</li>
+            <li><strong>【Phase 6.20完了】</strong> 保存確認モーダルを未保存の変更がある場合のみ表示／管理タブの表記整理（「現場リスト」「出力設定」「JZIP出力の対象現場…」の削除）／JZIP出力対象チェックのデフォルト全解除／出力ファイル名構成・写真の出力横幅の初期値がリセットで化ける不具合の修正。詳細は5.31参照。</li>
+            <li>iPhone実機での動作確認（部会お披露目時）：Phase 6.19の修正（現場名の縦折り返しが解消されたか）に加え、Phase 6.20の以下の点も実機確認が必要。①何も編集していない状態で「＋新規現場」「現場の切替」を押しても確認モーダルが出ないこと。②編集後は出ること。③JZIP読込直後の現場（formDataにphotoList等が含まれる）や、地図の図形を描いた現場で、未編集なのに「未保存」と判定されてしまわないこと（hasUnsavedChanges()の比較が、保存時と読込時でキーや座標の形が一致している前提のため）。</li>
+            <li><strong>【要判断】CSV出力の対象:</strong> 現状のCSV出力は現在の画面の内容のみで、現場一覧のチェックとは連動していない。チェックした現場を対象にする場合の論点：①複数現場を1つのCSV（1現場1行）にまとめるか、現場ごとに別ファイルにするか。②起点座標・終点座標（appControl.exportCSV内のmapApp.getMainCoords()）は現在の地図から取っているため、保存済みの他の現場については、保存データ（mainGeom）から座標を再計算する処理が必要（1_script_map.jsの現物確認が必要）。③未保存の変更がある現場を含める場合の扱い（JZIP出力と同じく拒否するか）。</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）</li>
             <li>AppB側：帳票の位置図セル（現状12.86×6.64cm）を4:3の比率に合わせて再調整（AppBスレッドで対応）</li>
             <li><strong>【継続・検討中】保存済みの初期値の閲覧UI:</strong> survey_app_defaultsの内容を一覧表示する専用UIを追加するかどうか未確定（5.29参照）。追加する場合、管理タブのどこに置くか・表示形式（読み取り専用の一覧か、初期値として保存ボタンの直下に簡易表示するか等）を次回の壁打ちで決める。</li>
@@ -5375,6 +5406,20 @@ document.addEventListener('click', (e) => {
 //     ある場合は、起動時に自動で「現場1」として1件だけ作成する。
 // =============================================================================
 //
+// 【Phase 6.20】保存確認モーダルの出し分け修正・初期値まわりの修正（本ファイルでの変更点）
+//   ・confirmAndProceed()：未保存の変更が実際にある場合（hasUnsavedChanges()）だけ
+//     保存確認モーダルを出す。変更が無ければ確認なしでそのまま処理を進める。
+//     （switchToSite・promptCreateSiteが対象。deleteSiteは元々confirmAndProceedを使わず、
+//       削除確認のconfirm()だけを出す作りのため変更なし）
+//   ・renderSiteList()：JZIP出力対象のチェックはデフォルト全解除。再描画時は直前の
+//     チェック状態を引き継ぐ。全選択チェックボックスは全件チェック時のみONに追随させる。
+//   ・_resetControlToDefault()／_resetSiteInputs()を新設。selectをselectedIndex=0ではなく
+//     HTMLの初期選択（defaultSelected）へ戻す。新規現場作成・現場削除のリセット対象から、
+//     「設定」「入出力データ設定」（端末・アプリ全体の設定）も除外した。
+//     （従来は新規現場作成のたびに、出力ファイル名構成が全て「調査日」に、写真の出力横幅が
+//       800pxに化けていた）
+//   ・clearAll()：selectのリセット先を先頭ではなくHTMLの初期選択に変更。
+//
 // 【Phase 6.18】管理タブのレイアウト整理（本ファイルでの変更点）
 //   ・「調査を実施した者」は端末固定の情報として扱う方針に変更。
 //     現場の新規作成(promptCreateSite)・削除(deleteSite)でも
@@ -5544,9 +5589,13 @@ window.siteManager = {
     // ブラウザ標準のconfirm()は2択（OK/キャンセル）しか出せず、「移動自体をやめる」という
     // 選択肢が作れなかったため、専用モーダル（#modal-save-confirm）に変更した。
     // 現在の現場がまだ無い場合（初回等）は確認せずそのまま続行する。
+    // 【Phase 6.20修正】未保存の変更が実際にある場合（hasUnsavedChanges()）だけモーダルを出す。
+    // 従来は現場が選択中というだけで無条件にモーダルを出していたため、何も編集していない
+    // 状態で「＋新規現場」「現場の切替」を押しても確認が出てしまっていた。
+    // 変更が無ければ確認なしでそのまま続行する（switchToSite・promptCreateSiteの両方に効く）。
     _pendingProceedFn: null,
     confirmAndProceed(afterFn) {
-        if (!this.getCurrentSiteId()) { afterFn(); return; }
+        if (!this.getCurrentSiteId() || !this.hasUnsavedChanges()) { afterFn(); return; }
         this._pendingProceedFn = afterFn;
         const m = document.getElementById('modal-save-confirm');
         if (m) m.style.display = 'flex'; else afterFn(); // モーダルが無い場合のフォールバック
@@ -5591,16 +5640,8 @@ window.siteManager = {
         this.confirmAndProceed(() => {
             const siteId = this.createSite(name);
             // 新規現場は空の状態から始める（前の現場の入力を引きずらない）。
-            // ただし「調査を実施した者」は端末固定情報として維持する。
-            document.querySelectorAll(
-                '.accordion-item:not([data-group="surveyor-info"]) input, ' +
-                '.accordion-item:not([data-group="surveyor-info"]) select, ' +
-                '.accordion-item:not([data-group="surveyor-info"]) textarea'
-            ).forEach(el => {
-                if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return;
-                if (el.tagName === 'SELECT') el.selectedIndex = 0;
-                else el.value = '';
-            });
+            // ただし「調査を実施した者」「設定」「入出力データ設定」は端末固定情報として維持する（Phase 6.20）。
+            this._resetSiteInputs();
             if (window.mapApp && mapApp.allDrawnItems) { mapApp.allDrawnItems.clearLayers(); mapApp.updateMapSummary(); }
             if (window.sketchApp) { sketchApp.elements = []; if (sketchApp.redrawAll) sketchApp.redrawAll(); }
             window.photoApp.photos = [];
@@ -5628,6 +5669,31 @@ window.siteManager = {
         return d.innerHTML;
     },
 
+    // 【Phase 6.20】入力欄1つを「初期状態」へ戻す共通処理。
+    // selectは従来 selectedIndex=0（先頭の選択肢）へ戻していたが、HTML上でselectedを付けた
+    // 初期値（出力ファイル名構成のfn2=災害番号／fn3〜5=なし、写真の出力横幅=1200px等）が
+    // 先頭の選択肢に化けてしまっていた。HTMLで指定した初期選択（defaultSelected）へ戻し、
+    // 指定が無いselectだけ先頭へ戻す。
+    _resetControlToDefault(el) {
+        if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return;
+        if (el.tagName === 'SELECT') {
+            const idx = Array.from(el.options).findIndex(o => o.defaultSelected);
+            el.selectedIndex = idx >= 0 ? idx : 0;
+        } else {
+            el.value = '';
+        }
+    },
+
+    // 【Phase 6.20】現場の新規作成・現場削除に伴う画面リセットの対象入力欄を一括でリセットする。
+    // 「調査を実施した者」（端末固定・Phase 6.18）に加え、「設定」「入出力データ設定」も
+    // 端末・アプリ全体の設定であり現場ごとの入力ではないため、リセット対象から除外する
+    // （除外しないと、新規現場を作るたびに出力ファイル名構成や写真の出力横幅が初期化されていた）。
+    _resetSiteInputs() {
+        const base = '.accordion-item:not([data-group="surveyor-info"]):not([data-group="io-area"]):not([data-group="output-settings"])';
+        document.querySelectorAll(`${base} input, ${base} select, ${base} textarea`)
+            .forEach(el => this._resetControlToDefault(el));
+    },
+
     // 【Phase 6.19】JZIP出力の対象選択チェックボックスと、現場の切替・編集・削除を
     // 1つのリストに統合した（従来は#site-list-containerと#bulk-export-site-listの2つに
     // 分かれていたが、見た目も機能も重複していたため一本化した）。
@@ -5640,8 +5706,15 @@ window.siteManager = {
         if (!container) return;
         const sites = this.getSites();
         const currentId = this.getCurrentSiteId();
+        // 【Phase 6.20】JZIP出力対象のチェックはデフォルト全解除。ただし再描画（切替・編集・
+        // 保存など）のたびにユーザーが付けたチェックが消えないよう、描画前のチェック状態を控えて引き継ぐ。
+        const prevChecked = new Set(
+            Array.from(container.querySelectorAll('.bulk-export-check:checked')).map(cb => cb.value)
+        );
         if (sites.length === 0) {
             container.innerHTML = '<p style="font-size:0.85rem; color:#888;">現場がまだありません。「＋新規現場」から始めてください。</p>';
+            const emptyCb = document.getElementById('bulk-export-select-all');
+            if (emptyCb) emptyCb.checked = false;
             return;
         }
         const sorted = sites.slice().sort((a, b) => {
@@ -5652,7 +5725,7 @@ window.siteManager = {
         container.innerHTML = sorted.map(s => {
             const active = s.siteId === currentId;
             return `<div style="display:grid; grid-template-columns:24px 1fr 52px 52px; align-items:center; gap:8px; padding:10px; border:1px solid ${active ? '#3498db' : '#ddd'}; border-radius:4px; margin-bottom:6px; background:${active ? '#eaf4fb' : '#fff'};">
-                <input type="checkbox" class="bulk-export-check" value="${s.siteId}" checked onclick="event.stopPropagation()">
+                <input type="checkbox" class="bulk-export-check" value="${s.siteId}" ${prevChecked.has(s.siteId) ? 'checked' : ''} onclick="event.stopPropagation()">
                 <div onclick="siteManager.switchToSite('${s.siteId}')" style="cursor:pointer; min-width:0; overflow:hidden;">
                     <div style="font-weight:bold; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${active ? '● ' : '○ '}${this._escapeHtml(s.siteName)}${active ? '（現在編集中）' : ''}</div>
                     <div style="font-size:0.75rem; color:#888; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${this._escapeHtml(s.siteId)}</div>
@@ -5663,8 +5736,9 @@ window.siteManager = {
                     onclick="event.stopPropagation(); siteManager.deleteSite('${s.siteId}')">削除</button>
             </div>`;
         }).join('');
+        // 全選択チェックボックスは、全ての現場にチェックが付いているときだけ入れる
         const selectAllCb = document.getElementById('bulk-export-select-all');
-        if (selectAllCb) selectAllCb.checked = true;
+        if (selectAllCb) selectAllCb.checked = sorted.length > 0 && sorted.every(s => prevChecked.has(s.siteId));
     },
 
     // 【Phase 6.19】現場名の付け替え。データの持ち方（siteId・createdAt等）は一切変えず、
@@ -5852,14 +5926,7 @@ window.siteManager = {
         if (this.getCurrentSiteId() === siteId) {
             // 今開いている現場自体を削除した場合、画面を空にする
             this.setCurrentSiteId(null);
-            document.querySelectorAll(
-                '.accordion-item:not([data-group="surveyor-info"]) input, ' +
-                '.accordion-item:not([data-group="surveyor-info"]) select, ' +
-                '.accordion-item:not([data-group="surveyor-info"]) textarea'
-            ).forEach(el => {
-                if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return;
-                if (el.tagName === 'SELECT') el.selectedIndex = 0; else el.value = '';
-            });
+            this._resetSiteInputs(); // 【Phase 6.20】設定・入出力データ設定も除外した共通リセット
             if (window.mapApp && mapApp.allDrawnItems) { mapApp.allDrawnItems.clearLayers(); mapApp.updateMapSummary(); }
             if (window.sketchApp) { sketchApp.elements = []; if (sketchApp.redrawAll) sketchApp.redrawAll(); }
             window.photoApp.photos = [];
@@ -6324,10 +6391,10 @@ window.appControl = {
             : "入力内容・写真・地図を消去し、初期値を適用します。\n本当に消しますか？";
         if (!confirm(msg)) return;
 
+        // 【Phase 6.20】selectは先頭ではなくHTMLの初期選択（fn1=調査日/fn2=災害番号/fn3〜5=なし、
+        // 写真の出力横幅=1200px等）へ戻す。明示的な全消去のため対象範囲は従来通り全アコーディオン。
         document.querySelectorAll('.accordion-item input, .accordion-item select, .accordion-item textarea').forEach(el => {
-            if (el.type === 'file' || el.type === 'radio' || el.type === 'checkbox') return;
-            if (el.tagName === 'SELECT') el.selectedIndex = 0;
-            else el.value = '';
+            window.siteManager._resetControlToDefault(el);
         });
 
         if (window.photoApp) {
