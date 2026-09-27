@@ -1,0 +1,274 @@
+<div class="spec-container">
+    <header style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
+        <h2>被災状況調査システム 開発仕様書 (Phase 13.43)</h2>
+        <p><strong>Last Updated:</strong> Phase 13.43 (PDF帳票：1行枠の文字切れ・文字位置ばらつきの修正)</p>
+        <p><strong>Status:</strong> App A (Stable) / App B (Development)</p>
+    </header>
+
+    <section>
+        <h3>1. プロジェクト背景と目的</h3>
+        <p>大規模災害時、通信遮断下にある現場から、確実に被害状況を事務所へ届けるための建設コンサルタント専用ツール。鹿児島県測量設計業協会の情報専門部会が主導して開発。</p>
+        <ul>
+            <li><strong>Local-First:</strong> サーバー・DB不要。ブラウザとHTMLファイル単体で動作する。</li>
+            <li><strong>Bucket Relay:</strong> データ連携は物理的なファイル移動（JZIP形式）で行う。</li>
+            <li><strong>Resilience:</strong> 意匠よりも、数千件のデータを扱っても落ちない堅牢性を最優先する。</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>2. 開発運用ルール（SSOT）</h3>
+        <ul>
+            <li><strong>Phase管理:</strong> 会議の局面管理番号（X.X）。package.jsonのphaseフィールドを正とする。</li>
+            <li><strong>永遠のβ版:</strong> 現場フィードバックにより開発は永続する。「完成」と決めつけない。</li>
+            <li><strong>Spec as Code:</strong> 本ファイル（src/spec.html）はプロジェクトの唯一の正解情報（SSOT）である。</li>
+            <li><strong>コード提示ルール:</strong> 省略不可・全文表示・変更ファイルのみ・圧縮不可。最適化と意匠変更は判断を仰ぐ。毎回 package.json と spec.html を提示する。</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>3. システム全体像</h3>
+        <p>JZIPを共通フォーマットとして、目的別にツールが連携する構成。</p>
+        <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
+            <tr style="background:#eee;"><th>アプリ</th><th>形態</th><th>役割</th></tr>
+            <tr><td><strong>AppA</strong></td><td>PWA（スマートフォン）</td><td>現場での被災状況調査・JZIP出力</td></tr>
+            <tr><td><strong>AppB</strong></td><td>ブラウザアプリ（PC）</td><td>JZIPの取りまとめ・位置管理・KML/GeoJSON出力・PDF/Excel帳票出力</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h3>4. ファイル構成 (File Manifest)</h3>
+        <p><code>src/</code> フォルダ内のリソースを <code>build.js</code> が結合し、<code>dist/</code> に単一HTMLを出力する。</p>
+        <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
+            <tr style="background:#eee;"><th>Filename</th><th>Role</th><th>Note</th></tr>
+            <tr><td><code>build.js</code></td><td>ビルドスクリプト</td><td>ライブラリ→アプリスクリプトの順で結合。template.xlsxをbase64埋め込み。</td></tr>
+            <tr><td><code>pc_manager.html.template</code></td><td>App B 骨格</td><td>3カラムレイアウト。{{XLSX_TEMPLATE}}プレースホルダーあり。</td></tr>
+            <tr><td><code>style.css</code></td><td>共通スタイル</td><td>レスポンシブ対応、印刷レイアウト定義</td></tr>
+            <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>ロゴ、タブ（個別/データベース/開発方針）</td></tr>
+            <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル</td></tr>
+            <tr><td><code>2_script_core.js</code></td><td>App B Logic</td><td>managerApp本体・フィールド定義・地図初期化・詳細パネル表示</td></tr>
+            <tr><td><code>2_script_db.js</code></td><td>App B Logic</td><td>リスト描画・マーカー描画・DB表示・ソート・検索フィルタ</td></tr>
+            <tr><td><code>2_script_import.js</code></td><td>App B Logic</td><td>JZIPインポート・CSV/GeoJSON/KMLエクスポート</td></tr>
+            <tr><td><code>2_script_report.js</code></td><td>App B Logic</td><td>PDF帳票生成エンジン・Canvas地図キャプチャ・全体図PNG出力</td></tr>
+            <tr><td><code>2_script_excel.js</code></td><td>App B Logic</td><td>Excel帳票生成エンジン（個別・一括）</td></tr>
+            <tr><td><code>exceljs.min.js</code></td><td>ライブラリ</td><td>ExcelJS v4.4.0。ビルド時にインライン埋め込み。</td></tr>
+            <tr><td><code>template.xlsx</code></td><td>Excelテンプレート</td><td>枠・罫線・図形オブジェクト入り。ビルド時にbase64でHTML内に埋め込み。</td></tr>
+            <tr><td><code>report_p1.svg</code></td><td>帳票テンプレート P1</td><td>PDF帳票用。ビルドで使用する正本。</td></tr>
+            <tr><td><code>report_p2.svg</code></td><td>帳票テンプレート P2</td><td>PDF帳票用。ビルドで使用する正本。</td></tr>
+            <tr><td><code>report_p3.svg</code></td><td>帳票テンプレート P3</td><td>PDF帳票用。ビルドで使用する正本。</td></tr>
+            <tr><td><code>kreport_p1〜p3.svg</code></td><td>帳票テンプレート（バックアップ）</td><td>Illustratorレイヤー情報付き。ビルドには使用しない。</td></tr>
+            <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppA・AppB共通のJZIPフィールド定義。AppAスレッドで管理。</td></tr>
+            <tr><td><code>rogo-AAA.txt</code></td><td>ロゴデータ</td><td>Base64エンコードされた画像文字列</td></tr>
+        </table>
+    </section>
+
+    <section>
+        <h3>5. 実装仕様とアーキテクチャ</h3>
+
+        <h4>5.1 データ構造 (JZIP)</h4>
+        <p>App Aが出力したJZIPをApp Bがインポートして統合管理する。詳細はjzip_spec.htmlを参照。</p>
+
+        <h4>5.2 App B 3カラムレイアウト</h4>
+        <ul>
+            <li><strong>左ペイン（地図）:</strong> Leaflet地図。選択箇所を黄色ハイライト表示。</li>
+            <li><strong>中央ペイン（リスト）:</strong> JZIPドロップゾーン＋取込箇所リスト。</li>
+            <li><strong>右ペイン（編集）:</strong> 詳細編集フォーム。帳票PDF出力・帳票Excel出力・JZIP再保存ボタン。</li>
+        </ul>
+
+        <h4>5.3 Excel帳票出力仕様（Phase 13.41追加）</h4>
+        <ul>
+            <li><strong>出力単位:</strong> 1件＝1xlsx（P1・P2・P3縦並び、165行、template.xlsxを複製）。</li>
+            <li><strong>個別出力:</strong> 右ペインの「帳票Excel出力」ボタン → generateExcel() → 1件分xlsxをそのままダウンロード。</li>
+            <li><strong>一括出力:</strong> データベースタブの「一括Excel出力」ボタン → batchExcel()。チェック件数分のxlsxをJSZipでまとめて <code>report_batch_N件_YYYYMMDD.zip</code> としてダウンロード。</li>
+            <li><strong>テキスト書き込み:</strong> JSZipでsharedStrings.xmlとsheet1.xmlを直接書き換え（ExcelJS不使用）。セルマッピングはP1〜P3対応表に準拠。</li>
+            <li><strong>画像書き込み:</strong> JSZipでdrawing1.xmlを直接書き換え。xdr:sp（Shape）→xdr:oneCellAnchor + xdr:pic（Picture）に変換してblipFillで画像を参照。drawing1.xml.relsも再構築。</li>
+            <li><strong>template.xlsx埋め込み:</strong> build.js がbase64変換してHTMLの hidden inputに埋め込む。{{XLSX_TEMPLATE}}プレースホルダーで置換。</li>
+            <li><strong>Content_Types.xml:</strong> jpeg MIMEタイプ定義を自動追加（ないとExcel修復エラーになる）。</li>
+            <li><strong>位置図:</strong> captureMapFinal()（PDF帳票と共通）で全体図・拡大図を生成してichizu_zentai/kakudaiに差し込む。</li>
+            <li><strong>ExcelJS廃止理由:</strong> writeBuffer()がdrawing1.xml等を削除・Print_AreaのNaN変換が発生しExcel修復エラーとなるため廃止。JSZip直接操作方式に変更。</li>
+        </ul>
+
+        <h4>5.4 updateValue の再描画制御（Phase 13.38修正）</h4>
+        <ul>
+            <li><strong>updateValue(key, f, v):</strong> データのみ更新・再描画なし。</li>
+            <li><strong>updateValueAndRefresh(key, f, v):</strong> データ更新＋renderDatabase()。</li>
+            <li>DBタブのinputはoninputでupdateValue()、onblurでrenderDatabase()を呼ぶ。</li>
+        </ul>
+
+        <h4>5.5 エクスポート仕様</h4>
+        <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
+            <tr style="background:#eee;"><th>メニュー表示</th><th>出力内容</th><th>想定用途</th></tr>
+            <tr><td>統合CSV</td><td>全フィールドのCSV</td><td>集計・Excel処理</td></tr>
+            <tr><td>GeoJSON（線・点）</td><td>Point/LineStringをそのまま出力</td><td>QGIS等GIS処理</td></tr>
+            <tr><td>GeoJSON（起点のみ）</td><td>LineStringは起点座標をPointに変換</td><td>地理院地図でのラベル表示</td></tr>
+            <tr><td>KML（線・点）</td><td>Point/LineStringをそのまま出力</td><td>GoogleEarth等</td></tr>
+            <tr><td>KML（起点のみ）</td><td>LineStringは起点座標をPointに変換</td><td>GoogleEarthでのラベル表示</td></tr>
+        </table>
+
+        <h4>5.6 帳票出力ロジック（PDF）</h4>
+        <ul>
+            <li>SVGテンプレート方式。report_p1〜p3.svgのrectをforeignObjectに置換してテキストを流し込む。</li>
+            <li>fillPhotoBook photo_comment インデックス修正済み（Phase 13.36）。</li>
+            <li><strong>テキスト配置（replaceRectWithText、Phase 13.43修正）:</strong>
+                <ul>
+                    <li><strong>1行枠</strong>（枠の高さが基準文字サイズ10の2.2倍未満。p1〜p3の災害番号・所属名・被災場所・路線名・被災日・延長・高さ・座標・会社名・電話・FAX・氏名・E-mail、P2の全景・近景コメント枠。高さ約11〜14pt）：余白0・行の高さ1・縦中央・折り返しなし（nowrap）・overflow:visible。文字サイズは10を基準とし、canvasのmeasureTextで測った幅が枠幅（左右余白4ずつを除く）を超える場合のみ、幅に収まるまで縮小する（下限4）。改行は空白に置換する。</li>
+                    <li><strong>複数行枠</strong>（コメント・拡大状況・特記状況・対策概要・P3の写真コメント等）：従来どおり。左上寄せ・行の高さ1.2・overflow:hidden・面積ベースの自動縮小（下限4）。</li>
+                    <li><strong>ハイフン・チェック印</strong>（「-」「✓」）：従来どおりSVG textで描画。空文字は枠ごと削除。</li>
+                    <li><strong>修正の経緯:</strong> 旧実装は行の高さ1.2（12px）＋上余白2pxで配置しており、高さ約11.3ptの1行枠では文字の下側が枠外に出て、overflow:hiddenで切れる／罫線と重なる不具合があった（意見箱：萩原技研・池田コンサルタント、Android）。あわせて、長文だけ縮小されて行ごとに文字サイズ・位置がばらつく問題があった。フォント（Androidの Noto Sans CJK JP 等）により縦位置が±1pt程度変わるため、1行枠はクリップしない方針とした。</li>
+                    <li><strong>見た目の変更点:</strong> 1行枠の文字は、幅に収まる限り10で統一される（従来は短い値でも枠の面積次第で7〜8に縮小されていた電話番号・延長・高さ等が10になる）。</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4>5.7 SVGテンプレートのrect ID命名規則</h4>
+        <ul>
+            <li>正本：report_p1〜p3.svg。kreport系はバックアップ。</li>
+            <li>_x5F_ はアンダースコアのエスケープ。末尾の_数字_はIllustratorの重複回避サフィックス。</li>
+        </ul>
+
+        <h4>5.8 全体図出力</h4>
+        <ul>
+            <li>Canvas直接描画方式でPNG出力。設定パネルはフローティング表示（右下固定）。</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>6. 重要な決定事項</h3>
+        <ul>
+            <li><strong>データ連携方式:</strong> クラウドDB不使用。ASP（現場クラウドONE）をファイル置き場として利用。</li>
+            <li><strong>App AとApp Bのフィールド整合:</strong> fieldMasterのキー名はApp AのJZIP出力のキー名と完全一致させること。</li>
+            <li><strong>Excel帳票をAppBに統合:</strong> Python exe版はウイルス検知問題で断念。HTMLアプリとしてAppBに組み込む方針に確定。</li>
+            <li><strong>GeoJSON/KMLのラベル問題:</strong> 地理院地図・GoogleEarthともにLineStringにはラベルが表示されない。起点のみ版を別出力として提供。</li>
+            <li><strong>JZIP一括出力:</strong> 現状は個別のみ。要望があれば対応。</li>
+            <li><strong>jzip_spec.html:</strong> AppAスレッドで管理。AppA・AppB両スレッドに毎回渡す。</li>
+            <li><strong>PDF帳票の1行枠は「クリップしない・縦中央・10を基準に幅で縮小」（Phase 13.43）:</strong> 端末のフォント差で縦位置が変わっても文字が欠けないことを優先する。</li>
+            <li><strong>Excel帳票の改善は優先度を下げる:</strong> Excelはセル・図形の自由度が高く後から対応できるため、当面はPDF帳票の改良を優先する（Phase 13.43時点の方針）。</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>7. 次に行うタスクの積み残し</h3>
+        <ul>
+            <li>試験運用後の現場フィードバック反映</li>
+        </ul>
+    </section>
+
+    <section>
+        <h3>8. 開発ツール</h3>
+        <div style="padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px; margin-top: 10px;">
+            <p style="margin:0 0 8px 0; font-weight:bold; color:#856404;">🛠 ダミーデータ生成（デモ・説明会用）</p>
+            <p style="margin:0 0 12px 0; font-size:0.85rem; color:#666;">
+                鹿児島付近に100件の試験用データ（全項目ランダム・写真付き）を生成します。<br>
+                既存のデータに追加されます。説明会・デモ用途にご利用ください。
+            </p>
+            <button
+                type="button"
+                style="background:#856404; color:white; border:none; padding:10px 20px; border-radius:4px; font-weight:bold; cursor:pointer; font-size:0.9rem;"
+                onclick="generateDummyData()">
+                ダミーデータを100件生成する（全項目・写真付き）
+            </button>
+        </div>
+    </section>
+
+    <script>
+    function generateDummyData() {
+        if (!confirm('100件の試験用データが生成されます。\n既存のデータに追加されますがよろしいですか？')) return;
+        (async function() {
+            const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+            const rnd = (min, max, dec) => parseFloat((Math.random() * (max - min) + min).toFixed(dec !== undefined ? dec : 1));
+            const pad = (n, len) => String(n).padStart(len !== undefined ? len : 4, '0');
+            const companies = ['大福コンサルタント', '南九測量設計', '鹿児島地質調査', '薩摩エンジニアリング', '霧島測量'];
+            const leaders   = ['田中一郎', '山田花子', '鈴木次郎', '中村美咲', '高橋健太', '伊藤裕子'];
+            const depts     = ['鹿児島県土木部', '南薩地域振興局', '姶良伊佐地域振興局', '大隅地域振興局', '熊毛支庁'];
+            const routes    = ['甲突川', '万之瀬川', '肝属川', '天降川', '国道3号', '国道10号', '県道21号'];
+            const locs      = ['鹿児島市城山町', '薩摩川内市隈之城', '霧島市国分中央', '鹿屋市寿3丁目', '指宿市山川'];
+            const comments  = ['法面崩壊により通行止め。復旧には重機が必要。','路肩欠損。車両通行に支障あり。','護岸崩壊。河川水位上昇により拡大の恐れあり。','土砂流出。下流への影響を確認済み。','斜面崩壊。二次災害の危険性あり。至急対応が必要。','道路冠水。水位は低下傾向だが監視が必要。'];
+            const photoColors = [['#c0392b','#e74c3c'],['#2980b9','#3498db'],['#27ae60','#2ecc71'],['#8e44ad','#9b59b6'],['#e67e22','#f39c12'],['#16a085','#1abc9c']];
+
+            function makePhoto(tag, colors, w, h) {
+                w = w || 400; h = h || 300;
+                const c = document.createElement('canvas');
+                c.width = w; c.height = h;
+                const ctx = c.getContext('2d');
+                const grad = ctx.createLinearGradient(0, 0, w, h);
+                grad.addColorStop(0, colors[0]);
+                grad.addColorStop(1, colors[1]);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+                ctx.fillStyle = 'rgba(255,255,255,0.85)';
+                ctx.font = 'bold 32px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(tag, w/2, h/2);
+                return c.toDataURL('image/jpeg', 0.7);
+            }
+
+            const count = 100;
+            const baseLat = 31.560;
+            const baseLng = 130.558;
+            for (let i = 1; i <= count; i++) {
+                const lat = baseLat + (Math.random() - 0.5) * 0.1;
+                const lng = baseLng + (Math.random() - 0.5) * 0.1;
+                const isLine = (i % 3 === 0);
+                const geom = isLine ? {
+                    type: 'FeatureCollection',
+                    features: [{ type: 'Feature', properties: {}, geometry: {
+                        type: 'LineString',
+                        coordinates: [[lng,lat],[lng+rnd(0.001,0.005,4),lat+rnd(0.001,0.005,4)],[lng+rnd(0.003,0.008,4),lat+rnd(0.001,0.004,4)]]
+                    }}]
+                } : {
+                    type: 'FeatureCollection',
+                    features: [{ type: 'Feature', properties: {}, geometry: {
+                        type: 'Point',
+                        coordinates: [lng, lat]
+                    }}]
+                };
+                const photos = [];
+                ['全景','近景'].forEach(function(tag) {
+                    const colors = pick(photoColors);
+                    photos.push({ dataUrl: makePhoto(tag, colors), tag: tag, memo: tag + 'の状況。' + pick(['崩壊箇所を確認。','被害範囲を記録。','現地状況を撮影。']) });
+                });
+                const extraCount = Math.floor(Math.random() * 2) + 1;
+                for (let p = 0; p < extraCount; p++) {
+                    const tag = pick(['補足','地図メモ']);
+                    photos.push({ dataUrl: makePhoto(tag, pick(photoColors), 300, 200), tag: tag, memo: '補足写真' + (p+1) + '枚目。' + pick(['詳細状況。','周辺状況。','参考写真。']) });
+                }
+                const surveyDate = '2026-0' + (Math.floor(Math.random()*6)+1) + '-' + pad(Math.floor(Math.random()*28)+1, 2);
+                const damageDate = '2026-0' + (Math.floor(Math.random()*3)+1) + '-' + pad(Math.floor(Math.random()*28)+1, 2);
+                const company = pick(companies);
+                window.managerApp.db.push({
+                    _key: 'dummy_' + Date.now() + '_' + i,
+                    company_id: company.slice(0,4).toUpperCase(),
+                    leader_name: pick(leaders),
+                    ref_no: pad(i),
+                    survey_date: surveyDate,
+                    disaster_no: 'R8-' + pad(Math.floor(Math.random()*999)+1, 3),
+                    dept_name: pick(depts),
+                    loc_name: pick(locs),
+                    route_name: pick(routes),
+                    damage_date: damageDate,
+                    length: String(rnd(5, 500)),
+                    height: String(rnd(0.5, 10)),
+                    side_type: pick(['右岸','左岸','距離標なし']),
+                    distance_label: Math.floor(Math.random()*10) + 'k' + pad(Math.floor(Math.random()*1000), 3),
+                    comment: pick(comments),
+                    expansion_exists: pick(['有','無','無','無']),
+                    expansion_status: pick(['','隣接斜面に亀裂確認。','上流部に崩壊の兆候あり。']),
+                    special_exists: pick(['有','無','無']),
+                    special_status: pick(['','附近に民家あり。緊急対応要。','電柱倒壊の恐れあり。']),
+                    plan_summary: pick(['','応急復旧工事（土嚢積み）','通行規制・監視継続','緊急排水ポンプ設置']),
+                    company_name: company,
+                    tel: '099-' + pad(Math.floor(Math.random()*999)+1, 3) + '-' + pad(Math.floor(Math.random()*9999)+1, 4),
+                    fax: '099-' + pad(Math.floor(Math.random()*999)+1, 3) + '-' + pad(Math.floor(Math.random()*9999)+1, 4),
+                    person_name: pick(leaders),
+                    email: 'info@' + company.slice(0,4) + '.co.jp',
+                    mainGeom: geom,
+                    subGeom: null,
+                    _photos: photos
+                });
+            }
+            window.managerApp.refreshAll();
+            alert('100件のダミーデータを投入しました。');
+        })();
+    }
+    </script>
+</div>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>被災状況調査アプリ 統合管理版 (Phase {{PHASE}})</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>{{STYLE}}</style>
+</head>
+<body>
+    <!-- Excelテンプレートbase64埋め込み（build.jsが置換） -->
+    <input type="hidden" id="xlsx-template-data" value="{{XLSX_TEMPLATE}}">
+
+    <div id="app-container">
+        {{HEADER}}
+        
+        <section id="content-individual" class="tab-content active">
+            <div class="individual-layout">
+                <div id="map-side"><div id="map" style="height: 100%; width: 100%;"></div></div>
+                <div id="list-side">
+                    <div class="drop-zone" id="drop-zone">JZIPドロップで追加</div>
+                    <div class="list-header">取込箇所リスト <span id="list-count">0</span></div>
+                    <div class="data-list" id="data-list"></div>
+                </div>
+                <div id="edit-side">
+                    <div id="edit-panel"></div>
+                    <div class="edit-actions" id="edit-actions" style="display:none; padding:15px; border-top:1px solid #ddd;">
+                        <button class="btn-main" style="background:#c0392b;" onclick="managerApp.generateReport()">帳票PDF出力</button>
+                        <button class="btn-main" style="background:#27ae60;" onclick="managerApp.generateExcel()">帳票Excel出力</button>
+                        <button class="btn-main" style="background:#2980b9;" onclick="managerApp.exportSingleJZip()">現在のデータをJZIP保存</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="content-database" class="tab-content">
+            <div style="padding:15px; flex:1; display:flex; flex-direction:column; overflow:hidden;">
+                <div style="margin-bottom:10px; display:flex; gap:10px; align-items:center;">
+                    <select id="db-search-field" class="detail-table" style="width:auto; height:32px;" onchange="managerApp.renderDatabase()">
+                        <option value="all">全項目</option>
+                    </select>
+                    <input type="text" id="db-search" class="input-group" style="flex:1; height:32px;" placeholder="検索キーワード..." oninput="managerApp.renderDatabase()">
+                    
+                    <button class="btn-batch-print" onclick="managerApp.batchPrint()">一括PDF印刷</button>
+                    <button class="btn-batch-print" style="background:#27ae60;" onclick="managerApp.batchExcel()">一括Excel出力</button>
+                    <button class="btn-a3-output" onclick="managerApp.startGlobalMapMode()">全体図出力</button>
+                    
+                    <div style="display:flex; border:1px solid #aaa; border-radius:4px; overflow:hidden;">
+                        <select id="export-type" style="border:none; padding:0 5px; height:32px; background:#eee;">
+                            <option value="csv">統合CSV</option>
+                            <option value="geojson">GeoJSON（線・点）</option>
+                            <option value="geojson_label">GeoJSON（起点のみ）</option>
+                            <option value="kml">KML（線・点）</option>
+                            <option value="kml_label">KML（起点のみ）</option>
+                        </select>
+                        <button class="btn-csv-total" style="border-radius:0; height:32px; margin:0;" onclick="managerApp.executeExport()">出力</button>
+                    </div>
+                </div>
+                <div style="flex:1; overflow:auto; border:1px solid #ddd; background:#fff;">
+                    <table class="db-table">
+                        <thead id="db-thead"></thead><tbody id="db-tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="content-spec" class="tab-content"><div style="padding:20px; overflow-y:auto;">{{SPEC}}</div></section>
+    </div>
+
+    <!-- 進捗オーバーレイ -->
+    <div id="progress-overlay">
+        <div class="progress-box">
+            <div class="spinner"></div>
+            <div id="progress-msg" style="font-weight:bold;">処理中...</div>
+            <div id="progress-count" style="margin-top:10px; font-size:0.9rem; color:#666;"></div>
+            <button class="btn-sub" style="margin-top:20px; background:#666; color:white; border:none; padding:8px 15px; border-radius:4px; cursor:pointer;" onclick="managerApp.abortProcess()">処理を中止する</button>
+        </div>
+    </div>
+
+    <!-- 全体図出力設定パネル (フローティング) -->
+    <div id="config-modal">
+        <div class="config-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; border-bottom:1px solid #ddd; padding-bottom:10px;">
+                <h3 style="margin:0; font-size:1rem;">全体図 出力設定</h3>
+                <button onclick="managerApp.closeA3Config()" style="border:none; background:none; cursor:pointer; font-weight:bold;">×</button>
+            </div>
+            
+            <p style="font-size:0.8rem; color:#666; margin-bottom:15px;">
+                地図を操作(ズーム/移動)して構図を決めてください。<br>
+                チェックされた箇所のみ表示中。
+            </p>
+
+            <div class="config-row">
+                <label>出力解像度 (高さ)</label>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <input type="number" id="cfg-height" value="2000" step="100" style="width:80px; padding:5px; text-align:right;">
+                    <span style="font-size:0.8rem; color:#666;">px</span>
+                </div>
+            </div>
+            
+            <div class="config-row">
+                <label>ラベル項目</label>
+                <select id="cfg-label-field" style="width:130px; padding:2px;"></select>
+            </div>
+
+            <div class="config-row">
+                <label>文字サイズ倍率</label>
+                <div style="display:flex; align-items:center; gap:5px;">
+                    <input type="number" id="cfg-font" value="1.0" step="0.1" min="0.1" style="width:60px; padding:5px; text-align:right;">
+                    <span style="font-size:0.8rem; color:#666;">倍 (基準:5px)</span>
+                </div>
+            </div>
+
+            <div class="config-row">
+                <label>方位記号 (N)</label>
+                <input type="checkbox" id="cfg-compass" checked>
+            </div>
+
+            <div class="config-row">
+                <label>スケールバー</label>
+                <input type="checkbox" id="cfg-scale" checked>
+            </div>
+
+            <div class="config-btns">
+                <button class="btn-sub" style="flex:1;" onclick="managerApp.closeA3Config()">キャンセル</button>
+                <button class="btn-a3-output" style="flex:1;" onclick="managerApp.execA3Output()">出力 (PNG)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="svg-templates">
+        <div id="tpl-p1">{{SVG_P1}}</div>
+        <div id="tpl-p2">{{SVG_P2}}</div>
+        <div id="tpl-p3">{{SVG_P3}}</div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
+    <script>{{SCRIPT}}</script>
+</body>
+</html>
