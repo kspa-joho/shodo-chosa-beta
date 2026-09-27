@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.31)</title>
+    <title>被災状況調査アプリ (Phase 6.33)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -422,6 +422,17 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <!-- 白紙メモエリア -->
             <div id="sketch-container" style="display:none;">
                 <div class="sketch-toolbar">
+                    <!-- 【Phase 6.33】背景画像（撮影した地図・現場写真を下敷きにする）。ページ内メモリのみ保持（保存はしない）。 -->
+                    <div class="sketch-tool-group">
+                        <input type="file" id="sketch-bg-camera-input" accept="image/*" capture="environment" style="display:none">
+                        <input type="file" id="sketch-bg-file-input" accept="image/*" style="display:none">
+                        <button type="button" class="sketch-btn" title="撮影して背景にする"
+                            onclick="document.getElementById('sketch-bg-camera-input').click()">📷背景</button>
+                        <button type="button" class="sketch-btn" title="写真ファイルを背景にする"
+                            onclick="document.getElementById('sketch-bg-file-input').click()">📁背景</button>
+                        <button type="button" class="sketch-btn" title="背景を消す"
+                            onclick="sketchApp.clearBackground()">🗑背景</button>
+                    </div>
                     <div class="sketch-tool-group">
                         <button id="sk-free"   class="sketch-btn active" onclick="sketchApp.setTool('free')">ペン</button>
                         <button id="sk-line"   class="sketch-btn"        onclick="sketchApp.setTool('line')">線</button>
@@ -666,12 +677,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.31</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.33</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.31</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.33</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -690,8 +701,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.31)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.31（位置図サブの編集を「①編集ボタン→②要素を選択→③編集開始」の3段階に変更／範囲(Polygon)がダブルタップ・始点タップで完了してしまう不具合を修正）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.33)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.33（白紙メモに、撮影した地図・現場写真を下敷きにできる「背景」機能を追加。保存はせず、その場限りの下敷き）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -724,13 +735,13 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>style.css</code></td><td>共通スタイル</td><td>【Phase 6.30更新】#map-draw-barをrow1(ツール)/row2(完了等・空き行)に分割し、アイコンをzoomで1.5倍化。【Phase 6.26更新】#map-draw-bar（地図枠外の描画バー）の指定を追加。CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
             <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
             <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.22更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力（チェックした現場が対象）の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（上から順に、出力ファイル名構成=初期は調査日・災害番号・なし・なし・なし／写真の出力横幅=初期1200px・強制4:3／まとめてZIP化／地図キャッシュを開放する。見出し横の補足表記は無し）・初期値の設定（旧・入出力データ設定。初期値として保存／クリア2種／初期値の読み込み／今の初期値（保存済み）の一覧表示。見出し横の補足表記は無し）</td></tr>
-            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
             <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
             <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
-            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.31更新】5.41参照（編集を「選択してから編集」の3段階に変更・範囲(Polygon)の途中完了を修正）。【Phase 6.30更新】5.40参照（操作パネルを地図下へ・アイコン1.5倍・編集のメイン/サブ分離・連続線修正・点の現在地/画面タップ選択）。【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
-            <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>【Phase 6.27更新】ペン色を12色プルダウン(#sketch-color-select)で選択（setColorがプルダウンと同期。start()でプルダウン値とペン色の食い違いを解消）。Canvas描画（ペン/直線/文字/編集/Undo）</td></tr>
+            <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>【Phase 6.33更新】5.43参照（背景画像機能を追加。setBackgroundFromFile／clearBackground／drawBackground。LocalStorage・IndexedDBには保存しない）。【Phase 6.27更新】ペン色を12色プルダウン(#sketch-color-select)で選択（setColorがプルダウンと同期。start()でプルダウン値とペン色の食い違いを解消）。Canvas描画（ペン/直線/文字/編集/Undo）</td></tr>
+            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.33更新】白紙メモのツールバーに「背景」ボタン群（📷背景・📁背景・🗑背景）と、そのための非表示file input（sketch-bg-camera-input／sketch-bg-file-input）を追加。【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
+            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.32更新】5.42参照（編集中の要素を単体削除する「単要素削除」ボタンを追加）。【Phase 6.31更新】5.41参照（編集を「選択してから編集」の3段階に変更・範囲(Polygon)の途中完了を修正）。【Phase 6.30更新】5.40参照（操作パネルを地図下へ・アイコン1.5倍・編集のメイン/サブ分離・連続線修正・点の現在地/画面タップ選択）。【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>【Phase 6.29更新】photoApp.recordAzimuth()を、値が届くまで最大4秒待つ作りに変更（azimuthManager.waitForAzimuth追加）。5.39参照。【Phase 6.28更新】写真アコーディオンを開いたときのGPS・方位センサー起動フックを、白紙メモと同じ「少し待ってから開いている状態を見る」作りに修正（5.38参照）。photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
             <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
@@ -1283,6 +1294,31 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>実機確認が必要な点:</strong> サブに複数の図形がある状態で「編集」を押したとき、案内文が分かりやすいか、タップで選びたい図形をきちんと選べるか（図形同士が近接している場合の選びやすさ）、キャンセルで確実に元の形状へ戻るか、範囲（サブ）を描く際に3点目以降も問題なく描けるか。</li>
         </ul>
 
+        <h4>5.42 編集フローに「単要素削除」ボタンを追加（Phase 6.32）</h4>
+        <ul>
+            <li><strong>背景:</strong> 5.41で「編集」を押した図形を1つ選んでから編集する流れに変更したが、選んだ図形だけをその場で削除する手段が無かった。位置図の「全て消去」ボタンは全ての図形を一括で消す機能であり、1要素だけを消したい場合には使えない。</li>
+            <li><strong>対応:</strong> 編集中（要素を選択し、保存・キャンセルが表示されている状態）のボタン列に「単要素削除」を追加した（保存・単要素削除・キャンセルの順）。押すと確認ダイアログを挟んだ上で、選択中の1要素だけをallDrawnItems（全図形の正本）から取り除き、編集を終了する。allDrawnItemsから直接取り除くため、地図の写真保存・CSV出力等にも正しく反映される。</li>
+            <li>ヘッドレスブラウザで、サブに置いたマーカーを選択→「単要素削除」→対象の1件だけが消えることを確認した。</li>
+        </ul>
+
+        <h4>5.43 白紙メモに背景画像（撮影した地図・現場写真の下敷き）を追加（Phase 6.33）</h4>
+        <ul>
+            <li><strong>背景（相談内容）:</strong> 位置図はズーム（地理院タイルの解像度）が実用上イマイチで、手元の紙地図を撮影してそれに書き込みたい、あるいは現場の写真を撮影してそれに書き込みたい、という要望があった。</li>
+            <li><strong>実装方針（相談の上で決定）:</strong>
+                <ul>
+                    <li>背景画像はページ内メモリ（Imageオブジェクト）だけに保持し、LocalStorage・IndexedDBのどちらにも保存しない、「その場限り」の下敷きとして割り切った（撮る→描く→写真に保存、の一連の操作を1回で終える使い方を想定）。アプリの再読込・現場の切替では消える。</li>
+                    <li>白紙メモのツールバー先頭に「背景」ボタン群（📷背景・📁背景・🗑背景）を追加した。📷背景・📁背景は、写真タブのカメラ/ファイル選択ボタンと同じ、非表示のinput[type=file]をclick()する方式（📷側はcapture="environment"でカメラを直接起動）。取り込むとsketchApp.setBackgroundFromFile()がFileReaderで読み込み、ImageオブジェクトとしてbackgroundImgに保持する。🗑背景（sketchApp.clearBackground()）は確認ダイアログを挟んで背景だけを消す。</li>
+                    <li>キャンバスは4:3固定（5.12）のため、取り込んだ画像はCSSのobject-fit:coverと同じ考え方（sketchApp.drawBackground()）で、縦横比を保ったままキャンバス全体を覆うように拡縮し、はみ出た部分は切り捨てて表示する。画像の縦横比を歪めることはない。</li>
+                    <li>redrawAll()の描画順を「背景画像→描いた要素（elements）→作図中のプレビュー→選択中の枠」に変更し、背景の上に書き込んだ内容が重なって見えるようにした。</li>
+                    <li>「全消去」ボタンは従来通り描いた要素（elements）だけを消し、背景画像は消さない（同じ背景に描き直したい場合があるため）。背景だけを消したい場合は「背景を消す」を使う、という役割分担にした。</li>
+                    <li>iOS対応：📷背景・📁背景のinputのchangeリスナーは、写真タブのカメラ/ファイル選択（3_script_main.js）と同じ理由（inline onchangeがcapture="environment"と組み合わさるとiOS Safariで発火しないことがある）で、DOMContentLoaded後にaddEventListenerで登録している。この登録・処理は1_script_sketch.js側で完結させ、3_script_main.jsには手を入れていない。</li>
+                </ul>
+            </li>
+            <li><strong>今回含めない点:</strong> 背景画像の保存・現場データへの永続化（現場を保存・切替・アプリ再読込しても背景を残す）は行わない。必要になった場合は、写真と同様にIndexedDBへ保存する仕組みを別途検討する（保存する場合は現場切替・クリア時の扱いなど3_script_main.js側の変更も必要になる）。</li>
+            <li>ヘッドレスブラウザで、画像取り込み→背景がキャンバス全体に表示される→上から線を描ける→「背景を消す」で背景だけが消え描いた線は残る、ことを確認した。</li>
+            <li><strong>実機確認が必要な点:</strong> 実際にカメラで紙地図・現場を撮影して背景に取り込めるか、大きな写真を取り込んだ際の動作速度、背景ありの状態で「写真に保存」した結果の見え方。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -1348,6 +1384,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
             </li>
             <li><strong>【Phase 6.30完了・実機確認待ち】</strong>位置図の操作パネルを地図の下へ移動しアイコンを1.5倍化、編集のメイン/サブ分離、連続線（ライン）の途中完了の修正、点をプロットする際の現在地/画面タップの選択肢追加。詳細は5.40参照。</li>
             <li><strong>【Phase 6.31完了・実機確認待ち】</strong>位置図の「編集」を「①編集ボタン→②要素を選択→③編集開始」の3段階の流れに変更。範囲(Polygon)がダブルタップ・始点タップで完了してしまう不具合を修正。詳細は5.41参照。</li>
+            <li><strong>【Phase 6.32完了・実機確認待ち】</strong>位置図の編集フローに、選択中の1要素だけを削除する「単要素削除」ボタンを追加。詳細は5.42参照。</li>
+            <li><strong>【Phase 6.33完了・実機確認待ち】</strong>白紙メモに、撮影した地図・現場写真を下敷きにできる「背景」機能を追加（保存はせず、その場限りの下敷き）。詳細は5.43参照。</li>
             <li><strong>【AppB確認待ち】</strong>一括ZIP（外側ZIPの中に現場ごとのフォルダ）をAppBが読み込めるか。読めない場合は、AppB側の改修か、AppA側を「個別ZIP」運用に絞るかの判断が必要（8.2・8.3参照）。</li>
             <li><strong>【Phase 6.21完了】保存済みの初期値の閲覧UI:</strong> 「初期値の設定」アコーディオン内、「初期値の読み込み」ボタンの下に、保存済みの初期値の一覧表示欄を追加（5.32参照）。管理タブの項目整理（ファイル名構成・地図キャッシュ開放を「設定」へ移動、「入出力データ設定」を「初期値の設定」に改名）もあわせて実施。実機での見え方の確認が必要。</li>
         </ul>
@@ -4434,6 +4472,9 @@ window.mapApp = {
             label.style.cssText = 'flex-basis:100%; font-size:0.85rem; color:#333;';
             box.appendChild(label);
             box.appendChild(mk('保存', () => this._saveEditSelect(), '#27ae60'));
+            // 【Phase 6.32】選んだ要素だけをその場で削除したいという要望に対応。
+            // 従来の「全て消去」ボタンは全図形を一括削除するため、編集中の1要素だけを消す手段が無かった。
+            box.appendChild(mk('単要素削除', () => this._deleteEditSelect(), '#e67e22'));
             box.appendChild(mk('キャンセル', () => this._cancelEditSelect(), '#e74c3c'));
         }
         row2.appendChild(box);
@@ -4491,6 +4532,19 @@ window.mapApp = {
         if (!state || !state.selected) { this._endEditSelect(); return; }
         this._restoreLatLngs(state.selected, state.snapshot);
         if (state.selected.editing) state.selected.editing.disable();
+        this._endEditSelect();
+    },
+
+    // 【Phase 6.32】編集中に選択している1要素だけを削除する。
+    // 「編集」フロー経由で選んだ図形をそのまま消せるようにするための専用ボタン。
+    // allDrawnItems（正本）から直接取り除くため、地図の写真保存・CSV等にも反映される。
+    _deleteEditSelect() {
+        const state = this._editSelectState;
+        if (!state || !state.selected) { this._endEditSelect(); return; }
+        if (!confirm("選択した要素を削除しますか？")) return;
+        if (state.selected.editing) state.selected.editing.disable();
+        this.allDrawnItems.removeLayer(state.selected);
+        this.updateMapSummary();
         this._endEditSelect();
     },
 
@@ -4749,6 +4803,9 @@ window.mapApp = {
 //
 // 【Phase 6.27】ペン色を、3色ボタンから12色のプルダウンに変更（既定は黒）。
 //
+// 【Phase 6.33】背景画像（撮影した地図・現場写真）を下敷きにして描き込めるようにした。
+// 詳細はsetBackgroundFromFile/clearBackground/drawBackground、spec.html 5.43参照。
+//
 // 【Phase 6.04】「線」ツールを、2点だけの直線から、タップのたびに頂点を追加していく
 // 連続線（折れ線）に変更。タップするごとに1点追加し、「完了」ボタンで確定、
 // 「中止」ボタンで破棄する。編集モードでは、確定した線のどの頂点にもつまみが出て、
@@ -4769,6 +4826,10 @@ window.sketchApp = {
     _editingIndex: null,
     buildingPolyline: null, // 連続線：タップのたびに頂点を追加していく途中データ
     selectedPointIndex: null, // 線のうち、今つまんでいる頂点（1点だけ削除する対象）
+
+    // 【Phase 6.33】背景画像（下敷き）。ページ内メモリ上のImageオブジェクトのみで保持し、
+    // LocalStorage・IndexedDBには保存しない（現場の切替・アプリ再読込で消える、その場限りの下敷き）。
+    backgroundImg: null,
 
     HANDLE_R: 14,     // 直線の端点つまみの当たり判定半径(px)
     LINE_HIT_TOL: 12, // 直線の「線上」判定の許容距離(px)
@@ -5117,12 +5178,78 @@ window.sketchApp = {
         this.redrawAll();
     },
     clearAll() {
-        if (confirm("メモを全消去しますか？")) {
+        if (confirm("メモを全消去しますか？（背景画像は消えません。背景も消す場合は「背景を消す」を使ってください）")) {
             this.elements = [];
             this.selectedIndex = null; this.dragType = null; this.selectedPointIndex = null;
             this.hideFloatingToolbar();
             this.redrawAll();
         }
+    },
+
+    // =========================================================================
+    // 【Phase 6.33】背景画像（撮影した地図・現場写真を下敷きにする）
+    // =========================================================================
+    // 経緯：位置図のズーム（地理院タイルの解像度）では細部が見づらいという指摘があり、
+    // 「手元の紙地図を撮影して、それに書き込む」「現場の写真を撮影して、それに書き込む」
+    // という使い方ができないか、という相談があった。
+    // 実装方針（相談の上で決定）：
+    //   ・背景はページ内メモリ（Imageオブジェクト）だけに保持し、LocalStorage・IndexedDBの
+    //     どちらにも保存しない。アプリの再読込・現場の切替・タブの開閉では消える、
+    //     「その場限り」の下敷きとして割り切る（撮る→描く→保存の一連の操作を1回で終える用途）。
+    //   ・白紙メモのツールバーに「背景」ボタン群（📷背景・📁背景・🗑背景）を追加した。
+    //     写真タブのカメラ/ファイル選択ボタンと同じ、input[type=file]を非表示で置いてclick()する方式。
+    //   ・キャンバスは4:3固定（5.12）のため、取り込んだ画像はobject-fit:coverと同じ考え方で、
+    //     キャンバスいっぱいに、はみ出た部分は切り捨てて表示する（縦横比を保ったまま拡縮）。
+    //   ・「全消去」ボタンは今まで通り描いた要素（elements）だけを消し、背景は消さない
+    //     （撮り直さずに何度も描き直したい場合があるため）。背景だけを消したい場合は
+    //     「背景を消す」を使う。
+    // =========================================================================
+    setBackgroundFromFile(file) {
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+                this.backgroundImg = img;
+                this.redrawAll();
+                if (window.uiHelper) window.uiHelper.showToast("背景を取り込みました");
+            };
+            img.onerror = () => {
+                if (window.uiHelper) window.uiHelper.showToast("背景画像を読み込めませんでした");
+            };
+            img.src = ev.target.result;
+        };
+        reader.onerror = () => {
+            if (window.uiHelper) window.uiHelper.showToast("背景画像を読み込めませんでした");
+        };
+        reader.readAsDataURL(file);
+    },
+    clearBackground() {
+        if (!this.backgroundImg) return;
+        if (confirm("背景画像を消しますか？（描き込んだ内容は消えません）")) {
+            this.backgroundImg = null;
+            this.redrawAll();
+        }
+    },
+    // キャンバス全体を覆うように背景画像を描く（object-fit:coverと同じ考え方。はみ出た部分は切り捨てる）
+    drawBackground() {
+        if (!this.backgroundImg || !this.canvas) return;
+        const cw = this.canvas.width, ch = this.canvas.height;
+        const iw = this.backgroundImg.naturalWidth || this.backgroundImg.width;
+        const ih = this.backgroundImg.naturalHeight || this.backgroundImg.height;
+        if (!iw || !ih || !cw || !ch) return;
+        const canvasRatio = cw / ch, imgRatio = iw / ih;
+        let sx, sy, sw, sh;
+        if (imgRatio > canvasRatio) {
+            // 画像の方が横長 → 縦方向は全部使い、左右をトリミングする
+            sh = ih; sw = ih * canvasRatio;
+            sx = (iw - sw) / 2; sy = 0;
+        } else {
+            // 画像の方が縦長 → 横方向は全部使い、上下をトリミングする
+            sw = iw; sh = iw / canvasRatio;
+            sx = 0; sy = (ih - sh) / 2;
+        }
+        this.ctx.drawImage(this.backgroundImg, sx, sy, sw, sh, 0, 0, cw, ch);
     },
 
     // --- 描画 ---
@@ -5197,6 +5324,7 @@ window.sketchApp = {
     },
     redrawAll() {
         this.clearCanvas();
+        this.drawBackground();
         this.elements.forEach(el => {
             if (el.type === 'stroke') this.drawStroke(el);
             else if (el.type === 'text') this.drawText(el);
@@ -5234,6 +5362,23 @@ document.addEventListener('click', (e) => {
             }
         }, 250);
     }
+});
+
+// 【Phase 6.33】背景画像用のカメラ・ファイル選択inputのchangeリスナー。
+// 写真タブのカメラ/ファイル選択（3_script_main.js）と同じ理由（iOS Safariでinline onchangeが
+// capture="environment"と組み合わさると発火しないことがある）で、DOMContentLoaded後に
+// addEventListenerで登録する。1_script_sketch.js側で完結させ、3_script_main.jsには手を入れない。
+document.addEventListener('DOMContentLoaded', () => {
+    const bgHandler = function () {
+        if (this.files && this.files.length > 0) {
+            window.sketchApp.setBackgroundFromFile(this.files[0]);
+        }
+        this.value = ''; // 同じファイルを選び直しても変化を検知できるようにする
+    };
+    const camInput = document.getElementById('sketch-bg-camera-input');
+    const fileInput = document.getElementById('sketch-bg-file-input');
+    if (camInput) camInput.addEventListener('change', bgHandler);
+    if (fileInput) fileInput.addEventListener('change', bgHandler);
 });
 
 
