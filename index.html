@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.27)</title>
+    <title>被災状況調査アプリ (Phase 6.29)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -654,12 +654,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.27</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.29</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.27</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.29</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -678,8 +678,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.27)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.27（白紙メモのペン色を12色プルダウンに変更／初期値一覧の「被災日」行を「調査日」行に置き換え。※直前の6.26は位置図の操作パネルの枠外移動）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.29)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.29（方位「記録」ボタンを押した1回目は必ず失敗する不具合を修正。実際の値が届くまで待ってから判定するように変更）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -719,7 +719,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
             <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>【Phase 6.27更新】ペン色を12色プルダウン(#sketch-color-select)で選択（setColorがプルダウンと同期。start()でプルダウン値とペン色の食い違いを解消）。Canvas描画（ペン/直線/文字/編集/Undo）</td></tr>
-            <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
+            <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>【Phase 6.29更新】photoApp.recordAzimuth()を、値が届くまで最大4秒待つ作りに変更（azimuthManager.waitForAzimuth追加）。5.39参照。【Phase 6.28更新】写真アコーディオンを開いたときのGPS・方位センサー起動フックを、白紙メモと同じ「少し待ってから開いている状態を見る」作りに修正（5.38参照）。photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
             <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
@@ -1187,6 +1187,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>目的：「現在地」ボタンで地図が現在地に移動した際、地図の中心（＝現在地）がどこか分かりにくいため。十字線の位置に〇を置くことで、現在地に〇を落としやすくする。</li>
                     <li>実装：地図コンテナ（#map）の中心に、黒線＋白縁取りの十字（約28px四方）を重ねて表示する。地図の操作を邪魔しないよう<code>pointer-events:none</code>、z-indexは650（描画・注記より上、Leafletのコントロールより下）。メイン・サブ・GPS修正モードのいずれでも表示される。</li>
                     <li>「地図を写真に保存」（captureToPhoto）はタイル・図形・注記のみを描き写す方式（5.8）のため、十字線は保存画像には写り込まない。</li>
+                    <li><strong>【Phase 6.29完了】方位「記録」ボタンを押した1回目は必ず失敗する不具合:</strong> 5.39参照。6.28の修正後も、写真タブを開いた直後の1回目は必ず失敗し、閉じて開き直すと2回目は成功する、という実機の報告があった。</li>
                     <li><strong>【保留】十字線の位置にワンタップで〇を置くボタン:</strong> 現在は十字線を目印に地図をタップして〇を置く。十字線の位置へ置くボタンが必要かは、実機で十字線を使ってから決める（ユーザー判断）。</li>
                 </ul>
             </li>
@@ -1230,6 +1231,24 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>互換:</strong> 色は従来どおりCSSの色指定文字列としてelementsに保存されるだけで、保存形式は変わらない。</li>
             <li><strong>初期値一覧の「被災日」→「調査日」（ユーザー指示）:</strong> 管理タブ「初期値の設定」の一覧の該当行を「調査日：新規作成時：当日の日付を自動入力」の固定表示に置き換えた（調査日は保存対象ではなく、常に当日が入る仕様のため）。<strong>damage_date（被災日）の保存自体は従来どおり残している</strong>（「他の現場から引用」①で使うため。5.24参照）。一覧に出さなくなっただけで、保存値は見えなくなる点に注意。</li>
             <li><strong>見送り:</strong> ブラウザ標準のprompt()の「〜の内容」表示を消すための自作モーダル化は、当面見送り（ユーザー判断）。</li>
+        </ul>
+
+        <h4>5.38 写真タブでGPS・方位センサーが起動しない不具合の修正（Phase 6.28）</h4>
+        <ul>
+            <li><strong>症状:</strong> 実機で、写真タブを開いて「記録」ボタンを押しても「センサー値を取得中です。少し待ってから再度押してください」のトーストが出続け、方位が記録できなかった。</li>
+            <li><strong>原因:</strong> 2_script_photo.jsの「写真アコーディオンを開いたときにGPS・方位センサーを起動するフック」は、document上のクリックイベントの中で<code>content.style.display !== 'block'</code>（＝まだ開く前）を条件に、gpsManager.start()とazimuthManager.startListening()を呼んでいた。しかし、アコーディオンの開閉自体は3_script_main.js側のクリックハンドラ（アコーディオンヘッダー要素に直接登録）が先に実行され、その時点で既にdisplayを'block'へ書き換えてしまう。documentへのクリックイベントの伝播（バブリング）はその後に来るため、このフックが見る時点では常に既に'block'になっており、条件が成立しない。つまり、この起動フックは実質ずっと機能していなかった。</li>
+            <li><strong>対応:</strong> 白紙メモ側（1_script_sketch.js）のmap-areaのフックと同じ作りに合わせ、クリック後にsetTimeout(…, 250)で少し待ってから、そのとき実際に開いている状態（display === 'block'）を見て起動するよう変更した。</li>
+            <li><strong>影響範囲:</strong> gpsManager.start()・azimuthManager.startListening()の呼び出しタイミングのみの変更。GPS取得・方位計算のロジック自体（azimuthManagerの計算式、記録ボタンrecordAzimuthの処理）は変更していない。</li>
+            <li><strong>関連する既知の注意点（変更なし）:</strong> iOS13以降は、DeviceOrientationEvent.requestPermission()の許可が必要で、ユーザー操作（クリック）を起点に呼ぶ必要がある。今回の修正後も、この起動フックはアコーディオンのクリックというユーザー操作を起点に呼ばれるため、この要件は満たしている。</li>
+        </ul>
+
+        <h4>5.39 方位「記録」ボタンの1回目が必ず失敗する不具合の修正（Phase 6.29）</h4>
+        <ul>
+            <li><strong>症状:</strong> 6.28で起動フックのタイミングを直した後も、実機で「写真タブを開く→記録ボタンを押す→失敗」「タブを閉じて再度開く→記録ボタンを押す→成功」という報告があった。1回目は必ず失敗する。</li>
+            <li><strong>原因:</strong> 6.28の修正で、タブを開いたときにazimuthManager.startListening()（イベントリスナーの登録）は正しく呼ばれるようになった。しかし、リスナー登録が完了した瞬間と、実際にセンサーから最初の値（deviceorientation/deviceorientationabsoluteイベント）が届く瞬間は別で、その間にはわずかにラグがある。従来のrecordAzimuth()は、押した瞬間にazimuthManager.currentAzimuthがまだnull（＝1件も値を受け取っていない）なら即座に「取得中です」として失敗させていた。1回目はほぼ確実にこのラグの最中に押すことになるため、必ず失敗していた。2回目に成功していたのは、タブを閉じている間もリスナーは動き続けており、開き直す頃には既に値が届いていたため。</li>
+            <li><strong>対応:</strong> azimuthManager.waitForAzimuth(timeoutMs=4000)を追加した。currentAzimuthが既にあれば即返し、無ければ100ms間隔で最大4秒待ってから、それでも無ければnullを返す。photoApp.recordAzimuth()を非同期にし、値が無い場合はstartListening()を保証してからwaitForAzimuth()で実際に待つようにした。これにより、1回目でも数百ms〜数秒待てば記録できるようになる（センサーが本当に反応していない場合は、4秒後に従来どおり失敗メッセージが出る）。</li>
+            <li><strong>影響範囲:</strong> recordAzimuth()の判定方法のみの変更。方位の計算式・記録後のデータ形式（azimuthはこれまでどおり整数の度）は変更していない。</li>
+            <li><strong>実機確認:</strong> 写真タブを開いてすぐ「記録」を押しても、少し待たされたのち成功するか確認が必要。センサー自体が使えない端末・許可拒否時は、4秒後に失敗メッセージが出ることを確認する。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -5142,6 +5161,28 @@ window.azimuthManager = {
         const dirs = ["北","北北東","北東","東北東","東","東南東","南東","南南東",
                       "南","南南西","南西","西南西","西","西北西","北西","北北西"];
         return dirs[Math.floor(((az + 11.25) % 360) / 22.5)];
+    },
+
+    // 【Phase 6.29】次の1回分のセンサー値が届くのを待つ。
+    // 写真タブを開いた直後は、リスナー登録は完了していても実際の最初のイベントが
+    // まだ届いていないことがある（isListening=trueでもcurrentAzimuthはまだnullの瞬間）。
+    // 「記録」ボタンをそのタイミングで押すと、以前は即座に失敗にしていた。
+    // 既に値があれば即返し、無ければポーリングしつつ最大timeoutMsだけ待ってから
+    // 諦める（諦めた場合はnullを返す＝呼び出し側でエラー表示させる）。
+    waitForAzimuth(timeoutMs = 4000) {
+        return new Promise((resolve) => {
+            if (this.currentAzimuth !== null) { resolve(this.currentAzimuth); return; }
+            const iv = setInterval(() => {
+                if (this.currentAzimuth !== null) {
+                    clearInterval(iv);
+                    resolve(this.currentAzimuth);
+                }
+            }, 100);
+            setTimeout(() => {
+                clearInterval(iv);
+                resolve(this.currentAzimuth); // タイムアウト時点でnullならnullのまま返す
+            }, timeoutMs);
+        });
     }
 };
 
@@ -5293,14 +5334,24 @@ window.photoApp = {
     },
 
     // ---- 方位を現在の写真に記録 ----
-    recordAzimuth() {
+    // 【Phase 6.29】写真タブを開いた直後（1回目）は、リスナーは起動していても
+    // センサーからの最初の値がまだ届いていないことがあり、以前はそれを
+    // 「取得中なので失敗」として弾いていた（＝1回目は必ず失敗する不具合）。
+    // ここで、値が無ければazimuthManager.startListening()を保証しつつ
+    // waitForAzimuth()で実際に値が届くのを最大4秒待ってから判定するようにした。
+    async recordAzimuth() {
         if (this.currentIndex === -1) {
             window.uiHelper && uiHelper.showToast("写真を選択してから記録してください"); return;
         }
         if (azimuthManager.currentAzimuth === null) {
-            window.uiHelper && uiHelper.showToast("センサー値を取得中です。少し待ってから再度押してください"); return;
+            window.uiHelper && uiHelper.showToast("センサー値を取得しています...");
+            await azimuthManager.startListening();
         }
-        const az = azimuthManager.currentAzimuth;
+        const az = await azimuthManager.waitForAzimuth(4000);
+        if (az === null) {
+            window.uiHelper && uiHelper.showToast("センサー値を取得できませんでした。少し待ってから再度押してください");
+            return;
+        }
         this.photos[this.currentIndex].azimuth = az;
         this.renderAzimuthField();
         window.uiHelper && uiHelper.showToast(`方位を記録しました: ${az}° ${azimuthManager._dir(az)}`);
@@ -5581,20 +5632,27 @@ window.photoApp = {
 // =============================================================================
 // 写真アコーディオンを開いたときに GPS・センサーを起動するフック
 // =============================================================================
+// 【Phase 6.28】アコーディオンの開閉自体は3_script_main.js側のクリックハンドラが先に処理し、
+// その時点でcontent.style.displayは既に'block'に書き換わっている。そのため、この関数を
+// 「開く前かどうか」を同じクリックの中で同期的に判定する作りにしていると、常にblockになった後を
+// 見ることになり、条件が成立せず起動しない（実質ずっと動いていなかった不具合）。
+// 白紙メモ側（1_script_sketch.js）と同じく、少し待ってから開いている状態そのものを見る作りに変更。
 document.addEventListener('click', (e) => {
     const header = e.target.closest('.accordion-header');
     if (!header) return;
     const item = header.parentElement;
     if (!item || item.dataset.group !== 'photo-area') return;
-    const content = header.nextElementSibling;
-    if (content && content.style.display !== 'block') {
-        gpsManager.start();
-        // startListening()完了後に_updateLiveUI()を呼ぶことで
-        // 初回起動時もセンサー値があれば即座に表示される
-        azimuthManager.startListening().then(() => {
-            azimuthManager._updateLiveUI();
-        });
-    }
+    setTimeout(() => {
+        const content = header.nextElementSibling;
+        if (content && content.style.display === 'block') {
+            gpsManager.start();
+            // startListening()完了後に_updateLiveUI()を呼ぶことで
+            // 初回起動時もセンサー値があれば即座に表示される
+            azimuthManager.startListening().then(() => {
+                azimuthManager._updateLiveUI();
+            });
+        }
+    }, 250);
 });
 
 
