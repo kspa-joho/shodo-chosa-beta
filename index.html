@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.29)</title>
+    <title>被災状況調査アプリ (Phase 6.30)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -52,13 +52,25 @@ body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; d
 .leaflet-draw-actions li:last-child a { background-color: #e74c3c !important; }
 
 /* 【Phase 6.26】描画ツールバーは地図枠の外（上部バー）に横並びで配置。完了/戻る/中止も同バー内に表示 */
-#map-draw-bar { min-height: 34px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; padding: 4px; background: #eee; }
-#map-draw-bar .leaflet-control { float: none !important; margin: 0 !important; clear: none !important; display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
-#map-draw-bar .leaflet-draw-section { position: relative; display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
-#map-draw-bar .leaflet-draw-toolbar { flex-direction: row !important; margin: 0 !important; }
-#map-draw-bar .leaflet-draw-actions { position: static !important; left: auto !important; top: auto !important; margin: 0 !important; padding: 0; list-style: none; display: none; }
-#map-draw-bar .leaflet-draw-actions[style*="block"] { display: flex !important; gap: 4px; }
-#map-draw-bar .leaflet-draw-actions li { margin: 0 !important; }
+/* 【Phase 6.30】操作パネルの並び方を全面的に見直し。
+   ・バーは地図の「下」に置く（地図の上にあると、完了/中止の出現・消滅のたびに地図自体が
+     押し下げられてチラつくため）。
+   ・row1（ツール行）とrow2（完了/戻る/中止・保存/キャンセル・現在地の選択肢を出す行）を分ける。
+   ・row2はあらかじめ高さを確保した「空き行」にしておき、そこに出し入れすることで
+     row1や地図がずれないようにする（ちらつき対策）。 */
+#map-draw-bar { box-sizing: border-box; display: flex; flex-direction: column; gap: 6px; padding: 6px 4px; background: #eee; }
+#map-draw-bar-tools { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; }
+#map-draw-bar-tools .leaflet-control { float: none !important; margin: 0 !important; clear: none !important; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+#map-draw-bar-tools .leaflet-draw-section { position: relative; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+#map-draw-bar-tools .leaflet-draw-toolbar { flex-direction: row !important; margin: 0 !important; }
+/* アイコンボタンを1.5倍表示に（スプライト画像の座標はそのまま使えるzoomで拡大する） */
+#map-draw-bar-tools .leaflet-draw-toolbar a { zoom: 1.5; margin-right: 4px !important; }
+/* row2：完了/戻る/中止・保存/キャンセル・現在地選択肢の「空き行」。中身が無い時も高さを確保する */
+#map-draw-bar-actions { min-height: 40px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 100%; }
+#map-draw-bar-actions .leaflet-draw-actions { position: static !important; left: auto !important; top: auto !important; margin: 0 !important; padding: 0; list-style: none; display: none; width: 100%; }
+#map-draw-bar-actions .leaflet-draw-actions[style*="block"] { display: flex !important; flex-wrap: wrap; gap: 6px; width: 100%; }
+#map-draw-bar-actions .leaflet-draw-actions li { margin: 0 !important; flex: 1; min-width: 70px; }
+#map-draw-bar-actions .leaflet-draw-actions li a { display: block; text-align: center; }
 
 /* 地図のタッチアクション制御 */
 #map { touch-action: none; }
@@ -654,12 +666,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.29</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.30</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.29</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.30</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -678,8 +690,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.29)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.29（方位「記録」ボタンを押した1回目は必ず失敗する不具合を修正。実際の値が届くまで待ってから判定するように変更）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.30)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.30（位置図の操作パネルを地図の下へ移動しアイコンを1.5倍化／メイン・サブの編集を分離／連続線の途中完了の修正／点をプロットする際に現在地・画面タップの選択肢を追加）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -709,7 +721,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr style="background:#eee;"><th>Filename</th><th>Role</th><th>Note</th></tr>
             <tr><td><code>build.js</code></td><td>ビルドスクリプト</td><td>App A専用。piexif.jsを先頭に結合する。manage.html・dev.htmlを追加読み込み。</td></tr>
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
-            <tr><td><code>style.css</code></td><td>共通スタイル</td><td>【Phase 6.26更新】#map-draw-bar（地図枠外の描画バー）の指定を追加。CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
+            <tr><td><code>style.css</code></td><td>共通スタイル</td><td>【Phase 6.30更新】#map-draw-barをrow1(ツール)/row2(完了等・空き行)に分割し、アイコンをzoomで1.5倍化。【Phase 6.26更新】#map-draw-bar（地図枠外の描画バー）の指定を追加。CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
             <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
             <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.22更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力（チェックした現場が対象）の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（上から順に、出力ファイル名構成=初期は調査日・災害番号・なし・なし・なし／写真の出力横幅=初期1200px・強制4:3／まとめてZIP化／地図キャッシュを開放する。見出し横の補足表記は無し）・初期値の設定（旧・入出力データ設定。初期値として保存／クリア2種／初期値の読み込み／今の初期値（保存済み）の一覧表示。見出し横の補足表記は無し）</td></tr>
             <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
@@ -717,7 +729,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
             <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
-            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
+            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.30更新】5.40参照（操作パネルを地図下へ・アイコン1.5倍・編集のメイン/サブ分離・連続線修正・点の現在地/画面タップ選択）。【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>【Phase 6.27更新】ペン色を12色プルダウン(#sketch-color-select)で選択（setColorがプルダウンと同期。start()でプルダウン値とペン色の食い違いを解消）。Canvas描画（ペン/直線/文字/編集/Undo）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>【Phase 6.29更新】photoApp.recordAzimuth()を、値が届くまで最大4秒待つ作りに変更（azimuthManager.waitForAzimuth追加）。5.39参照。【Phase 6.28更新】写真アコーディオンを開いたときのGPS・方位センサー起動フックを、白紙メモと同じ「少し待ってから開いている状態を見る」作りに修正（5.38参照）。photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
             <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
@@ -1188,7 +1200,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>実装：地図コンテナ（#map）の中心に、黒線＋白縁取りの十字（約28px四方）を重ねて表示する。地図の操作を邪魔しないよう<code>pointer-events:none</code>、z-indexは650（描画・注記より上、Leafletのコントロールより下）。メイン・サブ・GPS修正モードのいずれでも表示される。</li>
                     <li>「地図を写真に保存」（captureToPhoto）はタイル・図形・注記のみを描き写す方式（5.8）のため、十字線は保存画像には写り込まない。</li>
                     <li><strong>【Phase 6.29完了】方位「記録」ボタンを押した1回目は必ず失敗する不具合:</strong> 5.39参照。6.28の修正後も、写真タブを開いた直後の1回目は必ず失敗し、閉じて開き直すと2回目は成功する、という実機の報告があった。</li>
-                    <li><strong>【保留】十字線の位置にワンタップで〇を置くボタン:</strong> 現在は十字線を目印に地図をタップして〇を置く。十字線の位置へ置くボタンが必要かは、実機で十字線を使ってから決める（ユーザー判断）。</li>
+                    <li><strong>【保留】十字線の位置にワンタップで〇を置くボタン:</strong> 6.30で「点をプロット」に現在地の選択肢を追加したため、十字線の位置に置きたい場合は「画面タップ」を選べば従来どおり可能。地図の中心（十字線の位置）そのものへワンタップで置く専用ボタンが別途必要かは、実機で使ってから判断する（ユーザー判断）。</li>
                 </ul>
             </li>
             <li><strong>メイン〇の大きさ（Phase 6.24の対応は6.25で置き換え）:</strong> 6.24では半径10mを3.3mに変更したが、〇はメートル半径の円だったためズームによって大きさが変わり、意図（位置を示すマークとして常に同じ大きさで見える）と合わなかった。5.35で、ピクセル指定の固定サイズのマークに作り直した。</li>
@@ -1249,6 +1261,18 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>対応:</strong> azimuthManager.waitForAzimuth(timeoutMs=4000)を追加した。currentAzimuthが既にあれば即返し、無ければ100ms間隔で最大4秒待ってから、それでも無ければnullを返す。photoApp.recordAzimuth()を非同期にし、値が無い場合はstartListening()を保証してからwaitForAzimuth()で実際に待つようにした。これにより、1回目でも数百ms〜数秒待てば記録できるようになる（センサーが本当に反応していない場合は、4秒後に従来どおり失敗メッセージが出る）。</li>
             <li><strong>影響範囲:</strong> recordAzimuth()の判定方法のみの変更。方位の計算式・記録後のデータ形式（azimuthはこれまでどおり整数の度）は変更していない。</li>
             <li><strong>実機確認:</strong> 写真タブを開いてすぐ「記録」を押しても、少し待たされたのち成功するか確認が必要。センサー自体が使えない端末・許可拒否時は、4秒後に失敗メッセージが出ることを確認する。</li>
+        </ul>
+
+        <h4>5.40 位置図の操作パネル刷新・編集のメイン/サブ分離・連続線修正・点の配置方法選択（Phase 6.30）</h4>
+        <ul>
+            <li><strong>背景（実機フィードバック）:</strong> 6.26で操作パネルを地図の外（上部）へ出したが、①アイコンが小さく押しにくい、②完了/中止が横に出ると改行して使いにくい、③パネルが地図の上にあるため完了/中止の出現・消滅のたびに地図がずれてチラつく、④メインの「編集」を押すとサブの図形まで一緒に編集されてしまう、⑤連続線のはずが2〜3点目で勝手に完了してしまい3点目以降が描けない、⑥点（マーカー）を十字線の位置に置きたいが地図をタップする以外の方法がない、という指摘があった。</li>
+            <li><strong>①③操作パネルの配置とレイアウト:</strong> パネル（#map-draw-bar）を地図の「上」から「下」へ移動した。地図の下に置けば、下の要素の高さが変わっても地図自体の位置はずれない。加えて、パネルをrow1（ツールアイコン：ライン・地点・範囲・テキスト・編集・削除）とrow2（完了/戻る/中止・保存/キャンセル・点をプロットする際の選択肢）に分離し、row2はあらかじめ高さ（min-height:40px）を確保した「空き行」にして、その中に出し入れする。Leaflet.draw標準のactions要素（&lt;ul class="leaflet-draw-actions"&gt;）は、元々どのセクションに属していてもJSで全てrow2へ実体ごと移動する（mapApp._moveDrawControlOutside）。</li>
+            <li><strong>①アイコンの拡大:</strong> style.cssで#map-draw-bar-tools .leaflet-draw-toolbar aに<code>zoom:1.5</code>を指定し、Leaflet.draw標準のスプライト画像アイコンを座標をずらすことなくそのまま1.5倍表示にした（26px→約39px）。</li>
+            <li><strong>②完了/中止の折り返し:</strong> row2の中でLeaflet.drawのactions要素をflex-wrap:wrap・幅100%で表示するようにし、ボタンが横に並ぶ形は保ちつつ、row1側に食い込んで改行することがないようにした。</li>
+            <li><strong>④編集のメイン/サブ分離:</strong> 従来、編集コントロール（L.EditToolbar）に渡すfeatureGroupは、メイン・サブ問わず全図形が入ったallDrawnItemsそのものだったため、モードに関わらず全ての図形が編集対象になっていた。mapApp._editGroupForMode(mode)を追加し、allDrawnItemsから今のモード（isMainの値）に一致する図形だけを集めた一時的なFeatureGroupを都度作り、setMode()のたびにそれを編集対象として渡すようにした。allDrawnItems自体は今までどおり全図形の正本として維持しており、写真保存・CSV・復元などへの影響はない。作図・削除のたびにもsetMode(this.currentMode)を呼び直し、編集対象の一覧を最新の状態に保つ。削除（Draw.Event.DELETED）時は、編集用の一時グループ側だけでなくallDrawnItems側からも該当レイヤーを取り除くようにした（取り除かないと、写真保存等に消えたはずの図形が残ってしまうため）。</li>
+            <li><strong>⑤連続線の途中完了の修正:</strong> 原因はLeaflet.draw標準の2つの仕組みだった。(a)直前に置いた頂点のマーカーをクリック/タップすると完了する仕組み（_updateFinishHandlerが頂点マーカーにclickイベントで_finishShapeを登録する）。(b)タッチ操作で「直前の頂点から画面上10px以内」をタップすると自動的に完了する仕組み（_endPoint内のlastPtDistance&lt;10の判定）。スマホでは前の頂点の近くを続けてタップすることが多く、これが2〜3点目のあたりで意図せず完了する原因だった。以前（〜6.29）の対応は、実際に完了処理を呼んでいるメソッドとは別の同名メソッド（編集モード用の_onMarkerClick）を上書きしており効果が無かった。今回、_updateFinishHandlerを無効化（頂点クリックでの完了登録自体をしない）し、_endPointから(b)の分岐を取り除いた。「完了」ボタン（completeShape）はこれらとは別経路で呼ばれるため、この変更後も問題なく機能する。ヘッドレスブラウザで、近接した5点を連続でタップしても全点が頂点として追加され、「完了」を押すまで確定しないことを確認した。</li>
+            <li><strong>⑥点（マーカー）の配置方法の選択:</strong> 「地点をプロット」ボタンを押すと、即座に地図タップ待ちになる代わりに、row2（空き行）に「📍現在地」「👆画面タップ」「中止」の3つの選択肢を表示するようにした（mapApp._showMarkerChoice）。「画面タップ」は従来どおり地図をタップして置く（Leaflet.draw本来のマーカー描画ハンドラをそのまま有効化する）。「現在地」はブラウザのgeolocationで取得した現在地に、地図をタップせず直接プロットする（mapApp._placeMarkerAt。メインなら既存の〇を入れ替え、サブなら通常のマーカーを追加する、という置き換えルールは地図タップ時と同じ）。「中止」は選択肢を消すだけで何もしない。線（ポリライン）・範囲・テキストには、この選択肢は出さない（ユーザーからの明示的な指定どおり）。ボタン自体はモード切替のたびに作り直されるため、クリックの割り込みは個々のボタンにではなく、常に存在するバー側にキャプチャ段階で一度だけ委譲登録している（mapApp._bindMarkerChoiceIntercept）。</li>
+            <li><strong>実機確認が必要な点:</strong> アイコンの大きさ・押しやすさ、完了/中止のちらつきが無くなったか、メイン編集でサブが動かなくなったか、連続線が3点目以降も描けるか、現在地でのプロットの精度と速さ。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -3936,15 +3960,35 @@ SOFTWARE.
 // --- 地図日本語化 & 挙動カスタマイズ（完全版） ---
 const setupJapaneseDraw = () => {
     if (typeof L === 'undefined' || typeof L.drawLocal === 'undefined') return;
-    
-    // 【決定的な修正】ポリラインの「マーカークリックで完了」する挙動のみを無効化
-    // これにより、描画機能（マーカー生成など）は正常に保ちつつ、
-    // 誤操作による勝手な完了だけを防ぐことができる。
+
+    // 【Phase 6.30】連続線が2〜3点目で勝手に完了してしまう不具合の修正。
+    // 原因：Leaflet.draw標準の動作として、(a) 最後に置いた頂点のマーカーをクリック/タップすると
+    // 完了する仕組み（_updateFinishHandlerがマーカーにclickで_finishShapeを登録）と、
+    // (b) タッチ操作で「直前の頂点から画面上10px以内」をタップすると自動で完了する仕組み
+    // （_endPoint内のlastPtDistance<10判定）の2つがあり、スマホでは頂点の近くを続けて
+    // タップすることが多いため、2点目・3点目のあたりで意図せず完了してしまっていた。
+    // 以前（〜6.29）の_onMarkerClick上書きは、実際に完了処理を呼んでいる関数とは別の
+    // メソッドを上書きしていたため効果が無かった。
+    // 対応：上記(a)(b)を両方無効化し、「完了」ボタン（completeShape）を押すまでは
+    // 何度でも頂点を追加できるようにする。「完了」ボタン自体はこれらとは別経路
+    // （completeShapeを直接呼ぶ）のため、この変更の影響を受けない。
     if (L.Draw && L.Draw.Polyline) {
-        L.Draw.Polyline.prototype._onMarkerClick = function() {
-            // 何もしない。
-            // これにより、頂点をタップしても完了せず、線を書き続けられる。
-            // 完了するには「完了」ボタンを押す必要がある。
+        // (a) 頂点マーカーのクリックで完了する仕組みを無効化（登録自体をしない）
+        L.Draw.Polyline.prototype._updateFinishHandler = function () {};
+        // (b) 直前の頂点の近くをタップすると完了する仕組みを無効化。
+        // 元のLeaflet.draw実装から、該当の分岐だけを取り除いたもの。
+        L.Draw.Polyline.prototype._endPoint = function (clientX, clientY, e) {
+            if (this._mouseDownOrigin) {
+                const dragCheckDistance = L.point(clientX, clientY).distanceTo(this._mouseDownOrigin);
+                if (this.options.maxPoints > 1 && this.options.maxPoints === this._markers.length + 1) {
+                    this.addVertex(e.latlng);
+                    this._finishShape();
+                } else if (Math.abs(dragCheckDistance) < 9 * (window.devicePixelRatio || 1)) {
+                    this.addVertex(e.latlng);
+                }
+                this._enableNewMarkers();
+            }
+            this._mouseDownOrigin = null;
         };
     }
 
@@ -4054,15 +4098,15 @@ window.mapApp = {
     init() {
         if (this.map) return;
         setupJapaneseDraw();
-        
+
         // オプションは全て標準（デフォルト）に戻す
         // これでブラウザ標準のスムーズな操作感が戻る
-        this.map = L.map('map', { 
+        this.map = L.map('map', {
             renderer: L.canvas(),
             zoomControl: false,
             maxZoom: 25
         }).setView([31.5601, 130.5580], 16);
-        
+
         // +ボタン・現在のズーム数値・-ボタンを1つのコントロールとして追加
         new L.Control.ZoomWithLevel().addTo(this.map);
 
@@ -4075,9 +4119,10 @@ window.mapApp = {
         L.control.layers(layers).addTo(this.map);
         this.allDrawnItems = new L.FeatureGroup().addTo(this.map);
         this._addCrosshair();
-        
+
         this.setMode('main');
-        
+        this._bindMarkerChoiceIntercept();
+
         this.map.on(L.Draw.Event.CREATED, (e) => {
             let layer = e.layer;
             const isM = (this.currentMode === 'main');
@@ -4098,12 +4143,23 @@ window.mapApp = {
             } else if (layer.setStyle) {
                 layer.setStyle({ color: isM ? '#ff0000' : '#0000ff', weight: 6, opacity: 0.7, fillOpacity: 0.4 });
             }
-            this.allDrawnItems.addLayer(layer); 
+            this.allDrawnItems.addLayer(layer);
             this.updateMapSummary();
+            // 【Phase 6.30】編集の対象をメイン/サブそれぞれに絞るため、作図の都度
+            // 現在のモードでツールバーを作り直し、編集対象の一覧を最新にする。
+            this.setMode(this.currentMode);
         });
-        
+
         this.map.on(L.Draw.Event.EDITED, () => this.updateMapSummary());
-        this.map.on(L.Draw.Event.DELETED, () => this.updateMapSummary());
+        this.map.on(L.Draw.Event.DELETED, (e) => {
+            // 【Phase 6.30】編集を今のモードの図形だけに絞る仕組み（_editGroupForMode）を
+            // 導入したことで、削除もそのスナップショット側から行われる。allDrawnItems（全体の
+            // 正本）側からも消しておかないと、地図の写真保存やCSV等で消えたはずの図形が
+            // 残ってしまう。
+            if (e.layers) e.layers.eachLayer(l => this.allDrawnItems.removeLayer(l));
+            this.updateMapSummary();
+            this.setMode(this.currentMode);
+        });
     },
 
     createTextLayer(latlng, txt) {
@@ -4113,13 +4169,27 @@ window.mapApp = {
         });
     },
 
+    // 【Phase 6.30】「編集」の対象をメイン/サブそれぞれに絞る。
+    // allDrawnItemsは今までどおり全図形の正本（写真保存・CSV・復元などが参照する）として維持し、
+    // 編集コントロールに渡す一覧だけを、今のモード（isMainの値）で絞り込んだ一時的な
+    // FeatureGroupにする。これはallDrawnItemsを都度スキャンして作るだけの「見え方」の絞り込みで、
+    // レイヤーそのものを複製したり別々に持ち直したりはしない（同じレイヤー実体を参照するだけ）。
+    _editGroupForMode(mode) {
+        const g = new L.FeatureGroup();
+        this.allDrawnItems.eachLayer(l => {
+            const isM = !!(l.options && l.options.isMain);
+            if (isM === (mode === 'main')) g.addLayer(l);
+        });
+        return g;
+    },
+
     setMode(mode) {
         this.currentMode = mode;
         if(this.drawControl) this.map.removeControl(this.drawControl);
-        
+
         this.drawControl = new L.Control.Draw({
-            edit: { featureGroup: this.allDrawnItems, remove: true },
-            draw: mode === 'main' 
+            edit: { featureGroup: this._editGroupForMode(mode), remove: true },
+            draw: mode === 'main'
             ? { marker: true, polyline: { shapeOptions: { color: '#ff0000', weight: 6 } }, polygon: false, circle: false, rectangle: false, circlemarker: false }
             : { marker: true, polyline: { shapeOptions: { color: '#0000ff', weight: 4 } }, polygon: { shapeOptions: { color: '#0000ff', fillOpacity: 0.4 } }, circlemarker: true, circle: false, rectangle: false }
         });
@@ -4127,21 +4197,130 @@ window.mapApp = {
         this._moveDrawControlOutside();
     },
 
-    // 【Phase 6.26】描画ツールバー（完了/戻る/中止・編集/削除を含む）を地図枠の外（上）へ移動し、描画の邪魔にならないようにする
+    // 【Phase 6.26】描画ツールバー（完了/戻る/中止・編集/削除を含む）を地図枠の外へ移動し、描画の邪魔にならないようにする。
+    // 【Phase 6.30】以下の見直しを行った。
+    //   ・バーの位置を地図の「上」から「下」に変更（完了/中止が出るたびに地図自体が上下にずれて
+    //     チラつく問題は、バーが地図の上にあることが原因だったため。下にすれば地図はずれない）。
+    //   ・ツールアイコンの行（row1）と、完了/戻る/中止・保存/キャンセルの行（row2）を分離。
+    //     row2はあらかじめ一定の高さを確保した「空き行」とし、そこにLeaflet.draw標準のactions
+    //     <ul>を実体ごと移動させることで、出現・消滅してもrow1やその上の地図がずれないようにする
+    //     （ちらつき対策）。
+    //   ・アイコンは1.5倍表示にする（style.css側のzoomで対応）。
     _moveDrawControlOutside() {
         const mapEl = document.getElementById('map');
         if (!mapEl || !this.drawControl) return;
+        const container = mapEl.parentNode;
         let bar = document.getElementById('map-draw-bar');
+        let row1 = document.getElementById('map-draw-bar-tools');
+        let row2 = document.getElementById('map-draw-bar-actions');
         if (!bar) {
             bar = document.createElement('div');
             bar.id = 'map-draw-bar';
-            mapEl.parentNode.insertBefore(bar, mapEl);
+            row1 = document.createElement('div');
+            row1.id = 'map-draw-bar-tools';
+            row2 = document.createElement('div');
+            row2.id = 'map-draw-bar-actions';
+            bar.appendChild(row1);
+            bar.appendChild(row2);
+            // 地図の直後（＝地図の下）に挿入する
+            if (mapEl.nextSibling) container.insertBefore(bar, mapEl.nextSibling);
+            else container.appendChild(bar);
         }
         const c = this.drawControl.getContainer();
-        if (c && c.parentNode !== bar) bar.appendChild(c);
+        if (c && c.parentNode !== row1) row1.appendChild(c);
+
+        // 完了/戻る/中止（描画中）・保存/キャンセル（編集中）のul要素を、
+        // どのセクションに属していても全てrow2（空き行）へ実体ごと移動する。
+        c.querySelectorAll('ul.leaflet-draw-actions').forEach(ul => {
+            if (ul.parentNode !== row2) row2.appendChild(ul);
+        });
     },
 
-    clearLayers() { if (confirm("全ての図形を消去しますか？")) { this.allDrawnItems.clearLayers(); this.updateMapSummary(); } },
+    // 【Phase 6.30】点（マーカー）ツールを押した直後に「現在地／画面タップ／中止」の
+    // 選択肢を出す。Leaflet.draw標準のマーカーボタンは押すと即座に地図タップ待ちになるため、
+    // ボタンのクリックをこちらで先取り（キャプチャ段階でstopし、Leaflet.draw本来の
+    // 挙動より先に割り込む）し、代わりに選択肢を出す。ボタン自体はモード切替のたびに
+    // 作り直されるため、リスナーは個々のボタンにではなく、常に存在するバー側に一度だけ
+    // 委譲登録する。
+    _bindMarkerChoiceIntercept() {
+        if (this._markerChoiceBound) return;
+        this._markerChoiceBound = true;
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('#map-draw-bar-tools .leaflet-draw-draw-marker');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            this._showMarkerChoice();
+        }, true); // キャプチャ段階でLeaflet.draw本体のクリックハンドラより先に処理する
+    },
+
+    _showMarkerChoice() {
+        const row2 = document.getElementById('map-draw-bar-actions');
+        if (!row2) return;
+        this._hideMarkerChoice();
+        const box = document.createElement('div');
+        box.id = 'map-marker-choice';
+        box.style.cssText = 'display:flex; gap:6px; flex-wrap:wrap; width:100%;';
+        const mk = (label, onClick, bg) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = label;
+            b.style.cssText = `flex:1; min-width:80px; padding:8px 6px; border:none; border-radius:4px; font-weight:bold; font-size:0.85rem; color:white; background:${bg};`;
+            b.onclick = onClick;
+            return b;
+        };
+        box.appendChild(mk('📍 現在地', () => this._markerFromCurrentLocation(), '#27ae60'));
+        box.appendChild(mk('👆 画面タップ', () => this._markerByScreenTap(), '#3498db'));
+        box.appendChild(mk('中止', () => this._hideMarkerChoice(), '#95a5a6'));
+        row2.appendChild(box);
+    },
+    _hideMarkerChoice() {
+        const box = document.getElementById('map-marker-choice');
+        if (box) box.remove();
+    },
+    _markerByScreenTap() {
+        this._hideMarkerChoice();
+        const draw = this.drawControl && this.drawControl._toolbars && this.drawControl._toolbars.draw;
+        const handler = draw && draw._modes && draw._modes.marker && draw._modes.marker.handler;
+        if (handler) handler.enable();
+    },
+    _markerFromCurrentLocation() {
+        this._hideMarkerChoice();
+        if (!navigator.geolocation) {
+            window.uiHelper && uiHelper.showToast("この端末は現在地を取得できません");
+            return;
+        }
+        window.uiHelper && uiHelper.showToast("現在地を取得しています...");
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                const latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                this._placeMarkerAt(latlng);
+                if (this.map) this.map.setView(latlng, Math.max(this.map.getZoom(), 17));
+            },
+            () => { window.uiHelper && uiHelper.showToast("現在地を取得できませんでした"); },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+    },
+    // 「現在地」選択時に、地図タップ経由の作図（Draw.Event.CREATED）と同じ結果になるよう、
+    // メイン/サブそれぞれの見た目・入れ替えルールを揃えて直接レイヤーを追加する。
+    _placeMarkerAt(latlng) {
+        const isM = (this.currentMode === 'main');
+        let layer;
+        if (isM) {
+            this.allDrawnItems.eachLayer(l => { if (l.options && l.options.isMain) this.allDrawnItems.removeLayer(l); });
+            layer = this.createMainMark(latlng);
+        } else {
+            layer = L.marker(latlng);
+            if (!layer.options) layer.options = {};
+            layer.options.isMain = false;
+        }
+        this.allDrawnItems.addLayer(layer);
+        this.updateMapSummary();
+        this.setMode(this.currentMode);
+        window.uiHelper && uiHelper.showToast("現在地に地点をプロットしました");
+    },
+
+    clearLayers() { if (confirm("全ての図形を消去しますか？")) { this.allDrawnItems.clearLayers(); this.updateMapSummary(); this.setMode(this.currentMode); } },
     updateMapSummary() {
         let m = 0, s = 0; this.allDrawnItems.eachLayer(l => { if (l.options && l.options.isMain) m++; else s++; });
         const sum = document.querySelector('.accordion-item[data-group="map-area"] .summary-text');
