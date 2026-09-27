@@ -1,0 +1,10 @@
+{
+  "name": "disaster-survey-app-manager",
+  "version": "13.43.0",
+  "description": "被災状況調査システム App B (統合管理版)",
+  "main": "build.js",
+  "phase": "13.43",
+  "scripts": { "build": "node build.js" },
+  "author": "AxA-AIproject",
+  "license": "ISC"
+}
