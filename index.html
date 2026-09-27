@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.30)</title>
+    <title>被災状況調査アプリ (Phase 6.31)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -666,12 +666,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.30</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.31</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.30</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.31</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -690,8 +690,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.30)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.30（位置図の操作パネルを地図の下へ移動しアイコンを1.5倍化／メイン・サブの編集を分離／連続線の途中完了の修正／点をプロットする際に現在地・画面タップの選択肢を追加）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.31)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.31（位置図サブの編集を「①編集ボタン→②要素を選択→③編集開始」の3段階に変更／範囲(Polygon)がダブルタップ・始点タップで完了してしまう不具合を修正）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -729,7 +729,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
             <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
-            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.30更新】5.40参照（操作パネルを地図下へ・アイコン1.5倍・編集のメイン/サブ分離・連続線修正・点の現在地/画面タップ選択）。【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
+            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.31更新】5.41参照（編集を「選択してから編集」の3段階に変更・範囲(Polygon)の途中完了を修正）。【Phase 6.30更新】5.40参照（操作パネルを地図下へ・アイコン1.5倍・編集のメイン/サブ分離・連続線修正・点の現在地/画面タップ選択）。【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>【Phase 6.27更新】ペン色を12色プルダウン(#sketch-color-select)で選択（setColorがプルダウンと同期。start()でプルダウン値とペン色の食い違いを解消）。Canvas描画（ペン/直線/文字/編集/Undo）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>【Phase 6.29更新】photoApp.recordAzimuth()を、値が届くまで最大4秒待つ作りに変更（azimuthManager.waitForAzimuth追加）。5.39参照。【Phase 6.28更新】写真アコーディオンを開いたときのGPS・方位センサー起動フックを、白紙メモと同じ「少し待ってから開いている状態を見る」作りに修正（5.38参照）。photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
             <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
@@ -1275,6 +1275,14 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>実機確認が必要な点:</strong> アイコンの大きさ・押しやすさ、完了/中止のちらつきが無くなったか、メイン編集でサブが動かなくなったか、連続線が3点目以降も描けるか、現在地でのプロットの精度と速さ。</li>
         </ul>
 
+        <h4>5.41 編集フローの「選択してから編集」化・範囲(Polygon)の途中完了修正（Phase 6.31）</h4>
+        <ul>
+            <li><strong>背景（実機フィードバック）:</strong> サブに複数の図形がある状態で「編集」を押すと、Leaflet.draw標準の仕組み上、対象（メイン/サブに絞り込み済み。5.40の④）の図形が一斉に編集可能状態（制御点ドラッグ可能）になっていた。どれがどれだか分かりにくい・意図せず動かしてしまう、という指摘があり、「①編集ボタンを押す→②編集する要素を選択する→③編集を始める」という3段階の流れに変更してほしいという要望があった。また、範囲（Polygon）が、ダブルタップや始点のタップで完了してしまい、完了ボタンを押すまで作図を続けられない、という指摘もあった。</li>
+            <li><strong>①〜③ 選択してから編集する流れ（mapApp._bindEditSelectIntercept等）:</strong> 「編集」ボタン（.leaflet-draw-edit-edit）のクリックをキャプチャ段階で先取りし、Leaflet.draw標準の「対象を一斉にediting.enable()する」処理を実行させないようにした。代わりに、今のモードの対象（_editGroupForModeで絞り込み済み）が1件以上あれば、row2（空き行）に「編集する要素を地図上でタップしてください」という案内と「中止」ボタンを表示し（②の待機状態）、対象の各レイヤーに一時的なclickリスナーを付ける。いずれかの図形がタップされると、その1件だけをediting.enable()し（③編集開始）、他の候補のリスナーは全て解除する。編集中はrow2に「保存」「キャンセル」を表示する。「保存」はediting.disable()して地図サマリーを更新するだけ、「キャンセル」は選択直前に取得しておいた形状（緯度経度）のスナップショットへ戻してからediting.disable()する。対象が0件（メイン/サブどちらも図形が無い）の場合は、Leaflet.draw標準の「対象無し（ボタンがdisabled表示）」の見た目に合わせ、何も起きないようにした。この流れはメイン・サブの両方に同じ仕組みで適用している（編集ボタン・Editツールバー自体がメイン/サブで共通の仕組みのため）。</li>
+            <li><strong>④範囲(Polygon)の途中完了修正:</strong> 5.40の⑤で、連続線（Polyline）が2〜3点目で勝手に完了してしまう不具合を修正済みだったが、範囲（Polygon）はPolylineを継承しているものの、完了処理の登録（_updateFinishHandler）だけはPolygon側で別実装（1点目のマーカーをクリックすると閉じる／3点目以降で最後のマーカーをダブルクリックすると閉じる）に上書きされており、Polyline側の無効化がそのままでは効いていなかった。これがサブの「範囲」がダブルタップや始点タップで完了してしまう原因だった。Polygon側の_updateFinishHandlerも同様に無効化（登録自体をしない）することで、範囲も「完了」ボタンを押すまで何度でも頂点を追加できるようにした（直前の頂点付近をタップしたときの自動完了を防ぐ_endPointの修正は、Polygon側で上書きしていないためPolylineの修正がそのまま効いている）。ヘッドレスブラウザで、範囲を描画中に始点付近を再タップしても完了せず、5点目まで頂点として追加できること、および編集の選択フロー（対象0件・複数候補からの1件選択・保存・キャンセルでの形状復元）が意図どおり動作することを確認した。</li>
+            <li><strong>実機確認が必要な点:</strong> サブに複数の図形がある状態で「編集」を押したとき、案内文が分かりやすいか、タップで選びたい図形をきちんと選べるか（図形同士が近接している場合の選びやすさ）、キャンセルで確実に元の形状へ戻るか、範囲（サブ）を描く際に3点目以降も問題なく描けるか。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -1338,6 +1346,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li><strong>【検討】十字線の位置にワンタップで〇を置くボタン:</strong> 現在は十字線を目印に、地図をタップして〇を置く。十字線の位置へ置くボタンが必要かは、実機で十字線を使ってから判断する。</li>
                 </ul>
             </li>
+            <li><strong>【Phase 6.30完了・実機確認待ち】</strong>位置図の操作パネルを地図の下へ移動しアイコンを1.5倍化、編集のメイン/サブ分離、連続線（ライン）の途中完了の修正、点をプロットする際の現在地/画面タップの選択肢追加。詳細は5.40参照。</li>
+            <li><strong>【Phase 6.31完了・実機確認待ち】</strong>位置図の「編集」を「①編集ボタン→②要素を選択→③編集開始」の3段階の流れに変更。範囲(Polygon)がダブルタップ・始点タップで完了してしまう不具合を修正。詳細は5.41参照。</li>
             <li><strong>【AppB確認待ち】</strong>一括ZIP（外側ZIPの中に現場ごとのフォルダ）をAppBが読み込めるか。読めない場合は、AppB側の改修か、AppA側を「個別ZIP」運用に絞るかの判断が必要（8.2・8.3参照）。</li>
             <li><strong>【Phase 6.21完了】保存済みの初期値の閲覧UI:</strong> 「初期値の設定」アコーディオン内、「初期値の読み込み」ボタンの下に、保存済みの初期値の一覧表示欄を追加（5.32参照）。管理タブの項目整理（ファイル名構成・地図キャッシュ開放を「設定」へ移動、「入出力データ設定」を「初期値の設定」に改名）もあわせて実施。実機での見え方の確認が必要。</li>
         </ul>
@@ -3975,6 +3985,12 @@ const setupJapaneseDraw = () => {
     if (L.Draw && L.Draw.Polyline) {
         // (a) 頂点マーカーのクリックで完了する仕組みを無効化（登録自体をしない）
         L.Draw.Polyline.prototype._updateFinishHandler = function () {};
+        // 【Phase 6.31】範囲（Polygon）はPolylineを継承しているが、_updateFinishHandlerだけは
+        // Polygon側で別実装（始点クリック・終点ダブルクリックで閉じる）に上書きされているため、
+        // Polylineの無効化がそのままでは効かない。Polygon側にも同様の無効化を行う。
+        if (L.Draw.Polygon) {
+            L.Draw.Polygon.prototype._updateFinishHandler = function () {};
+        }
         // (b) 直前の頂点の近くをタップすると完了する仕組みを無効化。
         // 元のLeaflet.draw実装から、該当の分岐だけを取り除いたもの。
         L.Draw.Polyline.prototype._endPoint = function (clientX, clientY, e) {
@@ -4122,6 +4138,7 @@ window.mapApp = {
 
         this.setMode('main');
         this._bindMarkerChoiceIntercept();
+        this._bindEditSelectIntercept();
 
         this.map.on(L.Draw.Event.CREATED, (e) => {
             let layer = e.layer;
@@ -4318,6 +4335,176 @@ window.mapApp = {
         this.updateMapSummary();
         this.setMode(this.currentMode);
         window.uiHelper && uiHelper.showToast("現在地に地点をプロットしました");
+    },
+
+    // =========================================================================
+    // 【Phase 6.31】編集の流れを「①編集ボタンを押す→②編集する要素を選ぶ→③編集を始める」に変更。
+    // 従来（〜6.30）はLeaflet.draw標準のEditToolbarそのままで、「編集」ボタンを押した瞬間に
+    // 対象（メイン/サブ、_editGroupForModeで絞り込み済み）の全レイヤーが一斉に編集可能状態
+    // （制御点ドラッグ可能）になっていた。サブに複数の図形がある場合、どれがどれだか分かりにくい・
+    // 意図せず動かしてしまう、という問題があったため、まず対象を1つ選んでから、その1つだけを
+    // 編集できるようにする。
+    // 実装方針：
+    //   ・「編集」ボタン（.leaflet-draw-edit-edit）のクリックを先取り（キャプチャ段階）し、
+    //     Leaflet.draw標準の「全レイヤーediting.enable()」処理は一切実行させない。
+    //   ・代わりに、対象（_editGroupForMode(currentMode)）の各レイヤーに一時的にclickリスナーを
+    //     つけ、「編集する要素をタップしてください」という案内とともに「中止」を表示する。
+    //   ・レイヤーがタップされたら、そのレイヤーだけediting.enable()し、「保存」「キャンセル」を表示する。
+    //     キャンセル時は、タップ直前に取っておいた形状のスナップショットに戻す。
+    //   ・対象が1つもない場合は、Leaflet.draw標準の「対象なしで押しても反応しない」見た目に合わせ、
+    //     何もしない。
+    // =========================================================================
+    _editSelectState: null, // { candidates: [{layer, handler}], selected, snapshot }
+
+    _bindEditSelectIntercept() {
+        if (this._editSelectBound) return;
+        this._editSelectBound = true;
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('#map-draw-bar-tools .leaflet-draw-edit-edit');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            // Leaflet.draw標準では「対象0件」の場合ボタン自体がdisabled(leaflet-disabled)扱いになる。
+            // 見た目上も同じ挙動にするため、対象が無ければ何もしない。
+            if (btn.classList.contains('leaflet-disabled')) return;
+            this._startEditSelect();
+        }, true); // キャプチャ段階でLeaflet.draw本体（editing.enable()を一斉に呼ぶ処理）より先に止める
+    },
+
+    _startEditSelect() {
+        this._endEditSelect(); // 念のため、前回の選択状態が残っていれば片付ける
+
+        const group = this._editGroupForMode(this.currentMode);
+        const layers = group.getLayers();
+        if (layers.length === 0) return;
+
+        const row2 = document.getElementById('map-draw-bar-actions');
+        if (!row2) return;
+
+        const state = { candidates: [], selected: null, snapshot: null };
+        this._editSelectState = state;
+
+        layers.forEach(layer => {
+            const handler = (ev) => {
+                if (ev.originalEvent) {
+                    L.DomEvent.stop(ev.originalEvent);
+                }
+                this._selectLayerForEdit(layer);
+            };
+            layer.on('click', handler);
+            state.candidates.push({ layer, handler });
+        });
+
+        this._renderEditSelectUI();
+    },
+
+    _renderEditSelectUI() {
+        const row2 = document.getElementById('map-draw-bar-actions');
+        if (!row2) return;
+        const old = document.getElementById('map-edit-select-box');
+        if (old) old.remove();
+
+        const state = this._editSelectState;
+        if (!state) return;
+
+        const box = document.createElement('div');
+        box.id = 'map-edit-select-box';
+        box.style.cssText = 'display:flex; gap:6px; flex-wrap:wrap; width:100%; align-items:center;';
+
+        const mk = (label, onClick, bg) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.textContent = label;
+            b.style.cssText = `flex:1; min-width:80px; padding:8px 6px; border:none; border-radius:4px; font-weight:bold; font-size:0.85rem; color:white; background:${bg};`;
+            b.onclick = onClick;
+            return b;
+        };
+
+        if (!state.selected) {
+            // ①選択待ち：案内文＋中止
+            const label = document.createElement('div');
+            label.textContent = '編集する要素を地図上でタップしてください';
+            label.style.cssText = 'flex-basis:100%; font-size:0.85rem; color:#333;';
+            box.appendChild(label);
+            box.appendChild(mk('中止', () => this._endEditSelect(), '#95a5a6'));
+        } else {
+            // ②選択済み：保存／キャンセル
+            const label = document.createElement('div');
+            label.textContent = '要素をドラッグして編集し、「保存」を押してください';
+            label.style.cssText = 'flex-basis:100%; font-size:0.85rem; color:#333;';
+            box.appendChild(label);
+            box.appendChild(mk('保存', () => this._saveEditSelect(), '#27ae60'));
+            box.appendChild(mk('キャンセル', () => this._cancelEditSelect(), '#e74c3c'));
+        }
+        row2.appendChild(box);
+    },
+
+    // 図形の形状（緯度経度）のスナップショットを取る（キャンセル時の復元用）。
+    _snapshotLatLngs(layer) {
+        if (layer instanceof L.Marker || layer instanceof L.CircleMarker) {
+            const ll = layer.getLatLng();
+            return { type: 'point', latlng: L.latLng(ll.lat, ll.lng) };
+        }
+        if (layer.getLatLngs) {
+            // ネストした配列（ポリゴンのリング等）にも対応した再帰ディープコピー
+            const clone = (v) => Array.isArray(v)
+                ? v.map(clone)
+                : L.latLng(v.lat, v.lng);
+            return { type: 'path', latlngs: clone(layer.getLatLngs()) };
+        }
+        return null;
+    },
+    _restoreLatLngs(layer, snap) {
+        if (!snap) return;
+        if (snap.type === 'point') {
+            layer.setLatLng(snap.latlng);
+        } else if (snap.type === 'path' && layer.setLatLngs) {
+            layer.setLatLngs(snap.latlngs);
+        }
+    },
+
+    _selectLayerForEdit(layer) {
+        const state = this._editSelectState;
+        if (!state || state.selected) return;
+
+        // 選択待ちの間だけ付けていた候補全員分のclickリスナーは、
+        // 選択が確定したら全て外す（誤って別の図形を選び直せないようにする）。
+        state.candidates.forEach(c => c.layer.off('click', c.handler));
+
+        state.selected = layer;
+        state.snapshot = this._snapshotLatLngs(layer);
+
+        if (layer.editing) layer.editing.enable();
+        this._renderEditSelectUI();
+    },
+
+    _saveEditSelect() {
+        const state = this._editSelectState;
+        if (!state || !state.selected) { this._endEditSelect(); return; }
+        if (state.selected.editing) state.selected.editing.disable();
+        this.updateMapSummary();
+        this._endEditSelect();
+    },
+
+    _cancelEditSelect() {
+        const state = this._editSelectState;
+        if (!state || !state.selected) { this._endEditSelect(); return; }
+        this._restoreLatLngs(state.selected, state.snapshot);
+        if (state.selected.editing) state.selected.editing.disable();
+        this._endEditSelect();
+    },
+
+    _endEditSelect() {
+        const state = this._editSelectState;
+        if (state) {
+            // 選択未確定のまま中止された場合に備え、候補全員分のリスナーを外す
+            state.candidates.forEach(c => c.layer.off('click', c.handler));
+        }
+        this._editSelectState = null;
+        const box = document.getElementById('map-edit-select-box');
+        if (box) box.remove();
+        // ツールバーを作り直し、押しっぱなしになっている「編集」ボタンの見た目等を通常状態に戻す
+        this.setMode(this.currentMode);
     },
 
     clearLayers() { if (confirm("全ての図形を消去しますか？")) { this.allDrawnItems.clearLayers(); this.updateMapSummary(); this.setMode(this.currentMode); } },
