@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.24)</title>
+    <title>被災状況調査アプリ (Phase 6.25)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -647,12 +647,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.24</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.25</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.24</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.25</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -671,8 +671,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.24)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.24（実機デバッグ指摘の一部に対応：新規現場作成の質問順序入替・現場名の入力例削除・位置図の中心十字線・メイン〇の半径を約1/3に。残りの指摘は7章に積み残し）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.25)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.25（メイン〇を、ズームによらず画面上で同じ大きさに見える固定サイズのマークに変更。サイズはズーム18での従来の〇の1/3）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -710,10 +710,10 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
             <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
-            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇の半径定数（MAIN_CIRCLE_RADIUS=3.3m）</td></tr>
+            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.24更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
@@ -800,7 +800,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>実装内容:</strong>
                 <ul>
                     <li>タイル：#map内の.leaflet-tile-pane配下、読み込み済み（img.complete）の&lt;img class="leaflet-tile"&gt;要素を、その要素自身のgetBoundingClientRect()に基づく位置・サイズでcanvasへdrawImage()する。</li>
-                    <li>メイン(赤)・サブ(青)の図形：allDrawnItemsの緯度経度情報から、map.latLngToContainerPointで自前に座標変換して描き直す（円・ポリライン・ポリゴンに対応）。円の半径(メートル)は、中心から実距離ぶん東へ移動した地点を同じ座標系に投影して画面上のpx半径を算出する（外部プラグイン不要）。</li>
+                    <li>メイン(赤)・サブ(青)の図形：allDrawnItemsの緯度経度情報から、map.latLngToContainerPointで自前に座標変換して描き直す（円・ポリライン・ポリゴンに対応）。円の半径(メートル)は、中心から実距離ぶん東へ移動した地点を同じ座標系に投影して画面上のpx半径を算出する（外部プラグイン不要）。【Phase 6.25】メインの〇はピクセル指定のマーク（L.circleMarker）に変更したため、この換算は不要で、画面と同じピクセル半径・線幅でそのまま描く（5.35参照）。メートル半径のL.Circleは、旧データ・互換のための分岐として残してある。</li>
                     <li>注記（テキスト）：従来通り、位置を計算してcanvas上に吹き出し風のボックスとして手描きする。</li>
                     <li>サブレイヤー除外ロジックは維持：メインモードで保存する際はcurrentMode==='main'かつisMain===falseの図形を対象から除く、という既存ルールをそのまま踏襲。</li>
                     <li>Leafletコントロール（ズームボタン・ズームレベル数値・レイヤー切替・描画ツールバー等）はそもそも合成対象に含めていないため、隠す処理自体が不要になった（＝確実に写り込まない）。</li>
@@ -1183,13 +1183,28 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>今回は十字線の表示のみ。「十字線の位置にワンタップで〇を置くボタン」は未実装（7章の検討事項）。</li>
                 </ul>
             </li>
-            <li><strong>メイン〇の半径を約1/3に（mapApp.MAIN_CIRCLE_RADIUS）:</strong>
+            <li><strong>メイン〇の大きさ（Phase 6.24の対応は6.25で置き換え）:</strong> 6.24では半径10mを3.3mに変更したが、〇はメートル半径の円だったためズームによって大きさが変わり、意図（位置を示すマークとして常に同じ大きさで見える）と合わなかった。5.35で、ピクセル指定の固定サイズのマークに作り直した。</li>
+        </ul>
+
+        <h4>5.35 メイン〇を固定サイズのマークに変更（Phase 6.25）</h4>
+        <ul>
+            <li><strong>背景:</strong> 「位置図の〇が大きすぎるので3分の1にしてほしい」という指摘に対し、Phase 6.24では半径10mを3.3mにした。しかし〇は<strong>位置を示すマーク（点）</strong>であり、円ではない。半径をメートルで指定していたため、ズームアウトすると点のように小さく、ズームインすると大きくなり、CADで比較すると意図した大きさ（ズーム18での従来の〇の1/3）にならなかった。</li>
+            <li><strong>対応:</strong> メイン〇を、画面のピクセルで大きさを決めるマーク（Leafletの<code>L.circleMarker</code>）に変更した。ズームレベルによらず常に同じ大きさで表示される。
                 <ul>
-                    <li>従来の半径10mが大きすぎるという指摘のため、3.3mに変更した。半径は<strong>メートル</strong>指定のため、ズームレベルによって画面上の大きさが変わる点は従来どおり。</li>
-                    <li>半径はGeoJSONに保存されない（点として保存される）ため、作図時（1_script_map.js）だけでなく、現場データ・オートセーブからの復元時（3_script_main.jsのloadSiteIntoForm・storageManager.load）も同じ定数を参照する。<strong>保存済みの既存の現場に含まれる〇も、次回の読込から3.3mで描かれる。</strong></li>
-                    <li>線の太さ（weight:6・ピクセル指定）は変更していない。〇が小さくなった分、内側の空きが小さく見える場合は、線の太さの調整を検討する（意匠変更のため判断を仰ぐ）。</li>
+                    <li>サイズ：外形の直径約15px（半径<code>MAIN_MARK_RADIUS_PX</code>=6px＋線幅<code>MAIN_MARK_WEIGHT</code>=3px）。決め方は、ズーム18（緯度約31.5度）で従来の半径10m・線幅6pxの〇を描くと外形の直径が約45pxだったため、その1/3。大きさを変えたい場合は、mapApp（1_script_map.js）のこの2つの値だけを変える（作図・復元・地図の写真保存の全てが参照する）。</li>
+                    <li>色・塗りは従来どおり（赤・塗りなし）。線幅は、サイズを1/3にしたのに合わせて6px→3pxとした（線幅6pxのままだと内側の穴が塞がって塗りつぶしの点に見えるため）。</li>
+                    <li>生成はmapApp.createMainMark(latlng)に一本化。作図時（1_script_map.jsのDraw.Event.CREATED）、現場データ読込（loadSiteIntoForm）、オートセーブ復元（storageManager.load）の3箇所が共用する。</li>
                 </ul>
             </li>
+            <li><strong>保存データ・他アプリへの影響なし:</strong> 保存されるのはこれまでどおりGeoJSONのPoint（座標1点）。survey_data.json・JZIP・AppBへの影響はない。保存済みの既存の現場に含まれる〇も、次回の読込から新しいマークで描かれる。</li>
+            <li><strong>関連する処理の変更（1_script_map.js・3_script_main.js）:</strong>
+                <ul>
+                    <li>地図を写真に保存（captureToPhoto）：メインの〇はピクセル指定のため、画面と同じピクセル半径・線幅でそのまま描く（保存画像でも画面と同じ大きさになる）。</li>
+                    <li>起点座標の取得（getMainCoords）：点の判定にL.CircleMarkerを加えた（L.CircleはL.CircleMarkerの派生のため旧データも含めて判定される）。</li>
+                    <li>復元後のスタイル上書き（loadSiteIntoForm・storageManager.load内のsetStyle）の除外条件を、L.CircleからL.CircleMarkerに広げた。除外しないと、復元のたびに線幅6・不透明度0.7で上書きされ、マークの大きさが変わってしまう。</li>
+                </ul>
+            </li>
+            <li><strong>既知の制限:</strong> ①ズームインしても〇は大きくならないため、「〇が現地の何mを表すか」は表現しない（位置の目印として扱う）。②Leaflet.drawの編集モードでの〇の扱い（移動）は、L.circleMarkerに対応した編集ハンドラ（leaflet-draw 1.0系）に依存する。実機で編集モードを開いて〇を動かせるか確認が必要。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -1222,7 +1237,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>保存確認モーダルは未保存の変更がある場合のみ（Phase 6.20）:</strong> 現場の切替・新規作成の前に確認を出すのは、hasUnsavedChanges()がtrueのときだけ。変更が無いのに確認を出さない。</li>
             <li><strong>JZIP出力対象チェックはデフォルト全解除（Phase 6.20）:</strong> 出力対象を明示的に選ばせる。再描画でチェックが消えないよう、状態を引き継ぐ。</li>
             <li><strong>新規現場作成は「保存確認→現場名入力」の順（Phase 6.24）:</strong> 引き止められて入力が無駄になる質問を先に済ませる。入力欄には、入力内容を縛る入力例を付けない。</li>
-            <li><strong>メイン〇の大きさはmapApp.MAIN_CIRCLE_RADIUSの1箇所で管理（Phase 6.24）:</strong> 作図時・復元時で値を食い違わせない（半径はGeoJSONに保存されないため）。</li>
+            <li><strong>メイン〇はズームによらず同じ大きさのマーク（Phase 6.25）:</strong> 位置を示すマーク（点）であり、メートル半径の円ではない。ピクセル指定（L.circleMarker）で、サイズはmapApp.MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHTの2箇所で管理し、作図・復元・地図の写真保存で値を食い違わせない。サイズはGeoJSONに保存しない。今後この種の目印を追加するときも、メートル指定の図形ではなくピクセル指定のマークにするかを先に確認する。</li>
             <li><strong>CSV出力もチェックした現場が対象（Phase 6.22）:</strong> JZIP出力と同じチェックリストを共用する。チェックが無ければ現在の画面を出力、あれば保存済みデータから1現場1行。今開いている現場に未保存の変更がある場合は出力を拒否する（JZIP出力と同じ考え方）。</li>
             <li><strong>JZIP出力経路はチェックボックス方式に一本化（Phase 6.18）:</strong> 現場カードごとの個別JZIP出力ボタンは廃止。現場管理アコーディオン上部の「JZIP出力」ボタン＋対象選択チェックリストが唯一の出力経路。</li>
             <li><strong>現場一覧はチェックボックス選択・切替・編集・削除を1つのリストに統合（Phase 6.19）:</strong> 別々の一覧に分けない。行のレイアウトはCSS Grid（固定幅カラム＋1fr）で組み、現場名は1行省略表示（ellipsis）にする。flexベースの幅計算に依存したレイアウトは、実機で現場名が縦に1文字ずつ折り返される表示崩れを起こしたため、今後もこの種のリストはGrid＋ellipsisで組む方針とする。</li>
@@ -1244,7 +1259,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>【Phase 6.22完了】CSV出力の対象:</strong> チェックした現場を対象に、1つのCSVへ1現場1行で出力するよう変更。詳細は5.33参照。実機での確認（複数現場を選んでの出力、未保存の現場を選んだときの拒否、Excelでの文字化け・座標の見え方）が必要。</li>
             <li>App Bとのフィールド定義の整合確認（jzip_spec.htmlで管理）。AppB側での確認事項は8章にまとめた。</li>
             <li>AppB側：帳票の位置図セル（現状12.86×6.64cm）を4:3の比率に合わせて再調整（AppBスレッドで対応。8.3参照）</li>
-            <li><strong>【Phase 6.24完了】</strong>新規現場作成の質問順序の入替・入力例の削除、位置図の中心十字線、メイン〇の半径を約1/3に（5.34参照）。</li>
+            <li><strong>【Phase 6.24〜6.25完了】</strong>新規現場作成の質問順序の入替・入力例の削除、位置図の中心十字線（5.34）、メイン〇をズームによらない固定サイズのマーク（ズーム18での従来の1/3）に変更（5.35）。実機で、複数のズームでの大きさ・編集モードでの〇の移動を確認する必要あり。</li>
             <li><strong>【実機デバッグ指摘の残り（Phase 6.24時点。未対応）】</strong>
                 <ul>
                     <li><strong>位置図の操作パネルを枠外へ移動（メイン・サブ共通）:</strong> 現状はLeaflet.drawのツールバー（ライン・地点・範囲・テキスト・編集・削除）と、描画中の「完了／戻る／中止」が地図の上に重なり、描画の邪魔になっている。白紙メモのように、地図の枠外（上または下）に置く。特に「完了／戻る／中止」が絵を描く邪魔になっている。着手には introduction.html（位置図エリアのマークアップ）・style.css（地図・ツールバー関連）の現物が必要。</li>
@@ -1269,7 +1284,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>survey_data.json の主な内容:</strong>
                 <ul>
                     <li>管理項目・諸元等の入力値（キーは各入力欄のname属性）：survey_date（調査日）／company_id／leader_name／ref_no（整理番号）／disaster_no（災害番号）／dept_name（発注者名）／loc_name／route_name／damage_date（被災日）／length／height／side_type／distance_label／comment／expansion_exists／expansion_status／special_exists／special_status／plan_summary／company_name／tel／fax／person_name／email。全て文字列（未入力は空文字）。</li>
-                    <li><code>mainGeom</code>（メイン=赤の図形）・<code>subGeom</code>（サブ=青の落書き・注記）：GeoJSONのFeatureCollection。座標は[経度, 緯度]の順（GeoJSON標準）。メインは点（マーカー由来の円。半径はGeoJSONに含まれず、AppAは復元時に固定の半径（mapApp.MAIN_CIRCLE_RADIUS。5.34参照）で描く）または線。注記はPoint＋<code>properties.isText=true</code>・<code>properties.textVal</code>。各Featureに<code>properties.isMain</code>。</li>
+                    <li><code>mainGeom</code>（メイン=赤の図形）・<code>subGeom</code>（サブ=青の落書き・注記）：GeoJSONのFeatureCollection。座標は[経度, 緯度]の順（GeoJSON標準）。メインは点（マーカー由来の円。AppAは復元時に画面上で固定サイズのマーク（mapApp.createMainMark。5.35参照）として描く。GeoJSONにはサイズを含まない）または線。注記はPoint＋<code>properties.isText=true</code>・<code>properties.textVal</code>。各Featureに<code>properties.isMain</code>。</li>
                     <li><code>photoList</code>：<code>[{ fileName, memo, tag, azimuth, lat, lng, gpsAccuracy, gpsFixed }]</code>。fileNameは<code>photo_N.jpg</code>。azimuth（撮影方向・度）・lat・lng・gpsAccuracy（m）は無い場合null。gpsFixedは地図タップで位置を修正した場合true（このときgpsAccuracyはnull）。tagの既定は「補足」、「地図を写真に保存」で追加される写真のtagは「地図メモ」。</li>
                 </ul>
             </li>
@@ -3952,10 +3967,23 @@ L.Control.ZoomWithLevel = L.Control.extend({
 // --- 地図管理 ---
 window.mapApp = {
     map: null, allDrawnItems: null, drawControl: null, currentMode: 'main',
-    // 【Phase 6.24】メイン図形（〇）の半径[m]。従来の10mが大きすぎるとの指摘で約1/3にした。
-    // 半径はGeoJSONに保存されない（点として保存される）ため、復元時も3_script_main.jsが
-    // この値を参照して描き直す。ここを変えれば作図時・復元時の大きさが同時に変わる。
-    MAIN_CIRCLE_RADIUS: 3.3,
+    // 【Phase 6.25】メイン図形（〇）は「位置を示すマーク」であり、ズームレベルによらず画面上で
+    // 同じ大きさに見えるようにする。従来（〜6.24）は半径をメートルで指定した円（L.circle）で
+    // 描いていたため、ズームアウトすると点のように小さくなり、ズームインすると大きくなっていた。
+    // ピクセル指定のL.circleMarkerに変更した。保存される形は従来どおりGeoJSONのPoint（座標1点）で、
+    // JZIP・AppBへの影響はない。
+    // サイズの決め方：ズーム18（緯度約31.5度）で従来の半径10m・線幅6pxの〇を描くと、外形の直径は
+    // 約45px（半径19.7px＋線幅の分）だった。これを1/3にした外形の直径約15px（半径6px＋線幅3px）にする。
+    // 大きさを変えたい場合は、この2つの値だけを変える（作図・復元・地図の写真保存の全てが参照する）。
+    MAIN_MARK_RADIUS_PX: 6,
+    MAIN_MARK_WEIGHT: 3,
+    createMainMark(latlng) {
+        const m = L.circleMarker(latlng, {
+            radius: this.MAIN_MARK_RADIUS_PX, color: '#ff0000', weight: this.MAIN_MARK_WEIGHT, fillOpacity: 0
+        });
+        m.options.isMain = true;
+        return m;
+    },
 
     // 【Phase 6.24】地図の中心を示す十字線。現在地ボタンで移動した後など、地図の中心（＝現在地）が
     // どこか分かりにくいという指摘への対応。地図コンテナに重ねるだけの飾りで、タップは下の地図へ通す
@@ -4020,9 +4048,7 @@ window.mapApp = {
                 layer = this.createTextLayer(layer.getLatLng(), txt);
             } else if (e.layerType === 'marker') {
                 if (isM) {
-                    layer = L.circle(layer.getLatLng(), { radius: this.MAIN_CIRCLE_RADIUS, color: '#ff0000', weight: 6, fillOpacity: 0 });
-                    if (!layer.options) layer.options = {};
-                    layer.options.isMain = true;
+                    layer = this.createMainMark(layer.getLatLng());
                 }
             } else if (layer.setStyle) {
                 layer.setStyle({ color: isM ? '#ff0000' : '#0000ff', weight: 6, opacity: 0.7, fillOpacity: 0.4 });
@@ -4066,7 +4092,7 @@ window.mapApp = {
         let ml = null; this.allDrawnItems.eachLayer(l => { if (l.options && l.options.isMain) ml = l; });
         if (!ml) return { start: "", end: "" };
         const f = (ll) => `${ll.lat.toFixed(6)} ${ll.lng.toFixed(6)}`;
-        if (ml instanceof L.Marker || ml instanceof L.Circle) return { start: f(ml.getLatLng()), end: "" };
+        if (ml instanceof L.Marker || ml instanceof L.CircleMarker) return { start: f(ml.getLatLng()), end: "" };
         const pts = ml.getLatLngs();
         if (!pts || pts.length === 0) return { start: "", end: ""};
         const flat = Array.isArray(pts[0]) ? pts[0] : pts;
@@ -4129,7 +4155,13 @@ window.mapApp = {
         drawLayers.forEach(l => {
             const isMain = !!(l.options && l.options.isMain);
             const color = isMain ? '#ff0000' : '#0000ff';
-            if (l instanceof L.Circle) {
+            if (l instanceof L.CircleMarker && !(l instanceof L.Circle)) {
+                // 【Phase 6.25】メインの〇（ピクセル指定のマーク）：画面と同じピクセルサイズ・線幅でそのまま描く
+                const p = this.map.latLngToContainerPoint(l.getLatLng());
+                ctx.beginPath(); ctx.arc(p.x, p.y, l.getRadius(), 0, Math.PI * 2);
+                ctx.lineWidth = (l.options && l.options.weight) || this.MAIN_MARK_WEIGHT;
+                ctx.strokeStyle = color; ctx.stroke();
+            } else if (l instanceof L.Circle) {
                 // 中心から実距離(メートル)ぶん東へ移動した地点を求め、
                 // 両点を同じcontainerPoint座標系に投影して画面上の半径(px)を算出する
                 // （外部プラグイン不要・他の描画と同じ座標系で完結させるため）
@@ -5561,6 +5593,17 @@ document.addEventListener('click', (e) => {
 //     ある場合は、起動時に自動で「現場1」として1件だけ作成する。
 // =============================================================================
 //
+// 【Phase 6.25】メイン図形（〇）をズームに依存しない固定サイズのマークに変更（本ファイルでの変更点）
+//   ・現場読込（loadSiteIntoForm）・オートセーブ復元（storageManager.load）で、メインの点を
+//     L.circle（メートル半径）ではなく mapApp.createMainMark()（ピクセル指定のL.circleMarker）で復元する。
+//   ・復元後のスタイル上書き（setStyle）の除外条件を L.Circle から L.CircleMarker に広げた
+//     （除外しないと、復元のたびに線幅6・不透明度0.7で上書きされ、マークの大きさが変わってしまう）。
+//
+// 【Phase 6.24】デバッグ指摘への対応（本ファイルでの変更点）
+//   ・promptCreateSite()：保存確認（confirmAndProceed）を先に行い、その後に現場名を尋ねる順序に変更。
+//     現場名の入力例（例：〇〇橋 上流側）を削除。
+//   ・メイン図形（円）の復元時の半径を、mapApp.MAIN_CIRCLE_RADIUSに統一（→Phase 6.25で下記のとおり置き換え）。
+//
 // 【Phase 6.22】CSV出力を現場管理のチェックに連動（本ファイルでの変更点）
 //   ・appControl.exportCSV()：チェックが無ければ従来どおり現在の画面を1行で出力。
 //     チェックが1件以上あれば、チェックした現場の保存済みデータから1現場1行の1ファイルを出力する。
@@ -5695,13 +5738,13 @@ window.siteManager = {
                 const restoreGeom = (geom, isM) => {
                     if (!geom) return;
                     L.geoJSON(geom, {
-                        pointToLayer: (feature, latlng) => (isM && !feature.properties.isText) ? L.circle(latlng, { radius: 10, color: '#ff0000', weight: 6, fillOpacity: 0 }) : L.marker(latlng)
+                        pointToLayer: (feature, latlng) => (isM && !feature.properties.isText) ? mapApp.createMainMark(latlng) : L.marker(latlng)
                     }).eachLayer(l => {
                         if(!l.options) l.options = {}; l.options.isMain = isM;
                         if (l.feature.properties && l.feature.properties.isText) {
                             mapApp.allDrawnItems.addLayer(mapApp.createTextLayer(l.getLatLng(), l.feature.properties.textVal));
                         } else {
-                            if (l.setStyle && !(l instanceof L.Circle)) l.setStyle({ color: isM ? '#ff0000' : '#0000ff', weight: 6, opacity: 0.7 });
+                            if (l.setStyle && !(l instanceof L.CircleMarker)) l.setStyle({ color: isM ? '#ff0000' : '#0000ff', weight: 6, opacity: 0.7 });
                             if (isM && l instanceof L.Marker) { l.options.icon = new L.Icon.Default(); l.on('add', () => { if(l._icon) l._icon.classList.add('marker-red'); }); }
                             mapApp.allDrawnItems.addLayer(l);
                         }
@@ -5802,11 +5845,17 @@ window.siteManager = {
     // 【Phase 6.18】「調査を実施した者」は端末固定の情報のため、
     // 新規現場作成時のフォームリセットから除外する
     // （.accordion-item[data-group="surveyor-info"] 内の入力欄はクリアしない）。
+    // 【Phase 6.24】質問の順序を入れ替えた。従来は「現場名の入力」→「保存確認モーダル」の順で、
+    // 保存確認で「現場を移動しない」を選ぶと、先に入力した現場名が無駄になっていた。
+    // 先に保存確認（未保存の変更がある場合のみ。6.20参照）を済ませてから、現場名を尋ねる。
+    // あわせて、入力例（例：〇〇橋 上流側）が現場名の付け方を縛りかねないため、入力例は削除した。
+    // 現場名の入力をキャンセルした場合は、新規作成せず何も変わらない
+    // （保存確認で「変更を保存」を選んでいた場合は、現在の現場の保存だけが済んだ状態になる）。
     promptCreateSite() {
-        const name = prompt('新しい現場の名前を入力してください（例：〇〇橋 上流側）');
-        if (name === null) return; // キャンセル
-        if (!name.trim()) { alert('現場名を入力してください'); return; }
         this.confirmAndProceed(() => {
+            const name = prompt('新しい現場の名前を入力してください');
+            if (name === null) return; // キャンセル
+            if (!name.trim()) { alert('現場名を入力してください'); return; }
             const siteId = this.createSite(name);
             // 新規現場は空の状態から始める（前の現場の入力を引きずらない）。
             // ただし「調査を実施した者」「設定」「入出力データ設定」は端末固定情報として維持する（Phase 6.20）。
@@ -6326,13 +6375,13 @@ window.storageManager = {
                     const restoreGeom = (geom, isM) => {
                         if (!geom) return;
                         L.geoJSON(geom, {
-                            pointToLayer: (feature, latlng) => (isM && !feature.properties.isText) ? L.circle(latlng, { radius: 10, color: '#ff0000', weight: 6, fillOpacity: 0 }) : L.marker(latlng)
+                            pointToLayer: (feature, latlng) => (isM && !feature.properties.isText) ? mapApp.createMainMark(latlng) : L.marker(latlng)
                         }).eachLayer(l => {
                             if(!l.options) l.options = {}; l.options.isMain = isM;
                             if (l.feature.properties && l.feature.properties.isText) {
                                 mapApp.allDrawnItems.addLayer(mapApp.createTextLayer(l.getLatLng(), l.feature.properties.textVal));
                             } else {
-                                if (l.setStyle && !(l instanceof L.Circle)) l.setStyle({ color: isM ? '#ff0000' : '#0000ff', weight: 6, opacity: 0.7 });
+                                if (l.setStyle && !(l instanceof L.CircleMarker)) l.setStyle({ color: isM ? '#ff0000' : '#0000ff', weight: 6, opacity: 0.7 });
                                 if (isM && l instanceof L.Marker) { l.options.icon = new L.Icon.Default(); l.on('add', () => { if(l._icon) l._icon.classList.add('marker-red'); }); }
                                 mapApp.allDrawnItems.addLayer(l);
                             }
