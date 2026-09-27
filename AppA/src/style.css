@@ -1,0 +1,130 @@
+:root {
+    --primary-color: #2c3e50;
+    --accent-color: #3498db;
+    --bg-color: #f4f7f6;
+    --app-max-width: 480px;
+}
+body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; display: flex; justify-content: flex-start; }
+#app-container { width: 100%; max-width: var(--app-max-width); min-height: 100vh; background-color: var(--bg-color); box-shadow: 2px 0 10px rgba(0,0,0,0.3); display: flex; flex-direction: column; position: relative; transition: max-width 0.3s ease; }
+/* フルスクリーンモード */
+#app-container.fullwidth { max-width: 100% !important; }
+
+/* タブ制御 */
+.tab-content { display: none !important; }
+.tab-content.active { display: block !important; animation: fadeIn 0.2s; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* マーカー・地図UI */
+.marker-red { filter: hue-rotate(150deg) saturate(3) brightness(0.9); }
+.leaflet-draw-toolbar { display: flex !important; flex-direction: column; }
+.leaflet-draw-draw-marker { order: 1; }
+.leaflet-draw-draw-polyline { order: 2; }
+.leaflet-draw-draw-polygon { order: 3; }
+.leaflet-draw-draw-circlemarker { order: 4; }
+.leaflet-draw-draw-circlemarker { background-image: none !important; position: relative; }
+.leaflet-draw-draw-circlemarker::before { content: 'T'; font-weight: bold; font-family: serif; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 18px; color: #0000ff; }
+.map-text-wrapper { pointer-events: auto !important; }
+.map-text-wrapper::after { content: ''; position: absolute; top: 0; left: 0; width: 10px; height: 10px; background-color: #0000ff; border: 1px solid white; border-radius: 50%; transform: translate(-50%, -50%); z-index: 10; }
+.map-text-label-inner { display: inline-block; background: rgba(255, 255, 255, 0.85); color: #0000ff; padding: 2px 8px; border: 1.5px solid #0000ff; border-radius: 4px; font-weight: bold; font-size: 14px; white-space: nowrap; transform: translate(-50%, -120%); box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+
+/* Leaflet Drawのツールチップ非表示 */
+.leaflet-draw-tooltip { display: none !important; }
+
+/* 【修正】描画中のアクションボタン（完了/中止）を押しやすくする */
+.leaflet-draw-actions { left: 32px !important; top: 0 !important; }
+.leaflet-draw-actions li { margin: 0 0 5px 0 !important; }
+.leaflet-draw-actions a { 
+    background-color: #27ae60 !important; color: white !important; 
+    height: 30px !important; line-height: 30px !important; padding: 0 15px !important;
+    font-size: 14px !important; font-weight: bold; border-radius: 4px;
+}
+/* キャンセルボタンは赤く */
+.leaflet-draw-actions li:last-child a { background-color: #e74c3c !important; }
+
+/* 【Phase 6.26】描画ツールバーは地図枠の外（上部バー）に横並びで配置。完了/戻る/中止も同バー内に表示 */
+#map-draw-bar { min-height: 34px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; padding: 4px; background: #eee; }
+#map-draw-bar .leaflet-control { float: none !important; margin: 0 !important; clear: none !important; display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+#map-draw-bar .leaflet-draw-section { position: relative; display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+#map-draw-bar .leaflet-draw-toolbar { flex-direction: row !important; margin: 0 !important; }
+#map-draw-bar .leaflet-draw-actions { position: static !important; left: auto !important; top: auto !important; margin: 0 !important; padding: 0; list-style: none; display: none; }
+#map-draw-bar .leaflet-draw-actions[style*="block"] { display: flex !important; gap: 4px; }
+#map-draw-bar .leaflet-draw-actions li { margin: 0 !important; }
+
+/* 地図のタッチアクション制御 */
+#map { touch-action: none; }
+
+/* 【Phase 5.99】位置図の縦横比を帳票の写真枠と同じ4:3に固定（Step2-②対応）。
+   画面と保存画像を一致させる方針（Phase 5.97）を維持するため、画面表示自体の
+   縦横比を4:3にする。タブレット等で横幅が広い場合に高さが際限なく伸びないよう、
+   画面の高さの70%を上限とし、それを超える幅は自動で絞る（min(100%, 93.333vh)）。
+   93.333vh = 70vh(高さ上限) × 4/3。 */
+#map-container { width: 100%; max-width: min(100%, 93.333vh); margin: 0 auto; }
+#map { width: 100%; height: auto; aspect-ratio: 4 / 3; }
+
+/* + / - ボタンとズーム数値を1つにまとめたコントロール（Phase 5.98） */
+.zoom-with-level { display: flex; flex-direction: column; background: white; box-shadow: 0 1px 5px rgba(0,0,0,0.4); border-radius: 4px; overflow: hidden; }
+.zoom-with-level-in, .zoom-with-level-out {
+    display: block; width: 26px; height: 26px; line-height: 26px; text-align: center;
+    color: #2c3e50; text-decoration: none; font-size: 1.1rem; font-weight: bold;
+    background: white; border-bottom: 1px solid #eee; cursor: pointer; user-select: none;
+}
+.zoom-with-level-out { border-bottom: none; border-top: 1px solid #eee; }
+.zoom-with-level-in:hover, .zoom-with-level-out:hover { background: #f0f0f0; }
+.zoom-with-level-num {
+    width: 26px; height: 22px; line-height: 22px; text-align: center;
+    font-size: 0.75rem; font-weight: bold; color: #555; background: #f7f7f7;
+    border-bottom: 1px solid #eee; user-select: none;
+}
+
+/* ヘッダー */
+.app-header { background-color: var(--primary-color); color: white; padding: 10px; position: sticky; top: 0; z-index: 1000; }
+.header-top { display: flex; align-items: center; gap: 10px; height: auto; } 
+.app-title { font-size: 1.2rem; margin: 0; line-height: 1; font-weight: bold; } 
+.app-logo { height: 1.2rem; width: auto; }
+.header-tabs { display: flex; margin-top: 10px; gap: 2px; }
+.tab-btn { flex: 1; padding: 8px; border: none; background: rgba(255,255,255,0.1); color: white; cursor: pointer; }
+.tab-btn.active { background: var(--accent-color); font-weight: bold; }
+
+/* アコーディオン */
+.accordion-item { border-bottom: 1px solid #ddd; background: #fff; position: relative; z-index: 1; }
+.accordion-header { width: 100%; padding: 12px 15px; text-align: left; background: #fff; border: none; display: flex; justify-content: space-between; border-left: 6px solid var(--accent-color); font-weight: bold; cursor: pointer; position: relative; z-index: 2; }
+.accordion-header:hover { background-color: #f0f0f0; }
+.summary-text { font-size: 0.75rem; font-weight: normal; margin-top: 2px; }
+.summary-text.empty { color: #e74c3c; }
+.summary-text.filled { color: var(--accent-color); }
+.accordion-item[data-group="io-area"] .summary-text { font-weight: bold; color: #555; }
+.accordion-content { display: none; padding: 15px; background: #f9f9f9; position: relative; z-index: 1; }
+
+.input-group { margin-bottom: 12px; }
+.input-group label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 4px; }
+.input-group input, .input-group select, .input-group textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; box-sizing: border-box; }
+/* 【Phase 6.13】管理項目の参照ボタンで引用した値の目立たせ表示（書き換えるまで維持） */
+.ref-highlight { background-color: #fff3cd !important; border-color: #f0ad4e !important; }
+.btn-main { width: 100%; padding: 12px; background: #27ae60; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+.btn-sub { width: 100%; padding: 10px; background: #95a5a6; color: white; border: none; border-radius: 4px; cursor: pointer; }
+.map-controls { display: flex; gap: 5px; padding: 8px; background: #eee; }
+.map-controls button { flex: 1; padding: 8px; font-size: 0.8rem; border: 1px solid #ccc; border-radius: 3px; background: #fff; }
+.map-controls .btn-main { background: #27ae60; color: white; border: none; font-weight: bold; }
+
+/* モーダル */
+.custom-modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+.custom-modal-box { background: white; padding: 20px; border-radius: 8px; width: 80%; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.custom-modal-title { font-weight: bold; margin-bottom: 10px; color: var(--primary-color); }
+.custom-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
+
+/* トースト通知 */
+.toast-notification { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(44, 62, 80, 0.9); color: white; padding: 10px 20px; border-radius: 20px; font-size: 0.9rem; z-index: 3000; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.toast-notification.show { opacity: 1; }
+
+/* スケッチ機能 */
+.sketch-toolbar { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 5px; background: #fff; padding: 5px; border-radius: 4px; border: 1px solid #ddd; }
+.sketch-tool-group { display: flex; gap: 2px; align-items: center; border-right: 1px solid #eee; padding-right: 5px; margin-right: 5px; }
+.sketch-tool-group:last-child { border: none; }
+.sketch-btn { padding: 6px 10px; border: 1px solid #ccc; background: #f9f9f9; border-radius: 3px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+.sketch-btn.active { background: var(--accent-color); color: white; border-color: #2980b9; }
+/* 位置図タブのモード切替ボタン：非アクティブ時はダーク背景 */
+#mode-btn-map:not(.active), #mode-btn-draw:not(.active), #mode-btn-sketch:not(.active) { background: rgba(255,255,255,0.1); color: white; border-color: transparent; }
+.color-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 3px rgba(0,0,0,0.3); padding: 0; cursor: pointer; }
+.color-btn.active { transform: scale(1.2); border-color: #333; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
+.sketch-canvas-container { position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.1); background: white; cursor: crosshair; touch-action: none; margin-bottom: 5px; }
+canvas.sketch-canvas { display: block; width: 100%; }

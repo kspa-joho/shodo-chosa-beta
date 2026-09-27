@@ -1,0 +1,43 @@
+<div class="survey-app-ui">
+
+    <!-- アプリ更新 -->
+    <div class="accordion-item" data-group="app-update">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">{{PHASE_DISPLAY}}</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>{{PHASE_DISPLAY}}</strong></p>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
+                        onclick="appControl.checkForUpdate()">更新を確認する</button>
+                    <span id="update-status" style="font-size:0.9rem; color:#555;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 開発ログ（仕様書） -->
+    <div class="accordion-item" data-group="dev-log">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">開発ログ</span><span class="summary-text">仕様・決定事項</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content" style="padding:10px; overflow:hidden;">
+            <!-- INSERT: SPEC_CONTENT -->
+        </div>
+    </div>
+
+    <!-- アプリ化の手順 -->
+    <div class="accordion-item" data-group="install-guide">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">アプリ化の手順</span><span class="summary-text">インストール方法</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content" style="padding:10px; overflow:hidden;">
+            <!-- INSERT: INSTALL_CONTENT -->
+        </div>
+    </div>
+
+</div>

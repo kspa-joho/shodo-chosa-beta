@@ -1,0 +1,207 @@
+<div class="survey-app-ui">
+
+    <!-- 現場管理 -->
+    <div class="accordion-item" data-group="site-manage">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">現場管理</span><span class="summary-text" id="site-manage-summary" style="display:none;"></span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
+                <button type="button" class="btn-main" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="siteManager.promptCreateSite()">＋新規現場</button>
+                <input type="file" id="import-jzip" accept=".zip" style="display:none" onchange="appControl.importZip(this)">
+                <button type="button" class="btn-sub" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="document.getElementById('import-jzip').click()">JZIP読込</button>
+                <button type="button" class="btn-sub" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="siteManager.bulkExportSelected()">JZIP出力</button>
+                <button type="button" class="btn-sub" style="flex:1; padding:8px 2px; font-size:0.78rem;" onclick="appControl.exportCSV()">CSV出力</button>
+            </div>
+
+            <!-- 【Phase 6.20】アコーディオン見出し横の「現場リスト」「出力設定」表記、リスト上部の
+                 「JZIP出力の対象現場（チェックした現場が対象）」の注記を削除。JZIP出力対象のチェックは
+                 デフォルト全解除（全選択チェックボックスも初期はOFF）。
+                 出力ファイル名構成の初期値は fn1=調査日 / fn2=災害番号 / fn3〜5=なし、写真の出力横幅は
+                 1200px（標準）を、それぞれselected属性で明示している（リセット処理はこのselectedへ戻す）。 -->
+            <!-- 【Phase 6.19】JZIP出力の対象選択（チェックボックス）と、現場の切替・編集・削除を
+                 1つのリストに統合した。行はCSS Grid（固定カラム幅）で組んでおり、
+                 現場名がどれだけ長くても1行に収まらない分は省略表示(ellipsis)にする。
+                 以前のflexベースの実装は、現場名のボックス幅が計算に失敗して0近くまで潰れ、
+                 日本語が1文字ずつ縦に折り返される表示崩れを起こしていたため、Gridに変更した。 -->
+            <div style="background:#f7f7f7; padding:10px; margin-bottom:12px; border-radius:4px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer; padding:4px 0;">
+                    <input type="checkbox" id="bulk-export-select-all" onchange="siteManager.selectAllForBulkExport(this.checked)">
+                    全選択／全解除
+                </label>
+                <div id="site-list-container" style="max-height:320px; overflow-y:auto;"></div>
+                <div id="bulk-export-progress" style="font-size:0.8rem; color:#555; margin-top:6px; display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理項目 -->
+    <div class="accordion-item" data-group="num-mgmt">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">管理項目</span><span class="summary-text empty">未入力</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <button type="button" class="btn-sub" style="margin-bottom:10px; background:#8e44ad;"
+                onclick="siteManager.openReferenceModal()">📋 他の現場から引用</button>
+            <div class="input-group"><label>会社ID</label><input type="text" name="company_id"></div>
+            <div class="input-group"><label>調査班長名</label><input type="text" name="leader_name"></div>
+            <div class="input-group"><label>整理番号</label><input type="text" name="ref_no"></div>
+            <div class="input-group"><label>調査日</label><input type="date" name="survey_date" id="default-date"></div>
+            <div class="input-group"><label>災害番号</label><input type="text" name="disaster_no" oninput="syncDisasterNoTab(this.value)"></div>
+            <div class="input-group">
+                <label>発注者名</label>
+                <input type="text" name="dept_name" placeholder="例：鹿児島県"
+                    oninput="syncDeptName(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理項目の参照ボタン用モーダル（4択・左揃え） -->
+    <div id="modal-reference-choice" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">災害番号・発注者名・被災日・整理番号を引用</div>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromDefaults()">① 保存済みの初期値を引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromLastSite()">② 最後の現場を引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.openSitePickModal()">③ 他の現場を指定して引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.closeReferenceModal()">④ キャンセル</button>
+            </div>
+        </div>
+    </div>
+    <!-- ③で使う、現場を選ぶモーダル -->
+    <div id="modal-reference-site-pick" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">現場を選択</div>
+            <div id="reference-site-pick-list" style="max-height:300px; overflow-y:auto; margin-top:10px;"></div>
+            <div class="custom-modal-actions">
+                <button type="button" class="btn-sub" onclick="siteManager.closeSitePickModal()">戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 現場の切替・新規作成の前に出す、保存確認モーダル（3択：変更を保存／変更を保存せず破棄／現場を移動しない） -->
+    <div id="modal-save-confirm" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">今の入力内容をどうしますか？</div>
+            <p style="font-size:0.85rem; color:#555; margin-top:4px;">現場を切り替える・新規作成する前に選んでください。</p>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                <button type="button" class="btn-main" onclick="siteManager.proceedWithSave()">変更を保存</button>
+                <button type="button" class="btn-sub" style="background:#c0392b;" onclick="siteManager.proceedWithoutSave()">変更を保存せず破棄</button>
+            </div>
+            <div class="custom-modal-actions">
+                <button type="button" class="btn-sub" onclick="siteManager.cancelProceed()">現場を移動しない</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 調査を実施した者（端末固定：現場作成・削除で消えない） -->
+    <div class="accordion-item" data-group="surveyor-info">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">調査を実施した者</span><span class="summary-text empty">未入力</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <div class="input-group"><label>会社名</label><input type="text" name="company_name"></div>
+            <div class="input-group"><label>電話番号</label><input type="tel" name="tel" class="validate-tel"></div>
+            <div class="input-group"><label>FAX番号</label><input type="tel" name="fax" class="validate-tel"></div>
+            <div class="input-group"><label>職氏名</label><input type="text" name="person_name"></div>
+            <div class="input-group"><label>E-mail</label><input type="email" name="email"></div>
+        </div>
+    </div>
+
+    <!-- 設定 -->
+    <div class="accordion-item" data-group="output-settings">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">設定</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+
+            <!-- 【Phase 6.21】出力ファイル名構成を、旧・入出力データ設定から設定の先頭へ移動 -->
+            <!-- 出力ファイル名構成 -->
+            <div class="filename-builder" style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666;">出力ファイル名構成</label>
+                <div style="display:flex; gap:2px; margin-top:5px;">
+                    <select class="fn-part" id="fn1">
+                        <option value="survey_date" selected>調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none">なし</option>
+                    </select>
+                    <select class="fn-part" id="fn2">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no" selected>災害番号</option><option value="none">なし</option>
+                    </select>
+                    <select class="fn-part" id="fn3">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
+                    </select>
+                    <select class="fn-part" id="fn4">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
+                    </select>
+                    <select class="fn-part" id="fn5">
+                        <option value="survey_date">調査日</option><option value="company_id">会社ID</option><option value="leader_name">班長</option><option value="ref_no">整理番号</option><option value="disaster_no">災害番号</option><option value="none" selected>なし</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="background:#eee; padding:10px; margin-bottom:10px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666;">写真の出力横幅（長辺）</label>
+                <div style="display:flex; align-items:center; gap:8px; margin-top:5px; margin-bottom:8px;">
+                    <select id="photo-resize-width" style="flex:1; padding:8px; border:1px solid #ccc; border-radius:4px; font-size:0.9rem;">
+                        <option value="800">800px（小・軽量）</option>
+                        <option value="1200" selected>1200px（標準）</option>
+                        <option value="1600">1600px（大）</option>
+                        <option value="2000">2000px（最大）</option>
+                        <option value="0">リサイズなし（元サイズ）</option>
+                    </select>
+                    <span style="font-size:0.75rem; color:#888;">で保存</span>
+                </div>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer;">
+                    <input type="checkbox" id="photo-force-43" style="width:18px; height:18px;">
+                    強制的に4:3にする（右側をカット）
+                </label>
+            </div>
+
+            <div style="background:#eee; padding:10px; border-radius:4px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color:#333; cursor:pointer;">
+                    <input type="checkbox" id="bulk-export-bundle" checked style="width:18px; height:18px;">
+                    複数JZIP出力時、まとめて1つのZIPにする
+                </label>
+                <p style="font-size:0.7rem; color:#999; margin:6px 0 0 0;">
+                    オフにすると、現場管理でJZIP出力を実行したとき、チェックした現場ごとに個別のZIPファイルとして連続ダウンロードします。ブラウザによっては複数ファイルの連続ダウンロードがブロックされる場合があります。
+                </p>
+            </div>
+
+            <!-- 【Phase 6.21】地図キャッシュを開放するボタンを、旧・入出力データ設定から設定の末尾へ移動 -->
+            <hr style="margin: 15px 0;">
+            <button type="button" class="btn-sub" style="background:#7f8c8d;"
+                onclick="mapCacheManager.clearAllCache()">地図キャッシュを開放する</button>
+        </div>
+    </div>
+
+    <!-- 初期値の設定（旧・入出力データ設定。Phase 6.21で改名） -->
+    <div class="accordion-item" data-group="io-area">
+        <button class="accordion-header">
+            <div class="header-label"><span class="main-title">初期値の設定</span></div>
+            <span class="icon">+</span>
+        </button>
+        <div class="accordion-content">
+            <button type="button" class="btn-sub" style="background:#e67e22; margin-bottom:6px;"
+                onclick="appControl.saveDefaults()">初期値として保存</button>
+            <div style="display:flex; gap:6px; margin-bottom:6px;">
+                <button type="button" class="btn-sub" style="flex:1; background:#c0392b;"
+                    onclick="appControl.clearAll(false)">クリア（初期値を残す）</button>
+                <button type="button" class="btn-sub" style="flex:1; background:#922b21;"
+                    onclick="appControl.clearAll(true)">クリア（全未入力）</button>
+            </div>
+            <button type="button" class="btn-sub" style="background:#7f8c8d; margin-bottom:10px;"
+                onclick="appControl.applyDefaults()">初期値の読み込み</button>
+
+            <!-- 【Phase 6.21】今、端末に保存されている初期値（survey_app_defaults）の一覧。
+                 中身はappControl.renderDefaultsView()が描く。読み取り専用。 -->
+            <div style="background:#f7f7f7; padding:10px; border-radius:4px;">
+                <label style="font-size:0.7rem; color:#666; display:block; margin-bottom:6px;">今の初期値（保存済み）</label>
+                <div id="defaults-view"></div>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>被災状況調査アプリ ({{PHASE_DISPLAY}})</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+    <style>/* INSERT: CSS */</style>
+</head>
+<body>
+    <div id="app-container">
+        <!-- INSERT: HEADER -->
+        <main id="main-content">
+            <!-- 管理タブ：管理項目・調査を実施した者・端末設定 -->
+            <section id="content-manage" class="tab-content"><!-- INSERT: MANAGE_CONTENT --></section>
+            <!-- 現地調査タブ：位置図・諸元・被災状況・写真・JZIP入出力 -->
+            <section id="content-app"    class="tab-content active"><!-- INSERT: APP_CONTENT --></section>
+            <!-- 開発タブ：アプリ更新・開発ログ・アプリ化の手順 -->
+            <section id="content-dev"    class="tab-content"><!-- INSERT: DEV_CONTENT --></section>
+        </main>
+    </div>
+    <!-- トースト通知 -->
+    <div id="toast" class="toast-notification"></div>
+    <!-- モーダル：プリセット保存 -->
+    <div id="modal-preset-save" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">プリセット名を入力</div>
+            <input type="text" id="preset-name-input" style="width:100%; padding:8px; box-sizing:border-box; border:1px solid #ccc; border-radius:4px;">
+            <div class="custom-modal-actions">
+                <button type="button" class="btn-sub" onclick="uiHelper.closeModal()">キャンセル</button>
+                <button type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="uiHelper.confirmSavePreset()">保存</button>
+            </div>
+        </div>
+    </div>
+    <!-- モーダル：リセット確認 -->
+    <div id="modal-reset-confirm" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">新規調査を開始します</div>
+            <p style="font-size:0.9rem; color:#555;">調査を実施した者の情報を引き継ぎますか？</p>
+            <div class="custom-modal-actions">
+                <button type="button" class="btn-sub" onclick="uiHelper.confirmReset(false)">引き継がない</button>
+                <button type="button" class="btn-main" style="width:auto; padding:8px 16px;" onclick="uiHelper.confirmReset(true)">引き継ぐ</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- 地図画像化ライブラリ -->
+    <script src="https://unpkg.com/leaflet-image@0.4.0/leaflet-image.js"></script>
+    <!-- piexif.js・アプリ本体JSはビルド時にsrc/から読み込んでここにインライン埋め込みする -->
+    <script>/* INSERT: JS */</script>
+</body>
+</html>
