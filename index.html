@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.25)</title>
+    <title>被災状況調査アプリ (Phase 6.27)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -50,6 +50,15 @@ body { margin: 0; padding: 0; background-color: #666; font-family: sans-serif; d
 }
 /* キャンセルボタンは赤く */
 .leaflet-draw-actions li:last-child a { background-color: #e74c3c !important; }
+
+/* 【Phase 6.26】描画ツールバーは地図枠の外（上部バー）に横並びで配置。完了/戻る/中止も同バー内に表示 */
+#map-draw-bar { min-height: 34px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; padding: 4px; background: #eee; }
+#map-draw-bar .leaflet-control { float: none !important; margin: 0 !important; clear: none !important; display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+#map-draw-bar .leaflet-draw-section { position: relative; display: flex; flex-wrap: wrap; gap: 6px; align-items: flex-start; }
+#map-draw-bar .leaflet-draw-toolbar { flex-direction: row !important; margin: 0 !important; }
+#map-draw-bar .leaflet-draw-actions { position: static !important; left: auto !important; top: auto !important; margin: 0 !important; padding: 0; list-style: none; display: none; }
+#map-draw-bar .leaflet-draw-actions[style*="block"] { display: flex !important; gap: 4px; }
+#map-draw-bar .leaflet-draw-actions li { margin: 0 !important; }
 
 /* 地図のタッチアクション制御 */
 #map { touch-action: none; }
@@ -408,9 +417,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                         <button id="sk-edit"   class="sketch-btn"        onclick="sketchApp.setTool('edit')">編集</button>
                     </div>
                     <div class="sketch-tool-group">
-                        <button class="color-btn active" style="background:black;" onclick="sketchApp.setColor('black',this)"></button>
-                        <button class="color-btn"        style="background:red;"   onclick="sketchApp.setColor('red',this)"></button>
-                        <button class="color-btn"        style="background:blue;"  onclick="sketchApp.setColor('blue',this)"></button>
+                        <select id="sketch-color-select" class="sketch-btn" style="color:black;" onchange="sketchApp.setColor(this.value)" title="ペンの色"><option value="black" style="color:black;" selected>● 黒</option><option value="red" style="color:red;">● 赤</option><option value="blue" style="color:blue;">● 青</option><option value="#008000" style="color:#008000;">● 緑</option><option value="#ff8c00" style="color:#ff8c00;">● オレンジ</option><option value="#800080" style="color:#800080;">● 紫</option><option value="#8b4513" style="color:#8b4513;">● 茶</option><option value="#ff1493" style="color:#ff1493;">● ピンク</option><option value="#00a0c8" style="color:#00a0c8;">● 水色</option><option value="#808080" style="color:#808080;">● グレー</option><option value="#b8a000" style="color:#b8a000;">● 黄土</option><option value="#006400" style="color:#006400;">● 濃緑</option></select>
                     </div>
                     <div class="sketch-tool-group">
                         <button class="sketch-btn" onclick="sketchApp.undo()">戻る</button>
@@ -647,12 +654,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.25</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.27</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.25</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.27</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -671,8 +678,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.25)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.25（メイン〇を、ズームによらず画面上で同じ大きさに見える固定サイズのマークに変更。サイズはズーム18での従来の〇の1/3）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.27)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.27（白紙メモのペン色を12色プルダウンに変更／初期値一覧の「被災日」行を「調査日」行に置き換え。※直前の6.26は位置図の操作パネルの枠外移動）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -702,18 +709,18 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr style="background:#eee;"><th>Filename</th><th>Role</th><th>Note</th></tr>
             <tr><td><code>build.js</code></td><td>ビルドスクリプト</td><td>App A専用。piexif.jsを先頭に結合する。manage.html・dev.htmlを追加読み込み。</td></tr>
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
-            <tr><td><code>style.css</code></td><td>共通スタイル</td><td>CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
+            <tr><td><code>style.css</code></td><td>共通スタイル</td><td>【Phase 6.26更新】#map-draw-bar（地図枠外の描画バー）の指定を追加。CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
             <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
             <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.22更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力（チェックした現場が対象）の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（上から順に、出力ファイル名構成=初期は調査日・災害番号・なし・なし・なし／写真の出力横幅=初期1200px・強制4:3／まとめてZIP化／地図キャッシュを開放する。見出し横の補足表記は無し）・初期値の設定（旧・入出力データ設定。初期値として保存／クリア2種／初期値の読み込み／今の初期値（保存済み）の一覧表示。見出し横の補足表記は無し）</td></tr>
-            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
+            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
             <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
             <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
-            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
-            <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>Canvas描画（ペン/直線/文字/消しゴム/Undo）</td></tr>
+            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
+            <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>【Phase 6.27更新】ペン色を12色プルダウン(#sketch-color-select)で選択（setColorがプルダウンと同期。start()でプルダウン値とペン色の食い違いを解消）。Canvas描画（ペン/直線/文字/編集/Undo）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
@@ -1139,7 +1146,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>今の初期値（保存済み）の一覧表示:</strong>
                 <ul>
                     <li>場所：「初期値の設定」アコーディオン内、「初期値の読み込み」ボタンの直下（#defaults-view）。読み取り専用。</li>
-                    <li>表示内容：端末（LocalStorage：survey_app_defaults）に保存されている値そのもの。画面の今の入力値ではない。会社ID／調査班長名／会社名／電話番号／FAX番号／職氏名／E-mail／災害番号／発注者名／被災日／出力ファイル名構成（「調査日 ＋ 災害番号」のように「なし」を除いて連結）／写真の出力横幅／強制的に4:3（する・しない）。値が空・未保存の項目は「（未設定）」、初期値がまだ一度も保存されていない場合は「初期値はまだ保存されていません。」と表示する。</li>
+                    <li>表示内容：端末（LocalStorage：survey_app_defaults）に保存されている値そのもの。画面の今の入力値ではない。会社ID／調査班長名／会社名／電話番号／FAX番号／職氏名／E-mail／災害番号／発注者名／調査日（Phase 6.27〜。保存値ではなく「新規作成時：当日の日付を自動入力」の固定表示）／出力ファイル名構成（「調査日 ＋ 災害番号」のように「なし」を除いて連結）／写真の出力横幅／強制的に4:3（する・しない）。値が空・未保存の項目は「（未設定）」、初期値がまだ一度も保存されていない場合は「初期値はまだ保存されていません。」と表示する。</li>
                     <li>実装：appControl.renderDefaultsView()。起動時（loadDefaults()の直後）と、saveDefaults()の保存成功時に更新する。selectの表示名（「調査日」「1200px（標準）」等）は、該当selectの選択肢の表示テキストをDOMから引いて使うため、選択肢の名称を変えても表示は追随する。値の表示はHTMLエスケープしている。</li>
                     <li>注意：「初期値として保存」で保存される項目のうち、災害番号・発注者名・被災日は「他の現場から引用」の①（保存済みの初期値を引用）で使われるが、loadDefaults()（起動時・初期値の読み込み・クリア後）が画面へ反映するのは、会社ID・調査班長名・会社名・電話番号・FAX番号・職氏名・E-mail・ファイル名構成・写真設定のみ（Phase 6.13以降の従来仕様どおり）。</li>
                 </ul>
@@ -1180,7 +1187,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <li>目的：「現在地」ボタンで地図が現在地に移動した際、地図の中心（＝現在地）がどこか分かりにくいため。十字線の位置に〇を置くことで、現在地に〇を落としやすくする。</li>
                     <li>実装：地図コンテナ（#map）の中心に、黒線＋白縁取りの十字（約28px四方）を重ねて表示する。地図の操作を邪魔しないよう<code>pointer-events:none</code>、z-indexは650（描画・注記より上、Leafletのコントロールより下）。メイン・サブ・GPS修正モードのいずれでも表示される。</li>
                     <li>「地図を写真に保存」（captureToPhoto）はタイル・図形・注記のみを描き写す方式（5.8）のため、十字線は保存画像には写り込まない。</li>
-                    <li>今回は十字線の表示のみ。「十字線の位置にワンタップで〇を置くボタン」は未実装（7章の検討事項）。</li>
+                    <li><strong>【保留】十字線の位置にワンタップで〇を置くボタン:</strong> 現在は十字線を目印に地図をタップして〇を置く。十字線の位置へ置くボタンが必要かは、実機で十字線を使ってから決める（ユーザー判断）。</li>
                 </ul>
             </li>
             <li><strong>メイン〇の大きさ（Phase 6.24の対応は6.25で置き換え）:</strong> 6.24では半径10mを3.3mに変更したが、〇はメートル半径の円だったためズームによって大きさが変わり、意図（位置を示すマークとして常に同じ大きさで見える）と合わなかった。5.35で、ピクセル指定の固定サイズのマークに作り直した。</li>
@@ -1205,6 +1212,24 @@ canvas.sketch-canvas { display: block; width: 100%; }
                 </ul>
             </li>
             <li><strong>既知の制限:</strong> ①ズームインしても〇は大きくならないため、「〇が現地の何mを表すか」は表現しない（位置の目印として扱う）。②Leaflet.drawの編集モードでの〇の扱い（移動）は、L.circleMarkerに対応した編集ハンドラ（leaflet-draw 1.0系）に依存する。実機で編集モードを開いて〇を動かせるか確認が必要。</li>
+        </ul>
+
+        <h4>5.36 位置図の操作パネルを地図枠の外へ移動（Phase 6.26）</h4>
+        <ul>
+            <li><strong>背景:</strong> Leaflet.drawのツールバーが地図の上に重なり、特に描画中の「完了／戻る／中止」が邪魔で絵が描けなかった。またサブ地図では縦並びのツールバーが4:3の地図の高さを超え、「編集」「削除」が枠外に出て押せなかった。</li>
+            <li><strong>対応:</strong> mapApp.setMode()でL.Control.Drawを追加した直後に、mapApp._moveDrawControlOutside()で、そのコントロールのDOM（描画ボタン・編集/削除ボタン・完了/戻る/中止のリスト）を、#map-container内の地図(#map)の直前に作る専用バー<code>#map-draw-bar</code>へ移す。地図の上には何も重ならない。バーは横並び・折り返しありで、描画中の完了/戻る/中止は同じバー内のボタンの隣に横並びで出る。バーの高さは最小34pxで固定し、完了/戻る/中止の表示・非表示で地図が上下にずれないようにした。</li>
+            <li><strong>style.css:</strong> <code>#map-draw-bar</code>配下の指定を追加（ツールバーを横向き、<code>.leaflet-draw-actions</code>をposition:staticにして、Leafletが付けるinline styleのdisplay:blockのときだけ表示）。従来の<code>.leaflet-draw-actions</code>の緑／赤ボタン指定はそのまま使う。</li>
+            <li><strong>変えていないもの:</strong> ボタンの種類・順序・機能、〇マーク、十字線、ズームコントロール、地図の写真保存、保存データ。</li>
+            <li><strong>検証:</strong> ヘッドレスChromium＋Leaflet.drawで、サブモードの6ボタンが全て地図枠より上のバー内にあり、ライン描画開始で完了/戻る/中止が同バー内に出て地図内にLeaflet.drawのDOMが残らないこと、モード切替の再構築でエラーが出ないことを確認。編集モードでの実際の図形編集は実機で要確認。</li>
+        </ul>
+
+        <h4>5.37 白紙メモのペン色プルダウン・初期値一覧の調査日表示（Phase 6.27）</h4>
+        <ul>
+            <li><strong>ペン色:</strong> introduction.htmlの色ボタン3つ（黒・赤・青）を、<code>#sketch-color-select</code>（プルダウン）に置き換えた。12色：黒（既定）・赤・青・緑・オレンジ・紫・茶・ピンク・水色・グレー・黄土・濃緑。各選択肢は色付きの●で表示。選択でsketchApp.setColor(値)を呼ぶ。setColorはプルダウンの表示・文字色も同期する。</li>
+            <li><strong>プルダウンの初期化との食い違い対策:</strong> 新規現場作成や全消去は、アコーディオン内の入力欄を初期値に戻すため、プルダウンも黒に戻る。sketchApp.start()の先頭でプルダウンの値とペン色を照合し、違えばプルダウンに合わせる（表示と実際の色を必ず一致させる）。</li>
+            <li><strong>互換:</strong> 色は従来どおりCSSの色指定文字列としてelementsに保存されるだけで、保存形式は変わらない。</li>
+            <li><strong>初期値一覧の「被災日」→「調査日」（ユーザー指示）:</strong> 管理タブ「初期値の設定」の一覧の該当行を「調査日：新規作成時：当日の日付を自動入力」の固定表示に置き換えた（調査日は保存対象ではなく、常に当日が入る仕様のため）。<strong>damage_date（被災日）の保存自体は従来どおり残している</strong>（「他の現場から引用」①で使うため。5.24参照）。一覧に出さなくなっただけで、保存値は見えなくなる点に注意。</li>
+            <li><strong>見送り:</strong> ブラウザ標準のprompt()の「〜の内容」表示を消すための自作モーダル化は、当面見送り（ユーザー判断）。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -1238,6 +1263,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>JZIP出力対象チェックはデフォルト全解除（Phase 6.20）:</strong> 出力対象を明示的に選ばせる。再描画でチェックが消えないよう、状態を引き継ぐ。</li>
             <li><strong>新規現場作成は「保存確認→現場名入力」の順（Phase 6.24）:</strong> 引き止められて入力が無駄になる質問を先に済ませる。入力欄には、入力内容を縛る入力例を付けない。</li>
             <li><strong>メイン〇はズームによらず同じ大きさのマーク（Phase 6.25）:</strong> 位置を示すマーク（点）であり、メートル半径の円ではない。ピクセル指定（L.circleMarker）で、サイズはmapApp.MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHTの2箇所で管理し、作図・復元・地図の写真保存で値を食い違わせない。サイズはGeoJSONに保存しない。今後この種の目印を追加するときも、メートル指定の図形ではなくピクセル指定のマークにするかを先に確認する。</li>
+            <li><strong>位置図の操作パネルは地図枠の外（Phase 6.26）:</strong> 地図の上に操作部品を重ねない。描画ツールバーは#map-draw-bar（地図の上）に置く。Leaflet.drawのDOMを移す方式のため、Leaflet.drawのバージョンを上げる際は移動後も動作するか確認する。</li>
             <li><strong>CSV出力もチェックした現場が対象（Phase 6.22）:</strong> JZIP出力と同じチェックリストを共用する。チェックが無ければ現在の画面を出力、あれば保存済みデータから1現場1行。今開いている現場に未保存の変更がある場合は出力を拒否する（JZIP出力と同じ考え方）。</li>
             <li><strong>JZIP出力経路はチェックボックス方式に一本化（Phase 6.18）:</strong> 現場カードごとの個別JZIP出力ボタンは廃止。現場管理アコーディオン上部の「JZIP出力」ボタン＋対象選択チェックリストが唯一の出力経路。</li>
             <li><strong>現場一覧はチェックボックス選択・切替・編集・削除を1つのリストに統合（Phase 6.19）:</strong> 別々の一覧に分けない。行のレイアウトはCSS Grid（固定幅カラム＋1fr）で組み、現場名は1行省略表示（ellipsis）にする。flexベースの幅計算に依存したレイアウトは、実機で現場名が縦に1文字ずつ折り返される表示崩れを起こしたため、今後もこの種のリストはGrid＋ellipsisで組む方針とする。</li>
@@ -1262,10 +1288,10 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>【Phase 6.24〜6.25完了】</strong>新規現場作成の質問順序の入替・入力例の削除、位置図の中心十字線（5.34）、メイン〇をズームによらない固定サイズのマーク（ズーム18での従来の1/3）に変更（5.35）。実機で、複数のズームでの大きさ・編集モードでの〇の移動を確認する必要あり。</li>
             <li><strong>【実機デバッグ指摘の残り（Phase 6.24時点。未対応）】</strong>
                 <ul>
-                    <li><strong>位置図の操作パネルを枠外へ移動（メイン・サブ共通）:</strong> 現状はLeaflet.drawのツールバー（ライン・地点・範囲・テキスト・編集・削除）と、描画中の「完了／戻る／中止」が地図の上に重なり、描画の邪魔になっている。白紙メモのように、地図の枠外（上または下）に置く。特に「完了／戻る／中止」が絵を描く邪魔になっている。着手には introduction.html（位置図エリアのマークアップ）・style.css（地図・ツールバー関連）の現物が必要。</li>
-                    <li><strong>サブ地図で「編集」ボタンが枠外になり押せない:</strong> サブモードはツールが多く（地点・ライン・範囲・テキスト＋編集・削除）、縦に並べたツールバーが4:3の地図の高さを超えて、編集・削除ボタンが枠外に出ている。上記の操作パネルの枠外移動で同時に解消する想定。</li>
-                    <li><strong>白紙メモのペン色を12色程度のプルダウンに（既定は黒）:</strong> 着手には 1_script_sketch.js と introduction.html（白紙メモのツールバー）の現物が必要。</li>
-                    <li><strong>【要確認】「初期値」欄の「被災日」:</strong> 管理タブ「初期値の設定」の一覧に「被災日」が出ているが、調査日の間違いではないか、という指摘。初期値として保存しているのは被災日（damage_date）で、調査日（survey_date）は保存対象にしていない（調査日は常に今日の日付が入る仕様。5.24参照）。被災日を保存対象から外すのか、調査日に置き換えるのか、意図の確認が必要。</li>
+                    <li><strong>【Phase 6.26対応済み・実機確認待ち】位置図の操作パネルを枠外へ移動（メイン・サブ共通）:</strong> 5.36参照。</li>
+                    <li><strong>【Phase 6.26対応済み・実機確認待ち】サブ地図で「編集」ボタンが枠外になり押せない:</strong> 縦並びを横並びの枠外バーにしたため解消見込み（5.36参照）。</li>
+                    <li><strong>【Phase 6.27対応済み・実機確認待ち】白紙メモのペン色を12色のプルダウンに（既定は黒）:</strong> 5.37参照。</li>
+                    <li><strong>【Phase 6.27対応済み】「初期値」欄の「被災日」→「調査日」に置き換え:</strong> 5.37参照。</li>
                     <li><strong>【検討】十字線の位置にワンタップで〇を置くボタン:</strong> 現在は十字線を目印に、地図をタップして〇を置く。十字線の位置へ置くボタンが必要かは、実機で十字線を使ってから判断する。</li>
                 </ul>
             </li>
@@ -4079,6 +4105,21 @@ window.mapApp = {
             : { marker: true, polyline: { shapeOptions: { color: '#0000ff', weight: 4 } }, polygon: { shapeOptions: { color: '#0000ff', fillOpacity: 0.4 } }, circlemarker: true, circle: false, rectangle: false }
         });
         this.map.addControl(this.drawControl);
+        this._moveDrawControlOutside();
+    },
+
+    // 【Phase 6.26】描画ツールバー（完了/戻る/中止・編集/削除を含む）を地図枠の外（上）へ移動し、描画の邪魔にならないようにする
+    _moveDrawControlOutside() {
+        const mapEl = document.getElementById('map');
+        if (!mapEl || !this.drawControl) return;
+        let bar = document.getElementById('map-draw-bar');
+        if (!bar) {
+            bar = document.createElement('div');
+            bar.id = 'map-draw-bar';
+            mapEl.parentNode.insertBefore(bar, mapEl);
+        }
+        const c = this.drawControl.getContainer();
+        if (c && c.parentNode !== bar) bar.appendChild(c);
     },
 
     clearLayers() { if (confirm("全ての図形を消去しますか？")) { this.allDrawnItems.clearLayers(); this.updateMapSummary(); } },
@@ -4321,6 +4362,8 @@ window.mapApp = {
 //               浮動ツールバーは削除のみ。
 // 個々の要素を選んで🗑で消せるようになったため、消しゴム（面で塗りつぶして隠す方式）は廃止した。
 //
+// 【Phase 6.27】ペン色を、3色ボタンから12色のプルダウンに変更（既定は黒）。
+//
 // 【Phase 6.04】「線」ツールを、2点だけの直線から、タップのたびに頂点を追加していく
 // 連続線（折れ線）に変更。タップするごとに1点追加し、「完了」ボタンで確定、
 // 「中止」ボタンで破棄する。編集モードでは、確定した線のどの頂点にもつまみが出て、
@@ -4396,10 +4439,13 @@ window.sketchApp = {
         if(btn) btn.classList.add('active');
         this.redrawAll();
     },
+    // 【Phase 6.27】ペン色は12色のプルダウン（#sketch-color-select）で選ぶ。既定は黒。
     setColor(c, btn) {
         this.color = c;
         document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
         if(btn) btn.classList.add('active');
+        const sel = document.getElementById('sketch-color-select');
+        if (sel) { if (sel.value !== c) sel.value = c; sel.style.color = c; }
     },
 
     getPos(e) {
@@ -4410,6 +4456,9 @@ window.sketchApp = {
 
     // --- 入口：モードに応じて振り分け ---
     start(pos) {
+        // プルダウンの表示と実際のペン色を一致させる（新規現場作成・全消去でプルダウンが初期値に戻った場合の食い違い防止）
+        const _sel = document.getElementById('sketch-color-select');
+        if (_sel && _sel.value !== this.color) this.setColor(_sel.value);
         if (this.mode === 'text') {
             this._pendingTextPos = pos;
             this._editingIndex = null;
@@ -5593,6 +5642,9 @@ document.addEventListener('click', (e) => {
 //     ある場合は、起動時に自動で「現場1」として1件だけ作成する。
 // =============================================================================
 //
+// 【Phase 6.27】初期値の一覧表示の「被災日」行を「調査日」行に置き換え（本ファイルでの変更点）
+//   ・調査日は新規現場作成時に当日の日付が自動入力される仕様のため、一覧には「新規作成時：当日の日付を自動入力」と表示する。
+//   ・damage_dateの保存（saveDefaults）は、「他の現場から引用」①で使うため従来どおり維持している（一覧に出さないだけ）。
 // 【Phase 6.25】メイン図形（〇）をズームに依存しない固定サイズのマークに変更（本ファイルでの変更点）
 //   ・現場読込（loadSiteIntoForm）・オートセーブ復元（storageManager.load）で、メインの点を
 //     L.circle（メートル半径）ではなく mapApp.createMainMark()（ピクセル指定のL.circleMarker）で復元する。
@@ -6710,7 +6762,7 @@ window.appControl = {
             ['E-mail', val('email')],
             ['災害番号', val('disaster_no')],
             ['発注者名', val('dept_name')],
-            ['被災日', val('damage_date')],
+            ['調査日', '新規作成時：当日の日付を自動入力'],
             ['出力ファイル名構成', fnText],
             ['写真の出力横幅', resizeText],
             ['強制的に4:3', f43Text]
