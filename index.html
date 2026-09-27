@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.34)</title>
+    <title>被災状況調査アプリ (Phase 6.36)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -418,12 +418,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
                     <button type="button" style="background:#e67e22; color:white;" onclick="mapApp.captureToPhoto()">地図を写真に保存</button>
                     <button type="button" onclick="mapApp.clearLayers()">全て消去</button>
                 </div>
-                <!-- 【Phase 6.34】自社の調査範囲（KML）を見るだけの参考レイヤとして読み込む。保存はしない。 -->
+                <!-- 【Phase 6.34/6.35】KMLファイルを見るだけの参考レイヤとして読み込む（用途は問わない。保存はしない）。 -->
                 <div class="map-controls">
                     <input type="file" id="map-kml-input" accept=".kml" style="display:none">
                     <button type="button" style="background:#8e44ad; color:white;"
-                        onclick="document.getElementById('map-kml-input').click()">調査範囲(KML)を読込</button>
-                    <button type="button" onclick="mapApp.clearKml()">調査範囲を消す</button>
+                        onclick="document.getElementById('map-kml-input').click()">KMLを背景表示</button>
+                    <button type="button" onclick="mapApp.clearKml()">背景KMLを消す</button>
                 </div>
             </div>
             <!-- 白紙メモエリア -->
@@ -684,12 +684,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.34</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.36</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.34</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.36</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -708,8 +708,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.34)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.34（メイン位置図に、自社の調査範囲を示すKMLを読み込んで参考表示する機能を追加。見るだけの参考レイヤで、保存・地図の写真保存には出てこない）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.36)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.36（5.44のKML参考表示ボタンの文言を、指定されたとおり「KMLを背景表示」「背景KMLを消す」に修正）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -747,8 +747,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
             <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>【Phase 6.33更新】5.43参照（背景画像機能を追加。setBackgroundFromFile／clearBackground／drawBackground。LocalStorage・IndexedDBには保存しない）。【Phase 6.27更新】ペン色を12色プルダウン(#sketch-color-select)で選択（setColorがプルダウンと同期。start()でプルダウン値とペン色の食い違いを解消）。Canvas描画（ペン/直線/文字/編集/Undo）</td></tr>
-            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.34更新】地図コントロール（現在地／地図を写真に保存／全て消去）の下に、KML読込用の非表示file input（map-kml-input）と「調査範囲(KML)を読込」「調査範囲を消す」ボタンの行を追加。【Phase 6.33更新】白紙メモのツールバーに「背景」ボタン群（📷背景・📁背景・🗑背景）と、そのための非表示file input（sketch-bg-camera-input／sketch-bg-file-input）を追加。【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
-            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.34更新】5.44参照（自社の調査範囲KMLを参考レイヤとして読込表示。loadKmlFile／_buildKmlLayer／clearKml。allDrawnItemsとは別レイヤーで保存・地図の写真保存の対象外）。【Phase 6.32更新】5.42参照（編集中の要素を単体削除する「単要素削除」ボタンを追加）。【Phase 6.31更新】5.41参照（編集を「選択してから編集」の3段階に変更・範囲(Polygon)の途中完了を修正）。【Phase 6.30更新】5.40参照（操作パネルを地図下へ・アイコン1.5倍・編集のメイン/サブ分離・連続線修正・点の現在地/画面タップ選択）。【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
+            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.36更新】5.44のKMLボタンの文言を指定通り「KMLを背景表示」「背景KMLを消す」に修正。【Phase 6.35更新】5.44のKMLボタンの文言を「調査範囲」限定の表現から中立的な表現に修正（一旦「KMLを読込（参考表示）」「KML表示を消す」としていたが、6.36でさらに指定の文言へ修正）。【Phase 6.34更新】地図コントロール（現在地／地図を写真に保存／全て消去）の下に、KML読込用の非表示file input（map-kml-input）とKML読込／消去ボタンの行を追加。【Phase 6.33更新】白紙メモのツールバーに「背景」ボタン群（📷背景・📁背景・🗑背景）と、そのための非表示file input（sketch-bg-camera-input／sketch-bg-file-input）を追加。【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
+            <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.35更新】5.44のトースト文言を用途限定しない表現に修正。【Phase 6.34更新】5.44参照（任意のKMLを参考レイヤとして読込表示。用途は限定しない。loadKmlFile／_buildKmlLayer／clearKml。allDrawnItemsとは別レイヤーで保存・地図の写真保存の対象外）。【Phase 6.32更新】5.42参照（編集中の要素を単体削除する「単要素削除」ボタンを追加）。【Phase 6.31更新】5.41参照（編集を「選択してから編集」の3段階に変更・範囲(Polygon)の途中完了を修正）。【Phase 6.30更新】5.40参照（操作パネルを地図下へ・アイコン1.5倍・編集のメイン/サブ分離・連続線修正・点の現在地/画面タップ選択）。【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>【Phase 6.29更新】photoApp.recordAzimuth()を、値が届くまで最大4秒待つ作りに変更（azimuthManager.waitForAzimuth追加）。5.39参照。【Phase 6.28更新】写真アコーディオンを開いたときのGPS・方位センサー起動フックを、白紙メモと同じ「少し待ってから開いている状態を見る」作りに修正（5.38参照）。photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
             <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
@@ -1326,12 +1326,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>実機確認が必要な点:</strong> 実際にカメラで紙地図・現場を撮影して背景に取り込めるか、大きな写真を取り込んだ際の動作速度、背景ありの状態で「写真に保存」した結果の見え方。</li>
         </ul>
 
-        <h4>5.44 メイン位置図に自社の調査範囲（KML）を参考表示（Phase 6.34）</h4>
+        <h4>5.44 メイン位置図にKMLを参考表示（Phase 6.34・Phase 6.35で文言修正）</h4>
         <ul>
-            <li><strong>背景（相談内容）:</strong> メイン位置図に自社の調査範囲を示すKMLを読み込めるようにして、現場が調査範囲内かどうか地図上で分かるようにしたい、という相談があった。</li>
+            <li><strong>背景（相談内容）:</strong> メイン位置図にKMLを読み込めるようにしてほしい、という相談があった。相談時の例は「自社の調査範囲が分かるようにしたい」だったが、それは用途の一例であって、KML読込機能の使い道をその1つに限定する話ではない（Phase 6.34では「調査範囲」専用の機能であるかのようなボタン名・文言にしてしまっていたため、Phase 6.35で用途を限定しない中立的な表現に修正した。ボタン名「KMLを読込（参考表示）」「KML表示を消す」、内部の関数名（loadKmlFile等）・コメントも同様）。</li>
             <li><strong>実装方針（相談の上で決定）:</strong>
                 <ul>
-                    <li>読み込んだKMLは、タップしても選択・編集できない「見るだけの参考レイヤ」として扱う。地図コントロール（現在地／地図を写真に保存／全て消去）の下に新設した行の「調査範囲(KML)を読込」ボタンから、端末内のKMLファイルを選んで読み込む。「調査範囲を消す」でレイヤーごと消せる。</li>
+                    <li>読み込んだKMLは、タップしても選択・編集できない「見るだけの参考レイヤ」として扱う。地図コントロール（現在地／地図を写真に保存／全て消去）の下に新設した行の「KMLを背景表示」ボタンから、端末内のKMLファイルを選んで読み込む。「背景KMLを消す」でレイヤーごと消せる。</li>
                     <li>保存はしない。LocalStorage・IndexedDBのどちらにも書き込まず、mapApp.kmlLayer（Leafletのレイヤーグループ）としてページ内メモリに保持するだけの、その場限りの表示とした。アプリの再読込・現場の切替で消える。</li>
                     <li>allDrawnItems（メイン・サブの正本）とは完全に別レイヤーで保持するため、編集フロー（5.41・5.42）の対象にもならず、「地図を写真に保存」（captureToPhoto。5.8参照）はallDrawnItemsしか描き写さない実装のため、保存画像・帳票キャプチャのいずれにもKMLレイヤーは写り込まない。JZIP・CSV出力にも含まれない。</li>
                     <li>KML内の各図形はinteractive:falseで描画し、地図タップ（作図・GPS修正モード等）を邪魔しないようにした。</li>
@@ -1339,8 +1339,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
             </li>
             <li><strong>対応するKMLの中身:</strong> Placemark配下のPoint（点）・LineString（線）・Polygon（外周のみ。穴=innerBoundaryIsは今回対象外）に対応。複数のPlacemarkをまとめて読み込める。座標はKML標準の「経度,緯度[,高度]」形式（スペース区切りで複数点）を読み取る。見た目は紫の破線・半透明塗り（色 #8e44ad）で、メイン(赤)・サブ(青)と重ならない配色にした。読み込み後は自動的にその範囲へ地図の表示を合わせる（fitBounds）。</li>
             <li><strong>対応しない点:</strong> KMZ（zip圧縮されたKML）は非対応。エクスポート元のアプリ（Google EarthやGIS等）でKML形式（非圧縮）に書き出してもらう必要がある。読み込みに失敗した場合（形式が違う・図形が1つも無い等）はトーストで通知するのみで、アプリは落ちない。</li>
-            <li>ヘッドレスブラウザで、KML（範囲を表すPolygon）を読み込むと参考レイヤとして表示され、allDrawnItems側の件数には影響しないこと、「調査範囲を消す」でレイヤーが消えることを確認した。</li>
-            <li><strong>実機確認が必要な点:</strong> 実際の調査範囲KML（自社作成のもの）を読み込んだ際の見え方・ファイルサイズが大きい場合の読み込み速度、地図タップ（作図・マーカー配置等）が参考レイヤに邪魔されないか。</li>
+            <li>ヘッドレスブラウザで、KML（範囲を表すPolygon）を読み込むと参考レイヤとして表示され、allDrawnItems側の件数には影響しないこと、「背景KMLを消す」でレイヤーが消えることを確認した。</li>
+            <li><strong>実機確認が必要な点:</strong> 実際のKML（用途を問わず）を読み込んだ際の見え方・ファイルサイズが大きい場合の読み込み速度、地図タップ（作図・マーカー配置等）が参考レイヤに邪魔されないか。</li>
         </ul>
 
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
@@ -1410,7 +1410,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>【Phase 6.31完了・実機確認待ち】</strong>位置図の「編集」を「①編集ボタン→②要素を選択→③編集開始」の3段階の流れに変更。範囲(Polygon)がダブルタップ・始点タップで完了してしまう不具合を修正。詳細は5.41参照。</li>
             <li><strong>【Phase 6.32完了・実機確認待ち】</strong>位置図の編集フローに、選択中の1要素だけを削除する「単要素削除」ボタンを追加。詳細は5.42参照。</li>
             <li><strong>【Phase 6.33完了・実機確認待ち】</strong>白紙メモに、撮影した地図・現場写真を下敷きにできる「背景」機能を追加（保存はせず、その場限りの下敷き）。詳細は5.43参照。</li>
-            <li><strong>【Phase 6.34完了・実機確認待ち】</strong>メイン位置図に、自社の調査範囲を示すKMLを読み込んで参考表示する機能を追加（見るだけの参考レイヤ、保存はせず、地図の写真保存には出てこない）。詳細は5.44参照。</li>
+            <li><strong>【Phase 6.34完了・Phase 6.35で文言修正・実機確認待ち】</strong>メイン位置図に、KMLを読み込んで参考表示する機能を追加（用途は限定しない。見るだけの参考レイヤ、保存はせず、地図の写真保存には出てこない）。詳細は5.44参照。</li>
             <li><strong>【AppB確認待ち】</strong>一括ZIP（外側ZIPの中に現場ごとのフォルダ）をAppBが読み込めるか。読めない場合は、AppB側の改修か、AppA側を「個別ZIP」運用に絞るかの判断が必要（8.2・8.3参照）。</li>
             <li><strong>【Phase 6.21完了】保存済みの初期値の閲覧UI:</strong> 「初期値の設定」アコーディオン内、「初期値の読み込み」ボタンの下に、保存済みの初期値の一覧表示欄を追加（5.32参照）。管理タブの項目整理（ファイル名構成・地図キャッシュ開放を「設定」へ移動、「入出力データ設定」を「初期値の設定」に改名）もあわせて実施。実機での見え方の確認が必要。</li>
         </ul>
@@ -4135,7 +4135,8 @@ L.Control.ZoomWithLevel = L.Control.extend({
 // --- 地図管理 ---
 window.mapApp = {
     map: null, allDrawnItems: null, drawControl: null, currentMode: 'main',
-    // 【Phase 6.34】自社の調査範囲（KML）を見るだけの参考レイヤとして表示する。
+    // 【Phase 6.34】任意のKMLファイルを、見るだけの参考レイヤとして表示する。用途は問わない
+    // （例：自社の調査範囲、その他の下敷きにしたい範囲・ライン・地点など）。
     // allDrawnItemsとは別のレイヤーに保持するため、編集・削除・地図の写真保存(captureToPhoto)・
     // JZIP/CSV出力のいずれの対象にもならない（captureToPhotoはallDrawnItemsしか描き写さないため）。
     kmlLayer: null,
@@ -4815,7 +4816,7 @@ window.mapApp = {
     },
 
     // =========================================================================
-    // 【Phase 6.34】自社の調査範囲（KML）を参考レイヤとして表示
+    // 【Phase 6.34】任意のKMLファイルを参考レイヤとして表示（用途は限定しない）
     // =========================================================================
     // 見るだけの参考表示として割り切り、以下を徹底する：
     //   ・allDrawnItemsとは別のL.LayerGroup（kmlLayer）に保持する（編集・削除・保存の対象外）。
@@ -4896,7 +4897,7 @@ window.mapApp = {
             const b = group.getBounds();
             if (b.isValid()) this.map.fitBounds(b, { maxZoom: 18, padding: [20, 20] });
         } catch (e) { /* 範囲が取れない場合は表示位置を変えないだけ */ }
-        window.uiHelper && uiHelper.showToast(`調査範囲（KML）を読み込みました（${count}件）`);
+        window.uiHelper && uiHelper.showToast(`KMLを読み込みました（${count}件）`);
     },
 
     clearKml() {
