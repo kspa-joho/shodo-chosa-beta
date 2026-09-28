@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.37)</title>
+    <title>被災状況調査アプリ (Phase 6.38)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -212,47 +212,22 @@ canvas.sketch-canvas { display: block; width: 100%; }
         </div>
     </div>
 
-    <!-- 管理項目 -->
+    <!-- 共通項目（Phase 6.38：旧・管理項目。現場ごとに変わらない、端末・会社に紐づく項目のみを残した。
+         整理番号・調査日・災害番号は現場ごとに異なるため、現地調査タブ「諸元」へ移設した。
+         このパネルの値は「初期値の設定」（初期値として保存／初期値の読み込み）で使い回す運用とし、
+         「他の現場から引用」ボタン・モーダルは諸元側へ移設し、このパネルからは削除した。 -->
     <div class="accordion-item" data-group="num-mgmt">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">管理項目</span><span class="summary-text empty">未入力</span></div>
+            <div class="header-label"><span class="main-title">共通項目</span><span class="summary-text empty">未入力</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
-            <button type="button" class="btn-sub" style="margin-bottom:10px; background:#8e44ad;"
-                onclick="siteManager.openReferenceModal()">📋 他の現場から引用</button>
             <div class="input-group"><label>会社ID</label><input type="text" name="company_id"></div>
             <div class="input-group"><label>調査班長名</label><input type="text" name="leader_name"></div>
-            <div class="input-group"><label>整理番号</label><input type="text" name="ref_no"></div>
-            <div class="input-group"><label>調査日</label><input type="date" name="survey_date" id="default-date"></div>
-            <div class="input-group"><label>災害番号</label><input type="text" name="disaster_no" oninput="syncDisasterNoTab(this.value)"></div>
             <div class="input-group">
                 <label>発注者名</label>
                 <input type="text" name="dept_name" placeholder="例：鹿児島県"
                     oninput="syncDeptName(this.value)">
-            </div>
-        </div>
-    </div>
-
-    <!-- 管理項目の参照ボタン用モーダル（4択・左揃え） -->
-    <div id="modal-reference-choice" class="custom-modal-overlay">
-        <div class="custom-modal-box">
-            <div class="custom-modal-title">災害番号・発注者名・被災日・整理番号を引用</div>
-            <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
-                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromDefaults()">① 保存済みの初期値を引用</button>
-                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromLastSite()">② 最後の現場を引用</button>
-                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.openSitePickModal()">③ 他の現場を指定して引用</button>
-                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.closeReferenceModal()">④ キャンセル</button>
-            </div>
-        </div>
-    </div>
-    <!-- ③で使う、現場を選ぶモーダル -->
-    <div id="modal-reference-site-pick" class="custom-modal-overlay">
-        <div class="custom-modal-box">
-            <div class="custom-modal-title">現場を選択</div>
-            <div id="reference-site-pick-list" style="max-height:300px; overflow-y:auto; margin-top:10px;"></div>
-            <div class="custom-modal-actions">
-                <button type="button" class="btn-sub" onclick="siteManager.closeSitePickModal()">戻る</button>
             </div>
         </div>
     </div>
@@ -497,7 +472,16 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
-            <!-- 発注者名は管理タブで入力。値があるときのみ表示（readonly）。 -->
+            <!-- 【Phase 6.38】整理番号・調査日・災害番号を管理タブ（旧・管理項目→共通項目）から移設。
+                 現場ごとに異なる項目のため、諸元側に置く。id="default-date"（新規現場作成時の
+                 当日日付自動入力）・oninput="syncDisasterNoTab(...)"（災害番号タブへの同期表示）は
+                 従来どおり維持している。 -->
+            <button type="button" class="btn-sub" style="margin-bottom:10px; background:#8e44ad;"
+                onclick="siteManager.openReferenceModal()">📋 他の現場から引用</button>
+            <div class="input-group"><label>整理番号</label><input type="text" name="ref_no"></div>
+            <div class="input-group"><label>調査日</label><input type="date" name="survey_date" id="default-date"></div>
+            <div class="input-group"><label>災害番号</label><input type="text" name="disaster_no" oninput="syncDisasterNoTab(this.value)"></div>
+            <!-- 発注者名は管理タブ（共通項目）で入力。値があるときのみ表示（readonly）。 -->
             <div class="input-group" id="dept-name-display" style="display:none;">
                 <label>発注者名 <span style="font-size:0.7rem; color:#aaa;">※管理タブで設定</span></label>
                 <input type="text" id="dept-name-readonly" readonly
@@ -505,6 +489,30 @@ canvas.sketch-canvas { display: block; width: 100%; }
             </div>
             <div class="input-group"><label>被災場所</label><input type="text" name="loc_name" placeholder="住所等"></div>
             <div class="input-group"><label>路線・河川名等</label><input type="text" name="route_name"></div>
+        </div>
+    </div>
+
+    <!-- 諸元の参照ボタン用モーダル（Phase 6.38：管理タブ「共通項目」から移設。
+         引き継ぐ項目を整理番号・調査日・災害番号の3項目に変更した。） -->
+    <div id="modal-reference-choice" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">整理番号・調査日・災害番号を引用</div>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromDefaults()">① 保存済みの初期値を引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromLastSite()">② 最後の現場を引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.openSitePickModal()">③ 他の現場を指定して引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.closeReferenceModal()">④ キャンセル</button>
+            </div>
+        </div>
+    </div>
+    <!-- ③で使う、現場を選ぶモーダル -->
+    <div id="modal-reference-site-pick" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <div class="custom-modal-title">現場を選択</div>
+            <div id="reference-site-pick-list" style="max-height:300px; overflow-y:auto; margin-top:10px;"></div>
+            <div class="custom-modal-actions">
+                <button type="button" class="btn-sub" onclick="siteManager.closeSitePickModal()">戻る</button>
+            </div>
         </div>
     </div>
 
@@ -685,12 +693,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.37</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.38</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.37</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.38</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -709,8 +717,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.37)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.37（KML参考表示に「KMLへ移動」ボタンを追加。あわせて、KMLの範囲取得(fitBounds)が実は常に失敗していたバグを修正）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.38)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.38（管理タブ「管理項目」を「共通項目」に改名して会社ID・調査班長名・発注者名の3項目に縮小し、整理番号・調査日・災害番号と「他の現場から引用」機能を現地調査タブ「諸元」へ移設）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -742,16 +750,16 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>index.html.template</code></td><td>App A 骨格</td><td>3セクション構成：content-manage / content-app / content-dev</td></tr>
             <tr><td><code>style.css</code></td><td>共通スタイル</td><td>【Phase 6.30更新】#map-draw-barをrow1(ツール)/row2(完了等・空き行)に分割し、アイコンをzoomで1.5倍化。【Phase 6.26更新】#map-draw-bar（地図枠外の描画バー）の指定を追加。CSS変数、アコーディオン、地図UI、スケッチUI、モード切替ボタン、フルスクリーンを定義</td></tr>
             <tr><td><code>header.html</code></td><td>共通ヘッダー</td><td>3タブ（管理・現地調査・開発）＋⛶フルスクリーンボタン＋現地調査タブに災害番号を2段組みで表示</td></tr>
-            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.22更新】現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力（チェックした現場が対象）の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・管理項目（発注者名含む・参照モーダル左揃え）・調査を実施した者（端末固定）・設定（上から順に、出力ファイル名構成=初期は調査日・災害番号・なし・なし・なし／写真の出力横幅=初期1200px・強制4:3／まとめてZIP化／地図キャッシュを開放する。見出し横の補足表記は無し）・初期値の設定（旧・入出力データ設定。初期値として保存／クリア2種／初期値の読み込み／今の初期値（保存済み）の一覧表示。見出し横の補足表記は無し）</td></tr>
+            <tr><td><code>manage.html</code></td><td>管理タブUI</td><td>【Phase 6.38更新】5.45参照（旧・管理項目パネルを「共通項目」に改名し、会社ID・調査班長名・発注者名の3項目のみに縮小。整理番号・調査日・災害番号と「他の現場から引用」ボタン・参照モーダルは諸元（introduction.html）へ移設）。現場管理（新規現場作成／JZIP読込／JZIP出力／CSV出力（チェックした現場が対象）の1列ボタン＋JZIP出力対象選択と現場切替/編集/削除を統合したGridレイアウトの現場一覧。見出し横の補足表記・リスト上部の注記は無し。全選択チェックは初期OFF）・調査を実施した者（端末固定）・設定（上から順に、出力ファイル名構成=初期は調査日・災害番号・なし・なし・なし／写真の出力横幅=初期1200px・強制4:3／まとめてZIP化／地図キャッシュを開放する。見出し横の補足表記は無し）・初期値の設定（旧・入出力データ設定。初期値として保存／クリア2種／初期値の読み込み／今の初期値（保存済み）の一覧表示。見出し横の補足表記は無し）</td></tr>
             <tr><td><code>dev.html</code></td><td>開発タブUI</td><td>アプリ更新・開発ログ（spec.html埋め込み）・アプリ化の手順（install_guide.html埋め込み）</td></tr>
             <tr><td><code>spec.html</code></td><td>開発仕様書</td><td>本ファイル（開発タブの「開発ログ」に埋め込み）</td></tr>
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
             <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>【Phase 6.33更新】5.43参照（背景画像機能を追加。setBackgroundFromFile／clearBackground／drawBackground。LocalStorage・IndexedDBには保存しない）。【Phase 6.27更新】ペン色を12色プルダウン(#sketch-color-select)で選択（setColorがプルダウンと同期。start()でプルダウン値とペン色の食い違いを解消）。Canvas描画（ペン/直線/文字/編集/Undo）</td></tr>
-            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.37更新】5.44のKMLボタン行に「KMLへ移動」を追加、文言を「KML背景表示」「KMLへ移動」「背景KML削除」に統一。【Phase 6.36更新】5.44のKMLボタンの文言を指定通り「KMLを背景表示」「背景KMLを消す」に修正。【Phase 6.35更新】5.44のKMLボタンの文言を「調査範囲」限定の表現から中立的な表現に修正（一旦「KMLを読込（参考表示）」「KML表示を消す」としていたが、6.36でさらに指定の文言へ修正）。【Phase 6.34更新】地図コントロール（現在地／地図を写真に保存／全て消去）の下に、KML読込用の非表示file input（map-kml-input）とKML読込／消去ボタンの行を追加。【Phase 6.33更新】白紙メモのツールバーに「背景」ボタン群（📷背景・📁背景・🗑背景）と、そのための非表示file input（sketch-bg-camera-input／sketch-bg-file-input）を追加。【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
+            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.38更新】5.45参照（諸元アコーディオンの先頭に整理番号・調査日（id="default-date"）・災害番号（oninput="syncDisasterNoTab"）を管理タブから移設。あわせて「📋 他現場から引用」ボタンと参照モーダル一式（同じ要素IDのまま）を管理タブから移設し、引き継ぐ項目を整理番号・調査日・災害番号の3項目に変更）。【Phase 6.37更新】5.44のKMLボタン行に「KMLへ移動」を追加、文言を「KML背景表示」「KMLへ移動」「背景KML削除」に統一。【Phase 6.36更新】5.44のKMLボタンの文言を指定通り「KMLを背景表示」「背景KMLを消す」に修正。【Phase 6.35更新】5.44のKMLボタンの文言を「調査範囲」限定の表現から中立的な表現に修正（一旦「KMLを読込（参考表示）」「KML表示を消す」としていたが、6.36でさらに指定の文言へ修正）。【Phase 6.34更新】地図コントロール（現在地／地図を写真に保存／全て消去）の下に、KML読込用の非表示file input（map-kml-input）とKML読込／消去ボタンの行を追加。【Phase 6.33更新】白紙メモのツールバーに「背景」ボタン群（📷背景・📁背景・🗑背景）と、そのための非表示file input（sketch-bg-camera-input／sketch-bg-file-input）を追加。【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
             <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.37更新】5.44参照（「KMLへ移動」(zoomToKml)を追加。KMLレイヤーの生成をL.layerGroupからL.featureGroupに変更し、getBounds()が無く範囲取得(fitBounds)が常に失敗していたバグを修正）。【Phase 6.35更新】5.44のトースト文言を用途限定しない表現に修正。【Phase 6.34更新】5.44参照（任意のKMLを参考レイヤとして読込表示。用途は限定しない。loadKmlFile／_buildKmlLayer／clearKml。allDrawnItemsとは別レイヤーで保存・地図の写真保存の対象外）。【Phase 6.32更新】5.42参照（編集中の要素を単体削除する「単要素削除」ボタンを追加）。【Phase 6.31更新】5.41参照（編集を「選択してから編集」の3段階に変更・範囲(Polygon)の途中完了を修正）。【Phase 6.30更新】5.40参照（操作パネルを地図下へ・アイコン1.5倍・編集のメイン/サブ分離・連続線修正・点の現在地/画面タップ選択）。【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>【Phase 6.29更新】photoApp.recordAzimuth()を、値が届くまで最大4秒待つ作りに変更（azimuthManager.waitForAzimuth追加）。5.39参照。【Phase 6.28更新】写真アコーディオンを開いたときのGPS・方位センサー起動フックを、白紙メモと同じ「少し待ってから開いている状態を見る」作りに修正（5.38参照）。photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.38更新】5.45参照（諸元へ移設した参照ボタンに合わせ、applyReferenceFromDefaults／_applyReferenceFromSiteRecord／_applyReferenceFieldsの引き継ぎ項目をdisaster_no・ref_no・survey_dateに変更（dept_name・damage_dateは除外）。loadDefaultsの反映対象にdept_nameを追加し、「初期値の読み込み」で発注者名も反映されるよう修正）。【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
@@ -763,8 +771,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <h3>4. タブ構成</h3>
         <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
             <tr style="background:#eee;"><th>タブ</th><th>section ID</th><th>内容</th><th>ソースファイル</th></tr>
-            <tr><td>管理</td><td>content-manage</td><td>現場管理・管理項目・調査を実施した者・設定・初期値の設定</td><td>manage.html</td></tr>
-            <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元・被災状況・被災拡大・特記事項・写真・保存</td><td>introduction.html</td></tr>
+            <tr><td>管理</td><td>content-manage</td><td>現場管理・共通項目（Phase 6.38：旧・管理項目）・調査を実施した者・設定・初期値の設定</td><td>manage.html</td></tr>
+            <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元（Phase 6.38：整理番号・調査日・災害番号を含む）・被災状況・被災拡大・特記事項・写真・保存</td><td>introduction.html</td></tr>
             <tr><td>開発</td><td>content-dev</td><td>アプリ更新・開発ログ・アプリ化の手順</td><td>dev.html（spec.html・install_guide.htmlを内包）</td></tr>
         </table>
     </div>
@@ -1345,6 +1353,32 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>実機確認が必要な点:</strong> 実際のKML（用途を問わず）を読み込んだ際の見え方・ファイルサイズが大きい場合の読み込み速度、地図タップ（作図・マーカー配置等）が参考レイヤに邪魔されないか。</li>
         </ul>
 
+        <h4>5.45 管理タブと諸元の項目再編：共通項目（管理タブ）／諸元（現地調査タブ）への分割（Phase 6.38）</h4>
+        <ul>
+            <li><strong>背景（相談内容）:</strong> 管理タブ「管理項目」パネルには、現場が変わっても値が同じ「端末・会社に紐づく項目」（会社ID・調査班長名・発注者名）と、現場ごとに異なる「現場個別の項目」（整理番号・調査日・災害番号）が混在していた。現地調査タブ「諸元」には被災場所・路線・河川名等という現場個別の項目があり、性質としてはそちらに近い。この2種類を分けたい、という相談があった。</li>
+            <li><strong>結論（相談の上で決定）:</strong>
+                <ul>
+                    <li>管理タブの当該パネルは「共通項目」に改名。中身は会社ID・調査班長名・発注者名の3項目のみとし、整理番号・調査日・災害番号は現地調査タブ「諸元」へ移設した。</li>
+                    <li>共通項目パネルからは「📋 他の現場から引用」ボタンと、それに付随する2つのモーダル（現場を選ぶモーダル含む）を撤去した。共通項目の3項目は、現場が変わっても値を使い回す性質のものであり、「他の現場から引用」のような現場単位のコピーではなく、既存の「初期値の設定」（初期値として保存／初期値の読み込み）で使い回す運用とした。</li>
+                    <li>諸元パネルには、移設した整理番号・調査日・災害番号を（この順で）先頭に追加し、既存の被災場所・路線・河川名等はその後ろに残した。あわせて「📋 他の現場から引用」ボタンとモーダル一式（同じ要素IDのまま）を諸元側へ移設し、引き継ぐ項目を整理番号・調査日・災害番号の3項目に絞った（発注者名は共通項目パネルの管轄になったため対象外、被災日は別パネル「被災状況」の項目のため対象外）。</li>
+                    <li>調査日の相談時のコメント：「諸元のほうは、書き換えるんだけど、１つ前の現場の数字に１を足すとか、流用する感じが多いと思う」とのことで、これは②「最後の現場を引用」のような素の値コピーを諸元側に残す理由の説明であり、自動採番（＋1する機能）を追加する話ではない。今回もそのような自動採番は実装していない。</li>
+                </ul>
+            </li>
+            <li><strong>manage.htmlの変更点:</strong> <code>data-group="num-mgmt"</code>アコーディオンの見出しを「管理項目」→「共通項目」に改名。整理番号・調査日（<code>id="default-date"</code>）・災害番号（<code>oninput="syncDisasterNoTab(...)"</code>）の3つの<code>input-group</code>を削除し、会社ID・調査班長名・発注者名の3項目のみを残した。「📋 他の現場から引用」ボタン、<code>#modal-reference-choice</code>・<code>#modal-reference-site-pick</code>を削除した。</li>
+            <li><strong>introduction.htmlの変更点:</strong> 「諸元」（<code>data-group="base-info"</code>）アコーディオンの先頭に、「📋 他現場から引用」ボタンと、整理番号・調査日（<code>id="default-date"</code>を維持）・災害番号（<code>oninput="syncDisasterNoTab(...)"</code>を維持）を追加し、既存の発注者名（readonly表示）・被災場所・路線・河川名等はその後ろに残した。移設した<code>#modal-reference-choice</code>・<code>#modal-reference-site-pick</code>（要素IDは維持）も同じアコーディオン内に追加し、モーダルのタイトルを「整理番号・調査日・災害番号を引用」に変更した。</li>
+            <li><strong>3_script_main.jsの変更点:</strong>
+                <ul>
+                    <li><code>applyReferenceFromDefaults()</code>（①保存済みの初期値を引用）：引き継ぐ項目を<code>disaster_no</code>のみに変更した。<code>dept_name</code>は共通項目パネルの管轄になったため除外。<code>ref_no</code>・<code>survey_date</code>は現場ごとに異なる値のため、そもそも<code>saveDefaults()</code>で初期値として保存していない（従来からの仕様）ので、①では引用できない。</li>
+                    <li><code>_applyReferenceFromSiteRecord()</code>（②最後の現場を引用／③他の現場を指定して引用の実処理）：引き継ぐ項目を<code>disaster_no</code>・<code>ref_no</code>・<code>survey_date</code>の3項目に変更した（従来の<code>dept_name</code>・<code>damage_date</code>は除外）。</li>
+                    <li><code>_applyReferenceFields()</code>：<code>dept_name</code>を渡さなくなったため、発注者名の同期表示呼び出し（<code>window.syncDeptName</code>）を削除した。災害番号の同期表示（<code>window.syncDisasterNoTab</code>）はそのまま維持。</li>
+                    <li><code>loadDefaults()</code>（初期値の読み込み）：反映対象フィールドに<code>dept_name</code>を追加した。従来は<code>saveDefaults()</code>で発注者名を初期値として保存はしていたが、<code>loadDefaults()</code>側の反映対象に含まれておらず、「初期値の読み込み」ボタンを押しても発注者名は画面に反映されていなかった（気づかれにくい既存の抜け）。共通項目パネルが「他の現場から引用」を撤去し「初期値の設定」だけで運用する方針になったことで、この抜けを塞ぐ必要が生じたため、あわせて修正した。</li>
+                    <li><code>_resetSiteInputs()</code>（新規現場作成・現場削除時のリセット対象）・<code>saveDefaults()</code>（初期値として保存する項目一覧）・<code>renderDefaultsView()</code>（今の初期値の一覧表示）は、いずれも<code>data-group</code>やフィールドの<code>name</code>属性を基準にした汎用実装のため、今回のHTML側の項目移設だけでは変更が不要であることを確認した。</li>
+                </ul>
+            </li>
+            <li><strong>影響しない点:</strong> <code>getFormData()</code>はアコーディオン内の<code>name</code>属性付き入力欄を横断的に拾う実装のため、整理番号・調査日・災害番号がどちらのHTMLファイルにあっても、保存されるデータ（JZIP・現場データ）の構造は変わらない。<code>promptCreateSite()</code>の新規現場作成時の当日日付自動入力（<code>#default-date</code>）、<code>syncDisasterNoTab</code>による災害番号タブへの同期表示も、要素IDとoninputをそのまま維持したため影響を受けない。</li>
+            <li><strong>実機確認が必要な点:</strong> 共通項目パネル（会社ID・調査班長名・発注者名）の値が「初期値として保存」→「初期値の読み込み」で正しく画面に反映されること（発注者名を含む）。諸元パネルの「他現場から引用」①②③がそれぞれ整理番号・調査日・災害番号の3項目のみを対象に正しく引用されること。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -1412,7 +1446,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>【Phase 6.31完了・実機確認待ち】</strong>位置図の「編集」を「①編集ボタン→②要素を選択→③編集開始」の3段階の流れに変更。範囲(Polygon)がダブルタップ・始点タップで完了してしまう不具合を修正。詳細は5.41参照。</li>
             <li><strong>【Phase 6.32完了・実機確認待ち】</strong>位置図の編集フローに、選択中の1要素だけを削除する「単要素削除」ボタンを追加。詳細は5.42参照。</li>
             <li><strong>【Phase 6.33完了・実機確認待ち】</strong>白紙メモに、撮影した地図・現場写真を下敷きにできる「背景」機能を追加（保存はせず、その場限りの下敷き）。詳細は5.43参照。</li>
-            <li><strong>【Phase 6.34完了・Phase 6.35で文言修正・実機確認待ち】</strong>メイン位置図に、KMLを読み込んで参考表示する機能を追加（用途は限定しない。見るだけの参考レイヤ、保存はせず、地図の写真保存には出てこない）。詳細は5.44参照。</li>
+            <li><strong>【Phase 6.34完了・Phase 6.35で文言修正・Phase 6.37でバグ修正・実機確認待ち】</strong>メイン位置図に、KMLを読み込んで参考表示する機能を追加（用途は限定しない。見るだけの参考レイヤ、保存はせず、地図の写真保存には出てこない）。「KMLへ移動」ボタンも追加。詳細は5.44参照。</li>
+            <li><strong>【Phase 6.38完了・実機確認待ち】</strong>管理タブ「管理項目」を「共通項目」に改名し、会社ID・調査班長名・発注者名の3項目のみに縮小。整理番号・調査日・災害番号と「他の現場から引用」ボタン・参照モーダルは現地調査タブ「諸元」へ移設し、引き継ぐ項目も整理番号・調査日・災害番号の3項目に変更。あわせて「初期値の読み込み」が発注者名を反映していなかった抜けも修正。詳細は5.45参照。</li>
             <li><strong>【AppB確認待ち】</strong>一括ZIP（外側ZIPの中に現場ごとのフォルダ）をAppBが読み込めるか。読めない場合は、AppB側の改修か、AppA側を「個別ZIP」運用に絞るかの判断が必要（8.2・8.3参照）。</li>
             <li><strong>【Phase 6.21完了】保存済みの初期値の閲覧UI:</strong> 「初期値の設定」アコーディオン内、「初期値の読み込み」ボタンの下に、保存済みの初期値の一覧表示欄を追加（5.32参照）。管理タブの項目整理（ファイル名構成・地図キャッシュ開放を「設定」へ移動、「入出力データ設定」を「初期値の設定」に改名）もあわせて実施。実機での見え方の確認が必要。</li>
         </ul>
@@ -6932,8 +6967,10 @@ window.siteManager = {
         window.uiHelper && uiHelper.showToast('現場を削除しました');
     },
 
-    // ---- 段階3：管理項目の参照ボタン（設計は7.1参照） ----
-    // 引き継ぐ項目は災害番号・発注者名・被災日・整理番号の4項目。
+    // ---- 段階3：諸元の参照ボタン（設計は7.1参照） ----
+    // 【Phase 6.38】このボタン・モーダルは管理タブ「共通項目」（旧・管理項目）から
+    // 現地調査タブ「諸元」へ移設した。あわせて引き継ぐ項目を、諸元に実在する
+    // 整理番号・調査日・災害番号の3項目に変更した（発注者名・被災日は諸元の項目ではないため対象外）。
     // 整理番号は空欄にせず参照元の値をそのまま引き継ぐ（Phase 5.92確定）。
     // 引き継いだ項目は、値を実際に書き換えるまで.ref-highlightクラスで目立つ色にする。
 
@@ -6970,12 +7007,15 @@ window.siteManager = {
     },
 
     // ①保存済みの初期値を引用
+    // 【Phase 6.38】初期値（survey_app_defaults）にはdisaster_noのみ保存されている
+    // （dept_nameは共通項目パネルが「初期値の設定」で別途扱うため対象外。ref_no・survey_dateは
+    // 現場ごとに異なる値のため、そもそも初期値として保存していない＝この①では引用できない）。
     applyReferenceFromDefaults() {
         const raw = localStorage.getItem('survey_app_defaults');
         if (!raw) { alert('初期値が保存されていません'); return; }
         let d;
         try { d = JSON.parse(raw); } catch(e) { return; }
-        this._applyReferenceFields({ disaster_no: d.disaster_no, dept_name: d.dept_name, damage_date: d.damage_date });
+        this._applyReferenceFields({ disaster_no: d.disaster_no });
     },
     // ②最後の現場を引用
     applyReferenceFromLastSite() {
@@ -6993,8 +7033,7 @@ window.siteManager = {
     _applyReferenceFromSiteRecord(site) {
         const d = site.formData || {};
         this._applyReferenceFields({
-            disaster_no: d.disaster_no, dept_name: d.dept_name,
-            damage_date: d.damage_date, ref_no: d.ref_no
+            disaster_no: d.disaster_no, ref_no: d.ref_no, survey_date: d.survey_date
         });
     },
     // 実際にフィールドへ値を入れて、ハイライトを付ける（inputイベントは発火させない。
@@ -7008,8 +7047,7 @@ window.siteManager = {
             el.value = val;
             el.classList.add('ref-highlight');
         });
-        // 発注者名・災害番号の同期表示は個別に呼ぶ（上記の理由でinputイベント経由にしない）
-        if (fields.dept_name !== undefined && window.syncDeptName) window.syncDeptName(fields.dept_name);
+        // 災害番号の同期表示は個別に呼ぶ（上記の理由でinputイベント経由にしない）
         if (fields.disaster_no !== undefined && window.syncDisasterNoTab) window.syncDisasterNoTab(fields.disaster_no);
         window.storageManager && window.storageManager.save();
         this.closeReferenceModal();
@@ -7571,7 +7609,11 @@ window.appControl = {
             const jsonStr = localStorage.getItem(DEFAULTS_KEY);
             if (!jsonStr) return;
             const d = JSON.parse(jsonStr);
-            ['company_id','leader_name','company_name','tel','fax','person_name','email'].forEach(k => {
+            // 【Phase 6.38】dept_name（発注者名）を追加。共通項目パネルから「他の現場から引用」
+            // ボタンを撤去し「初期値の設定」だけで運用する方針になったため、初期値の読み込みでも
+            // dept_nameを実際にフォームへ反映させる必要がある（従来はsaveDefaultsで保存だけされ、
+            // このloadDefaultsでは反映されていなかった）。
+            ['company_id','leader_name','company_name','tel','fax','person_name','email','dept_name'].forEach(k => {
                 if (d[k] !== undefined) {
                     const el = document.querySelector(`[name="${k}"]`);
                     if (el) { el.value = d[k]; el.dispatchEvent(new Event('input')); }
