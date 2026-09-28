@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>被災状況調査アプリ (Phase 6.38)</title>
+    <title>被災状況調査アプリ (Phase 6.39)</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -493,15 +493,16 @@ canvas.sketch-canvas { display: block; width: 100%; }
     </div>
 
     <!-- 諸元の参照ボタン用モーダル（Phase 6.38：管理タブ「共通項目」から移設。
-         引き継ぐ項目を整理番号・調査日・災害番号の3項目に変更した。） -->
+         Phase 6.39：引き継ぐ項目を整理番号・調査日・災害番号・被災場所・路線河川名等の5項目に拡大。
+         これらはいずれも現場ごとに異なる値で「保存済みの初期値」という概念が無いため、
+         旧①「保存済みの初期値を引用」は撤去し、②③のみの2択にした。） -->
     <div id="modal-reference-choice" class="custom-modal-overlay">
         <div class="custom-modal-box">
-            <div class="custom-modal-title">整理番号・調査日・災害番号を引用</div>
+            <div class="custom-modal-title">整理番号・調査日・災害番号・被災場所・路線河川名等を引用</div>
             <div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;">
-                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromDefaults()">① 保存済みの初期値を引用</button>
-                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromLastSite()">② 最後の現場を引用</button>
-                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.openSitePickModal()">③ 他の現場を指定して引用</button>
-                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.closeReferenceModal()">④ キャンセル</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.applyReferenceFromLastSite()">① 最後の現場を引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.openSitePickModal()">② 他の現場を指定して引用</button>
+                <button type="button" class="btn-sub" style="text-align:left;" onclick="siteManager.closeReferenceModal()">③ キャンセル</button>
             </div>
         </div>
     </div>
@@ -672,7 +673,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         </div>
     </div>
 
-    <!-- 保存（Phase 6.16：現場データの上書き保存・別名保存。JZIPの入出力は現場管理タブへ移動） -->
+    <!-- 保存（Phase 6.16：現場データの上書き保存・別名保存。JZIPの入出力は現場管理タブへ移動。
+         Phase 6.39：CSV出力は管理タブ「現場管理」に既にあるため、ここの「日報用CSVエクスポート」は重複として削除） -->
     <div class="accordion-item" data-group="io-area">
         <button class="accordion-header">
             <div class="header-label"><span class="main-title">保存</span><span class="summary-text filled" id="save-status-summary">保存済み</span></div>
@@ -680,9 +682,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
         </button>
         <div class="accordion-content">
             <button type="button" class="btn-main" style="margin-bottom:8px;" onclick="siteManager.overwriteSave()">上書き保存</button>
-            <button type="button" class="btn-sub" style="margin-bottom:10px;" onclick="siteManager.saveAsNew()">別名保存</button>
-            <hr style="margin: 15px 0;">
-            <button type="button" class="btn-sub" onclick="appControl.exportCSV()">日報用CSVエクスポート（写真なし）</button>
+            <button type="button" class="btn-sub" onclick="siteManager.saveAsNew()">別名保存</button>
         </div>
     </div>
 </div>
@@ -693,12 +693,12 @@ canvas.sketch-canvas { display: block; width: 100%; }
     <!-- アプリ更新 -->
     <div class="accordion-item" data-group="app-update">
         <button class="accordion-header">
-            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.38</span></div>
+            <div class="header-label"><span class="main-title">アプリ更新</span><span class="summary-text" id="current-version-display">Phase 6.39</span></div>
             <span class="icon">+</span>
         </button>
         <div class="accordion-content">
             <div style="padding: 10px; background: #e8f6f3; border: 1px solid #a2d9ce; border-radius: 4px;">
-                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.38</strong></p>
+                <p style="margin:0 0 10px 0; font-size:0.9rem;">現在のバージョン: <strong>Phase 6.39</strong></p>
                 <div style="display:flex; align-items:center; gap:10px;">
                     <button id="update-app-btn" type="button" class="btn-main" style="width:auto; padding:8px 16px;"
                         onclick="appControl.checkForUpdate()">更新を確認する</button>
@@ -717,8 +717,8 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <div class="accordion-content" style="padding:10px; overflow:hidden;">
             <div class="spec-container" style="padding: 10px; color: #333; font-size: 0.9rem;">
     <div class="spec-header" style="border-bottom: 2px solid #333; margin-bottom: 20px; padding-bottom: 10px;">
-        <h2>被災状況調査システム 開発仕様書 (Phase 6.38)</h2>
-        <p><strong>Last Updated:</strong> Phase 6.38（管理タブ「管理項目」を「共通項目」に改名して会社ID・調査班長名・発注者名の3項目に縮小し、整理番号・調査日・災害番号と「他の現場から引用」機能を現地調査タブ「諸元」へ移設）</p>
+        <h2>被災状況調査システム 開発仕様書 (Phase 6.39)</h2>
+        <p><strong>Last Updated:</strong> Phase 6.39（諸元「他の現場から引用」の引き継ぎ項目に被災場所・路線河川名等を追加し5項目に。現場ごとに異なる値のみのため①「保存済みの初期値を引用」は撤去。現地調査タブ「保存」の日報用CSVエクスポート（管理タブと重複）を削除）</p>
         <p><strong>Status:</strong> App A β版運用中</p>
     </div>
 
@@ -756,10 +756,10 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <tr><td><code>install_guide.html</code></td><td>インストール手順</td><td>iPhone/Android向けPWA追加手順・統合管理版DLリンク（β版リポジトリ）</td></tr>
             <tr><td><code>jzip_spec.html</code></td><td>JZIP連携仕様書</td><td>AppAとAppBの連携仕様を定義する共通ドキュメント。build.jsには組み込まない。両スレッドに毎回渡す。</td></tr>
             <tr><td><code>1_script_sketch.js</code></td><td>白紙メモ</td><td>【Phase 6.33更新】5.43参照（背景画像機能を追加。setBackgroundFromFile／clearBackground／drawBackground。LocalStorage・IndexedDBには保存しない）。【Phase 6.27更新】ペン色を12色プルダウン(#sketch-color-select)で選択（setColorがプルダウンと同期。start()でプルダウン値とペン色の食い違いを解消）。Canvas描画（ペン/直線/文字/編集/Undo）</td></tr>
-            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.38更新】5.45参照（諸元アコーディオンの先頭に整理番号・調査日（id="default-date"）・災害番号（oninput="syncDisasterNoTab"）を管理タブから移設。あわせて「📋 他現場から引用」ボタンと参照モーダル一式（同じ要素IDのまま）を管理タブから移設し、引き継ぐ項目を整理番号・調査日・災害番号の3項目に変更）。【Phase 6.37更新】5.44のKMLボタン行に「KMLへ移動」を追加、文言を「KML背景表示」「KMLへ移動」「背景KML削除」に統一。【Phase 6.36更新】5.44のKMLボタンの文言を指定通り「KMLを背景表示」「背景KMLを消す」に修正。【Phase 6.35更新】5.44のKMLボタンの文言を「調査範囲」限定の表現から中立的な表現に修正（一旦「KMLを読込（参考表示）」「KML表示を消す」としていたが、6.36でさらに指定の文言へ修正）。【Phase 6.34更新】地図コントロール（現在地／地図を写真に保存／全て消去）の下に、KML読込用の非表示file input（map-kml-input）とKML読込／消去ボタンの行を追加。【Phase 6.33更新】白紙メモのツールバーに「背景」ボタン群（📷背景・📁背景・🗑背景）と、そのための非表示file input（sketch-bg-camera-input／sketch-bg-file-input）を追加。【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
+            <tr><td><code>introduction.html</code></td><td>現地調査タブUI</td><td>【Phase 6.39更新】5.46参照（諸元「他の現場から引用」モーダルの選択肢を、①保存済みの初期値を引用を撤去した2択（①最後の現場を引用／②他の現場を指定して引用）に変更。モーダルタイトルを「整理番号・調査日・災害番号・被災場所・路線河川名等を引用」に更新。「保存」アコーディオンの「日報用CSVエクスポート」ボタンを削除（管理タブのCSV出力と重複のため））。【Phase 6.38更新】5.45参照（諸元アコーディオンの先頭に整理番号・調査日（id="default-date"）・災害番号（oninput="syncDisasterNoTab"）を管理タブから移設。あわせて「📋 他現場から引用」ボタンと参照モーダル一式（同じ要素IDのまま）を管理タブから移設し、引き継ぐ項目を整理番号・調査日・災害番号の3項目に変更）。【Phase 6.37更新】5.44のKMLボタン行に「KMLへ移動」を追加、文言を「KML背景表示」「KMLへ移動」「背景KML削除」に統一。【Phase 6.36更新】5.44のKMLボタンの文言を指定通り「KMLを背景表示」「背景KMLを消す」に修正。【Phase 6.35更新】5.44のKMLボタンの文言を「調査範囲」限定の表現から中立的な表現に修正（一旦「KMLを読込（参考表示）」「KML表示を消す」としていたが、6.36でさらに指定の文言へ修正）。【Phase 6.34更新】地図コントロール（現在地／地図を写真に保存／全て消去）の下に、KML読込用の非表示file input（map-kml-input）とKML読込／消去ボタンの行を追加。【Phase 6.33更新】白紙メモのツールバーに「背景」ボタン群（📷背景・📁背景・🗑背景）と、そのための非表示file input（sketch-bg-camera-input／sketch-bg-file-input）を追加。【Phase 6.27更新】白紙メモの色ボタン3つを12色プルダウンに置換。位置図（3モード＋白紙メモ）・諸元・被災状況・被災拡大・特記事項・写真・保存（上書き保存／別名保存）</td></tr>
             <tr><td><code>1_script_map.js</code></td><td>地図管理</td><td>【Phase 6.37更新】5.44参照（「KMLへ移動」(zoomToKml)を追加。KMLレイヤーの生成をL.layerGroupからL.featureGroupに変更し、getBounds()が無く範囲取得(fitBounds)が常に失敗していたバグを修正）。【Phase 6.35更新】5.44のトースト文言を用途限定しない表現に修正。【Phase 6.34更新】5.44参照（任意のKMLを参考レイヤとして読込表示。用途は限定しない。loadKmlFile／_buildKmlLayer／clearKml。allDrawnItemsとは別レイヤーで保存・地図の写真保存の対象外）。【Phase 6.32更新】5.42参照（編集中の要素を単体削除する「単要素削除」ボタンを追加）。【Phase 6.31更新】5.41参照（編集を「選択してから編集」の3段階に変更・範囲(Polygon)の途中完了を修正）。【Phase 6.30更新】5.40参照（操作パネルを地図下へ・アイコン1.5倍・編集のメイン/サブ分離・連続線修正・点の現在地/画面タップ選択）。【Phase 6.26更新】描画ツールバーを地図枠外の上部バー(#map-draw-bar)へ移すmapApp._moveDrawControlOutside()を追加。【Phase 6.24更新】Leaflet初期化・描画・モード切替・地図画像化・GPS修正モード。maxZoom:25（オーバーズーム対応）。中心の十字線（_addCrosshair）・メイン〇のマーク（createMainMark。ピクセル指定のL.circleMarker。サイズ定数MAIN_MARK_RADIUS_PX／MAIN_MARK_WEIGHT）</td></tr>
             <tr><td><code>2_script_photo.js</code></td><td>写真管理・センサー</td><td>【Phase 6.29更新】photoApp.recordAzimuth()を、値が届くまで最大4秒待つ作りに変更（azimuthManager.waitForAzimuth追加）。5.39参照。【Phase 6.28更新】写真アコーディオンを開いたときのGPS・方位センサー起動フックを、白紙メモと同じ「少し待ってから開いている状態を見る」作りに修正（5.38参照）。photoStorage(IndexedDB) + gpsManager + azimuthManager + photoApp（GPS修正フロー含む）</td></tr>
-            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.38更新】5.45参照（諸元へ移設した参照ボタンに合わせ、applyReferenceFromDefaults／_applyReferenceFromSiteRecord／_applyReferenceFieldsの引き継ぎ項目をdisaster_no・ref_no・survey_dateに変更（dept_name・damage_dateは除外）。loadDefaultsの反映対象にdept_nameを追加し、「初期値の読み込み」で発注者名も反映されるよう修正）。【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
+            <tr><td><code>3_script_main.js</code></td><td>制御・入出力</td><td>【Phase 6.39更新】5.46参照（諸元の参照ボタンの引き継ぎ項目にloc_name・route_nameを追加。applyReferenceFromDefaults（①保存済みの初期値を引用）は、対象項目がいずれも現場ごとに異なる値のため意味を成さなくなり削除。呼び出し元のUIボタンも削除）。【Phase 6.38更新】5.45参照（諸元へ移設した参照ボタンに合わせ、applyReferenceFromDefaults／_applyReferenceFromSiteRecord／_applyReferenceFieldsの引き継ぎ項目をdisaster_no・ref_no・survey_dateに変更（dept_name・damage_dateは除外）。loadDefaultsの反映対象にdept_nameを追加し、「初期値の読み込み」で発注者名も反映されるよう修正）。【Phase 6.27更新】renderDefaultsViewの「被災日」行を「調査日（新規作成時：当日の日付を自動入力）」行に置換。【Phase 6.25更新】UIヘルパー・オートセーブ・JZIP入出力（EXIF書き込み含む）・CSV出力（exportCSV／_csvRow／_coordsFromMainGeom／_downloadCSV。チェックした現場の保存済みデータから1現場1行）・siteManager（promptCreateSiteは保存確認→現場名入力の順・confirmAndProceedは未保存の変更がある場合のみモーダル表示・現場一覧のチェック状態の引き継ぎ・_resetControlToDefault/_resetSiteInputsによる設定を巻き込まないリセット・renameSite）・更新確認・mapCacheManager・saveDefaults/loadDefaults/renderDefaultsView（保存済み初期値の一覧表示）・clearAll・toggleFullWidth・syncDeptName/syncDisasterNoTab</td></tr>
             <tr><td><code>sw.js</code></td><td>Service Worker</td><td>地図タイル・アプリ本体のキャッシュ管理（自動キャッシュ方式）・skip-waiting対応</td></tr>
             <tr><td><code>manifest.json</code></td><td>PWAマニフェスト</td><td>β版: start_url/scope=/shodo-chosa-beta/</td></tr>
             <tr><td><code>piexif.js</code></td><td>EXIFライブラリ</td><td>piexifjs v1.0.6。src/直下に配置しビルド時にインライン埋め込み</td></tr>
@@ -772,7 +772,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
         <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;" border="1">
             <tr style="background:#eee;"><th>タブ</th><th>section ID</th><th>内容</th><th>ソースファイル</th></tr>
             <tr><td>管理</td><td>content-manage</td><td>現場管理・共通項目（Phase 6.38：旧・管理項目）・調査を実施した者・設定・初期値の設定</td><td>manage.html</td></tr>
-            <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元（Phase 6.38：整理番号・調査日・災害番号を含む）・被災状況・被災拡大・特記事項・写真・保存</td><td>introduction.html</td></tr>
+            <tr><td>現地調査</td><td>content-app（デフォルト）</td><td>位置図・諸元（Phase 6.38：整理番号・調査日・災害番号を含む）・被災状況・被災拡大・特記事項・写真・保存（Phase 6.39：CSV出力ボタンは管理タブに一本化し削除）</td><td>introduction.html</td></tr>
             <tr><td>開発</td><td>content-dev</td><td>アプリ更新・開発ログ・アプリ化の手順</td><td>dev.html（spec.html・install_guide.htmlを内包）</td></tr>
         </table>
     </div>
@@ -1379,6 +1379,15 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>実機確認が必要な点:</strong> 共通項目パネル（会社ID・調査班長名・発注者名）の値が「初期値として保存」→「初期値の読み込み」で正しく画面に反映されること（発注者名を含む）。諸元パネルの「他現場から引用」①②③がそれぞれ整理番号・調査日・災害番号の3項目のみを対象に正しく引用されること。</li>
         </ul>
 
+        <h4>5.46 諸元「他の現場から引用」の対象拡大（被災場所・路線河川名等を追加）／不要になった①の撤去／現地調査タブ「保存」のCSVボタン削除（Phase 6.39）</h4>
+        <ul>
+            <li><strong>指摘①（引用の対象漏れ）:</strong> 5.45で諸元へ移設した「他の現場から引用」は、当初は整理番号・調査日・災害番号の3項目のみを対象にしていた。しかし諸元には被災場所・路線・河川名等という、これも現場ごとに書き換える・前の現場から流用することが多い項目が他に2つあり、これらが対象から漏れていた。今回、この2項目も引き継ぎ対象に加え、諸元パネルの5項目（発注者名を除く全項目）がすべて「他の現場から引用」の対象になった。</li>
+            <li><strong>指摘②（①「保存済みの初期値を引用」の不整合）:</strong> 諸元の5項目（整理番号・調査日・災害番号・被災場所・路線河川名等）はいずれも現場ごとに異なる値であり、「初期値として保存」（LocalStorageのsurvey_app_defaults）には元々ref_no・survey_date・loc_name・route_nameのいずれも保存されていない。5.45時点ではdisaster_noだけが保存対象になっていたためモーダルに①として残していたが、対象を5項目に揃えたことで「保存済みの初期値」という概念自体がこのパネルには馴染まないと判断し、①「保存済みの初期値を引用」（<code>applyReferenceFromDefaults</code>）はボタン・関数ともに削除した。モーダルは②「最後の現場を引用」・③「他の現場を指定して引用」の2択に整理し、番号を①②へ繰り上げた。モーダルタイトルも「整理番号・調査日・災害番号・被災場所・路線河川名等を引用」に更新した。</li>
+            <li><strong>3_script_main.jsの変更点:</strong> <code>_applyReferenceFromSiteRecord()</code>が引き継ぐフィールドに<code>loc_name</code>・<code>route_name</code>を追加した。これらには専用の同期表示関数（dept_nameのsyncDeptName、disaster_noのsyncDisasterNoTabのような）が無いため、<code>_applyReferenceFields()</code>の汎用処理（値を入れて<code>.ref-highlight</code>を付けるだけ）がそのまま適用される。<code>applyReferenceFromDefaults()</code>は本体を削除した（呼び出し元のボタンも削除したため未使用関数になるところだった）。</li>
+            <li><strong>指摘③（現地調査タブ「保存」のCSVボタンが重複）:</strong> 現地調査タブ「保存」アコーディオンにあった「日報用CSVエクスポート（写真なし）」ボタンは、管理タブ「現場管理」に既にある「CSV出力」ボタン（チェックした現場が対象）と機能が重複しており、CSV出力の窓口を管理タブに一本化する方針のため削除した。introduction.htmlの「保存」アコーディオンは、上書き保存・別名保存の2ボタンのみになった。3_script_main.js側の<code>appControl.exportCSV()</code>自体は管理タブから引き続き呼ばれるため変更していない。</li>
+            <li><strong>実機確認が必要な点:</strong> 諸元の「他現場から引用」②③で、被災場所・路線河川名等を含む5項目が正しく引用され、ハイライト表示されること。現地調査タブ「保存」からCSVボタンが消え、管理タブのCSV出力に支障が無いこと。</li>
+        </ul>
+
         <h4>5.9 災害番号の常時表示（Phase 5.93）</h4>
         <ul>
             <li>現地調査タブのボタンを2段組みにし、上段「現地調査」・下段に災害番号の値を小さく表示する。</li>
@@ -1448,6 +1457,7 @@ canvas.sketch-canvas { display: block; width: 100%; }
             <li><strong>【Phase 6.33完了・実機確認待ち】</strong>白紙メモに、撮影した地図・現場写真を下敷きにできる「背景」機能を追加（保存はせず、その場限りの下敷き）。詳細は5.43参照。</li>
             <li><strong>【Phase 6.34完了・Phase 6.35で文言修正・Phase 6.37でバグ修正・実機確認待ち】</strong>メイン位置図に、KMLを読み込んで参考表示する機能を追加（用途は限定しない。見るだけの参考レイヤ、保存はせず、地図の写真保存には出てこない）。「KMLへ移動」ボタンも追加。詳細は5.44参照。</li>
             <li><strong>【Phase 6.38完了・実機確認待ち】</strong>管理タブ「管理項目」を「共通項目」に改名し、会社ID・調査班長名・発注者名の3項目のみに縮小。整理番号・調査日・災害番号と「他の現場から引用」ボタン・参照モーダルは現地調査タブ「諸元」へ移設し、引き継ぐ項目も整理番号・調査日・災害番号の3項目に変更。あわせて「初期値の読み込み」が発注者名を反映していなかった抜けも修正。詳細は5.45参照。</li>
+            <li><strong>【Phase 6.39完了・実機確認待ち】</strong>諸元「他の現場から引用」の対象に被災場所・路線河川名等を追加（計5項目）。対象がいずれも現場ごとに異なる値のみになったため①「保存済みの初期値を引用」を撤去し②③の2択に整理。現地調査タブ「保存」の「日報用CSVエクスポート」（管理タブと重複）を削除。詳細は5.46参照。</li>
             <li><strong>【AppB確認待ち】</strong>一括ZIP（外側ZIPの中に現場ごとのフォルダ）をAppBが読み込めるか。読めない場合は、AppB側の改修か、AppA側を「個別ZIP」運用に絞るかの判断が必要（8.2・8.3参照）。</li>
             <li><strong>【Phase 6.21完了】保存済みの初期値の閲覧UI:</strong> 「初期値の設定」アコーディオン内、「初期値の読み込み」ボタンの下に、保存済みの初期値の一覧表示欄を追加（5.32参照）。管理タブの項目整理（ファイル名構成・地図キャッシュ開放を「設定」へ移動、「入出力データ設定」を「初期値の設定」に改名）もあわせて実施。実機での見え方の確認が必要。</li>
         </ul>
@@ -6969,8 +6979,12 @@ window.siteManager = {
 
     // ---- 段階3：諸元の参照ボタン（設計は7.1参照） ----
     // 【Phase 6.38】このボタン・モーダルは管理タブ「共通項目」（旧・管理項目）から
-    // 現地調査タブ「諸元」へ移設した。あわせて引き継ぐ項目を、諸元に実在する
-    // 整理番号・調査日・災害番号の3項目に変更した（発注者名・被災日は諸元の項目ではないため対象外）。
+    // 現地調査タブ「諸元」へ移設した（発注者名は共通項目パネルの項目のため対象外）。
+    // 【Phase 6.39】引き継ぐ項目を、諸元に実在する5項目（整理番号・調査日・災害番号・
+    // 被災場所・路線河川名等）に拡大した。これらはいずれも現場ごとに異なる値で
+    // 「保存済みの初期値」という概念に馴染まないため、旧①「保存済みの初期値を引用」
+    // （applyReferenceFromDefaults）は撤去し、②最後の現場を引用／③他の現場を指定して引用の
+    // 2択にした。
     // 整理番号は空欄にせず参照元の値をそのまま引き継ぐ（Phase 5.92確定）。
     // 引き継いだ項目は、値を実際に書き換えるまで.ref-highlightクラスで目立つ色にする。
 
@@ -7006,24 +7020,13 @@ window.siteManager = {
         if (m) m.style.display = 'none';
     },
 
-    // ①保存済みの初期値を引用
-    // 【Phase 6.38】初期値（survey_app_defaults）にはdisaster_noのみ保存されている
-    // （dept_nameは共通項目パネルが「初期値の設定」で別途扱うため対象外。ref_no・survey_dateは
-    // 現場ごとに異なる値のため、そもそも初期値として保存していない＝この①では引用できない）。
-    applyReferenceFromDefaults() {
-        const raw = localStorage.getItem('survey_app_defaults');
-        if (!raw) { alert('初期値が保存されていません'); return; }
-        let d;
-        try { d = JSON.parse(raw); } catch(e) { return; }
-        this._applyReferenceFields({ disaster_no: d.disaster_no });
-    },
-    // ②最後の現場を引用
+    // ①最後の現場を引用
     applyReferenceFromLastSite() {
         const sites = this.getSites();
         if (sites.length === 0) { alert('参照できる現場がありません'); return; }
         this._applyReferenceFromSiteRecord(sites[sites.length - 1]);
     },
-    // ③指定した現場を引用
+    // ②指定した現場を引用
     applyReferenceFromSite(siteId) {
         const site = this.getSite(siteId);
         if (!site) return;
@@ -7033,7 +7036,8 @@ window.siteManager = {
     _applyReferenceFromSiteRecord(site) {
         const d = site.formData || {};
         this._applyReferenceFields({
-            disaster_no: d.disaster_no, ref_no: d.ref_no, survey_date: d.survey_date
+            disaster_no: d.disaster_no, ref_no: d.ref_no, survey_date: d.survey_date,
+            loc_name: d.loc_name, route_name: d.route_name
         });
     },
     // 実際にフィールドへ値を入れて、ハイライトを付ける（inputイベントは発火させない。
